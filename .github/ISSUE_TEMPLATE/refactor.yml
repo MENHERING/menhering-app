@@ -1,0 +1,78 @@
+name: '♻️ 리팩토링 제안'
+description: '코드 구조 개선, 성능 최적화, 기술 부채 해소를 제안해주세요.'
+title: '[REFACTOR] : '
+labels: ['refactor']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ♻️ 리팩토링 제안
+        개선이 필요한 코드나 구조를 아래 형식에 맞게 작성해주세요.
+
+  - type: textarea
+    id: target
+    attributes:
+      label: '🎯 리팩토링 대상'
+      description: '어떤 파일, 컴포넌트, 모듈, 함수가 대상인지 구체적으로 작성해주세요.'
+      placeholder: |
+        예: src/features/auth/LoginForm.tsx
+        예: API 레이어 전반의 에러 핸들링 구조
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: '❗ 현재 문제점'
+      description: '현재 코드의 어떤 부분이 문제인지 설명해주세요. (가독성, 중복, 성능, 결합도 등)'
+      placeholder: |
+        예: 동일한 fetch 로직이 3개 컴포넌트에 중복되어 있음
+        예: 단일 컴포넌트가 500줄을 초과해 역할 분리가 필요함
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: '🧠 개선 방향'
+      description: '어떤 방식으로 개선할지 설명해주세요. 코드 스니펫이 있으면 첨부해주세요.'
+      placeholder: |
+        예: useFetch 커스텀 훅으로 추출 후 공통화
+        예: Container / Presenter 패턴으로 역할 분리
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: '🗂️ 리팩토링 유형'
+      description: '가장 가까운 유형을 선택해주세요.'
+      options:
+        - 코드 중복 제거
+        - 컴포넌트 분리 / 역할 정리
+        - 성능 최적화
+        - 타입 안전성 강화
+        - 아키텍처 구조 개선
+        - 기술 부채 해소
+        - 기타
+    validations:
+      required: true
+
+  - type: dropdown
+    id: risk
+    attributes:
+      label: '⚠️ 변경 영향 범위'
+      description: '이 리팩토링이 기존 동작에 미치는 영향 범위를 선택해주세요.'
+      options:
+        - 낮음 (로컬 변경, 외부 영향 없음)
+        - 중간 (일부 모듈 또는 페이지에 영향)
+        - 높음 (전역 구조 또는 공통 레이어에 영향)
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: '💬 추가 정보'
+      description: '참고 자료, 관련 이슈, 테스트 전략 등을 남겨주세요.'
+      placeholder: '예: 변경 전후 Lighthouse 점수 비교 예정'
