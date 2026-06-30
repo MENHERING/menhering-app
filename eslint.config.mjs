@@ -28,16 +28,47 @@ const eslintConfig = defineConfig([
           alphabetize: { order: 'asc', caseInsensitive: true },
         },
       ],
+
+      // any 타입 금지
+      '@typescript-eslint/no-explicit-any': 'error',
+
+      // default export 지양 — export function 사용
+      'import/no-default-export': 'error',
     },
   },
+
+  // Next.js App Router 파일은 default export 필수
+  {
+    files: [
+      'src/app/**/page.tsx',
+      'src/app/**/layout.tsx',
+      'src/app/**/error.tsx',
+      'src/app/**/loading.tsx',
+      'src/app/**/not-found.tsx',
+      'src/app/**/template.tsx',
+      'src/app/**/route.ts',
+    ],
+    rules: {
+      'import/no-default-export': 'off',
+    },
+  },
+
+  // 설정 파일은 default export 허용
+  {
+    files: [
+      'next.config.ts',
+      'postcss.config.mjs',
+      'tailwind.config.ts',
+      'eslint.config.mjs',
+      'commitlint.config.mjs',
+    ],
+    rules: {
+      'import/no-default-export': 'off',
+    },
+  },
+
   // Override default ignores of eslint-config-next.
-  globalIgnores([
-    // Default ignores of eslint-config-next:
-    '.next/**',
-    'out/**',
-    'build/**',
-    'next-env.d.ts',
-  ]),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
 ]);
 
 export default eslintConfig;
