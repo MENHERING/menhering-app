@@ -45,6 +45,7 @@ context-notes.md
 .claude/settings.local.json
 .claude/.local/
 CLAUDE.local.md
+.omc/
 
 # OS / 에디터
 .DS_Store
