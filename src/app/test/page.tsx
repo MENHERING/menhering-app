@@ -69,25 +69,7 @@ export default function TestPage() {
       {/* case 08: Type C - 타이틀 + 닫기(오른쪽) */}
       <Header title="Type C" leftType="none" rightType="close" />
 
-      {/* case 09: 뒤로가기 + rightElement 조합 - 타이틀이 정중앙인지 확인 */}
-      <Header
-        title="좌우 조합"
-        leftType="back"
-        rightElement={<span className="text-sm text-[#3D3D3D]">저장</span>}
-      />
-
-      {/* case 10: rightElement + 닫기 동시 노출 */}
-      <Header
-        title="저장 + 닫기"
-        leftType="none"
-        rightType="close"
-        rightElement={<span className="text-sm text-[#3D3D3D]">저장</span>}
-      />
-
-      {/* case 11: 긴 타이틀에서 레이아웃이 깨지지 않는지 확인 */}
-      <Header title="아주 길고 긴 타이틀 텍스트 테스트입니다" leftType="none" rightType="close" />
-
-      {/* case 12: onLeftPress / onRightPress 클릭 동작 확인 */}
+      {/* case 09: onLeftPress / onRightPress 클릭 동작 확인 */}
       <Header
         title={`클릭 ${clickCount}회`}
         leftType="back"
