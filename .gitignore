@@ -44,8 +44,12 @@ context-notes.md
 # Claude Code
 .claude/settings.local.json
 .claude/.local/
+.claude/launch.json
 CLAUDE.local.md
 .omc/
+
+# Codex
+.codex/
 
 # OS / 에디터
 .DS_Store
