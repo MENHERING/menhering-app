@@ -2,8 +2,6 @@
 
 import { ChevronLeft, X } from 'lucide-react';
 
-// leftType: 'back'(뒤로가기) / 'none'(버튼 없음)
-// rightType: 'close'(닫기) / 'none'(버튼 없음)
 interface HeaderProps {
   title: string;
   leftType: 'back' | 'none';
@@ -36,7 +34,7 @@ export function Header({
         )}
       </div>
 
-      {/* justify-between만 쓰면 좌/우 영역 폭에 따라 제목이 밀리므로 절대 위치로 항상 정중앙 고정 */}
+      {/* 좌우 폭 차이로 제목이 밀리지 않도록 절대 위치로 중앙 고정 */}
       <h1 className="absolute left-1/2 -translate-x-1/2 text-[17px] font-bold text-[#3D3D3D]">
         {title}
       </h1>
