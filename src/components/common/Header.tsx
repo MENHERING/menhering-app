@@ -35,7 +35,7 @@ export function Header({
       </div>
 
       {/* 좌우 폭 차이로 제목이 밀리지 않도록 절대 위치로 중앙 고정 */}
-      <h1 className="absolute left-1/2 -translate-x-1/2 text-[17px] font-bold text-[#3D3D3D]">
+      <h1 className="pointer-events-none absolute left-1/2 max-w-[60%] -translate-x-1/2 truncate text-[17px] font-bold text-[#3D3D3D]">
         {title}
       </h1>
 
