@@ -1,0 +1,89 @@
+'use client';
+
+import { BookOpen, Home, Shirt, UserRound, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+import { ROUTES } from '@/constants/routes';
+import { cn } from '@/lib/cn';
+
+interface NavItem {
+  label: string;
+  href: string;
+  Icon: LucideIcon;
+}
+
+// 아이콘은 디자인 확정 시 교체 가능
+const NAV_ITEMS: NavItem[] = [
+  { label: '홈', href: ROUTES.HOME, Icon: Home },
+  { label: '학습', href: ROUTES.LEARNING, Icon: BookOpen },
+  { label: '아바타', href: ROUTES.AVATAR, Icon: Shirt },
+  { label: '마이페이지', href: ROUTES.MYPAGE, Icon: UserRound },
+];
+
+// 홈은 정확히 일치, 나머지는 하위 경로(예: /learning/stage/3)까지 활성 처리.
+// startsWith에 '/'를 붙여 형제 경로(예: /avatar-settings)가 /avatar로 오탐되지 않게 한다.
+function isActiveTab(pathname: string, href: string) {
+  if (href === ROUTES.HOME) return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+interface FooterProps {
+  /** nav 요소에 병합할 추가 클래스 (예: 그림자, z-index/여백 조정) */
+  className?: string;
+}
+
+/**
+ * 앱 하단 탭 내비게이션(공용).
+ *
+ * 마운트 계약: `sticky bottom-0`으로 하단 고정하므로, 소비 측 레이아웃을
+ * `flex min-h-dvh flex-col` 컨테이너로 감싸고 Footer를 마지막 자식으로 두세요.
+ * (본문에는 `flex-1`을 주어 Footer를 아래로 밀어냄)
+ *
+ * @example
+ * <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
+ *   <main className="flex-1">{children}</main>
+ *   <Footer />
+ * </div>
+ */
+export function Footer({ className }: FooterProps) {
+  const pathname = usePathname();
+
+  return (
+    <nav
+      aria-label="하단 탭 내비게이션"
+      className={cn(
+        'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[env(safe-area-inset-bottom)] dark:border-neutral-800 dark:bg-neutral-900',
+        className,
+      )}
+    >
+      {NAV_ITEMS.map(({ label, href, Icon }) => {
+        const active = isActiveTab(pathname, href);
+
+        return (
+          <Link
+            key={href}
+            href={href}
+            aria-current={active ? 'page' : undefined}
+            className={cn(
+              'flex flex-col items-center gap-1 py-1.5 text-xs font-bold transition-colors',
+              // 탭 누르는 순간 피드백(모바일 탭 하이라이트)
+              'active:opacity-70',
+              active ? 'text-coral' : 'text-brown-soft dark:text-neutral-400',
+            )}
+          >
+            <span
+              className={cn(
+                'flex size-8 items-center justify-center rounded-full transition-colors',
+                active && 'bg-coral-soft dark:bg-coral/20',
+              )}
+            >
+              <Icon className="h-5 w-5" aria-hidden />
+            </span>
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
