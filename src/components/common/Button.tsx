@@ -1,5 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
+import { Spinner } from '@/components/common/Spinner';
 import { cn } from '@/lib/cn';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -8,7 +9,7 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
-  fullWidth?: boolean;
+  isFullWidth?: boolean;
   isLoading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
@@ -38,7 +39,7 @@ const SIZE: Record<ButtonSize, string> = {
 export function Button({
   variant = 'primary',
   size = 'lg',
-  fullWidth = false,
+  isFullWidth = false,
   isLoading = false,
   leftIcon,
   rightIcon,
@@ -52,7 +53,7 @@ export function Button({
     <button
       type={type}
       disabled={disabled || isLoading}
-      className={cn(BASE, VARIANT[variant], SIZE[size], fullWidth && 'w-full', className)}
+      className={cn(BASE, VARIANT[variant], SIZE[size], isFullWidth && 'w-full', className)}
       {...props}
     >
       {isLoading ? (
@@ -65,24 +66,5 @@ export function Button({
         </>
       )}
     </button>
-  );
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="size-5 animate-spin"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-label="로딩 중"
-      role="status"
-    >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"
-      />
-    </svg>
   );
 }
