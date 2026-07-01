@@ -1,4 +1,7 @@
-// className 조건부 결합 유틸 (falsy 제거 후 공백 join)
-export function cn(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(' ');
+import clsx from 'clsx';
+import type { ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
