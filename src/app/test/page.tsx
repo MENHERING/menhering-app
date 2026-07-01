@@ -1,9 +1,16 @@
+'use client';
+
+import { useState } from 'react';
+
 import { notFound } from 'next/navigation';
 
+import { Header } from '@/components/common/Header';
 import { Section } from '@/components/common/Section';
 
 export default function TestPage() {
   if (process.env.NODE_ENV !== 'development') notFound();
+
+  const [clickCount, setClickCount] = useState(0);
 
   return (
     <main className="flex min-h-screen flex-col gap-5 bg-gray-50 px-4 py-16">
@@ -52,6 +59,24 @@ export default function TestPage() {
           레드판다(나)
         </p>
       </Section>
+
+      {/* case 06: Type A - 뒤로가기 + 타이틀 */}
+      <Header title="Type A" leftType="back" />
+
+      {/* case 07: Type B - 타이틀만 */}
+      <Header title="Type B" leftType="none" />
+
+      {/* case 08: Type C - 타이틀 + 닫기(오른쪽) */}
+      <Header title="Type C" leftType="none" rightType="close" />
+
+      {/* case 09: onLeftPress / onRightPress 클릭 동작 확인 */}
+      <Header
+        title={`클릭 ${clickCount}회`}
+        leftType="back"
+        onLeftPress={() => setClickCount((count) => count + 1)}
+        rightType="close"
+        onRightPress={() => setClickCount((count) => count + 1)}
+      />
     </main>
   );
 }
