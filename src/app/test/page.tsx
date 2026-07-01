@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { notFound } from 'next/navigation';
 
+import { Footer } from '@/components/common/Footer';
 import { Header } from '@/components/common/Header';
 import { Section } from '@/components/common/Section';
 
@@ -77,6 +78,11 @@ export default function TestPage() {
         rightType="close"
         onRightPress={() => setClickCount((count) => count + 1)}
       />
+
+      {/* Footer (하단 탭바) — active 하이라이트는 실제 라우트에서 동작 (현재 경로 /test) */}
+      <div className="mx-auto w-full max-w-[430px] overflow-hidden rounded-2xl border border-gray-200">
+        <Footer />
+      </div>
     </main>
   );
 }

@@ -11,6 +11,9 @@
   --coral-soft: #fdd0c4;
   --linen: #faf0e6;
   --ink: #3d3d3d;
+
+  /* 하단 탭바 비활성 텍스트 (공용 토큰 없음) */
+  --brown-soft: #c27a5a;
 }
 
 @theme inline {
@@ -23,6 +26,7 @@
   --color-coral-soft: var(--coral-soft);
   --color-linen: var(--linen);
   --color-ink: var(--ink);
+  --color-brown-soft: var(--brown-soft);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
