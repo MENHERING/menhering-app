@@ -11,14 +11,14 @@ interface LessonStartCardProps {
 
 export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCardProps) {
   return (
-    <div className="relative mx-14 -my-4 self-stretch">
+    <div className="relative w-full">
       <span
         aria-hidden
         className={cn(
           'bg-coral absolute -top-2 left-1/2 h-4 w-4 rotate-45 rounded-sm',
           pointerAlign === 'right'
-            ? 'translate-x-[calc(-50%+40px)]'
-            : 'translate-x-[calc(-50%-40px)]',
+            ? 'translate-x-[calc(-50%+64px)]'
+            : 'translate-x-[calc(-50%-64px)]',
         )}
       />
 
