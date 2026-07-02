@@ -47,7 +47,9 @@ export function LessonRoadmap({
       {selectedLesson && (
         <div
           className="absolute left-1/2 w-[calc(100%-7rem)] -translate-x-1/2"
-          style={{ top: TOP_PADDING_PX + selectedIndex * (NODE_SIZE_PX + ROW_GAP_PX) + NODE_SIZE_PX }}
+          style={{
+            top: TOP_PADDING_PX + selectedIndex * (NODE_SIZE_PX + ROW_GAP_PX) + NODE_SIZE_PX,
+          }}
         >
           <LessonStartCard
             level={level}
