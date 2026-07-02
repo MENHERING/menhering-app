@@ -12,8 +12,12 @@
   --linen: #faf0e6;
   --ink: #3d3d3d;
 
-  /* 하단 탭바 비활성 텍스트 (공용 토큰 없음) */
   --brown-soft: #c27a5a;
+
+  --gold: #fbbf24;
+  
+  --locked: #d1d5db;
+  --locked-icon: #6b7280;
 }
 
 @theme inline {
@@ -27,6 +31,9 @@
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
+  --color-gold: var(--gold);
+  --color-locked: var(--locked);
+  --color-locked-icon: var(--locked-icon);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

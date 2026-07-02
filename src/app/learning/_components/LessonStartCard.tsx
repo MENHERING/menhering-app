@@ -5,7 +5,7 @@ import type { Lesson } from '@/types/lesson';
 interface LessonStartCardProps {
   level: string;
   lesson: Lesson;
-  // 카드 위 노드가 어느 쪽에 있는지에 맞춰 말풍선 꼬리 위치를 정한다.
+  // 카드 섹션에 따라 말풍선 꼬리 지정
   pointerAlign: 'left' | 'right';
 }
 
@@ -49,7 +49,7 @@ export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCard
           size="md"
           isFullWidth
           onClick={() => {
-            // TODO: 레슨 상세 화면 라우팅 연결
+            // TODO: 학습 상세 화면 라우팅 연결
           }}
         >
           시작하기 +{lesson.xpReward} XP

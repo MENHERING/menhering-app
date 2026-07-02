@@ -22,7 +22,7 @@ export function UserStatusBar({ level, xp, avatarSrc }: UserStatusBarProps) {
       </div>
 
       <div className="bg-coral-soft flex items-center gap-1.5 rounded-full px-4 py-2">
-        <Star size={20} className="fill-amber-400 text-amber-400" />
+        <Star size={20} className="fill-gold text-gold" />
         <span className="text-coral-dark text-base font-bold">{xp.toLocaleString()} XP</span>
       </div>
     </div>

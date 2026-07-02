@@ -1,7 +1,7 @@
 import { cn } from '@/lib/cn';
 
 interface RoadPathProps {
-  // 'right-to-left'가 기본 도형이며, 'left-to-right'는 좌우 반전으로 재사용한다.
+  // 'left-to-right'는 기본 도형을 좌우 반전해서 재사용한다.
   direction: 'right-to-left' | 'left-to-right';
 }
 
@@ -10,8 +10,7 @@ const HEIGHT = 80;
 const PATH = `M 164 0 C 164 40, 20 40, 20 ${HEIGHT}`;
 
 export function RoadPath({ direction }: RoadPathProps) {
-  // 부모 노드가 좌우로 밀려있는 만큼(±72px, LessonRoadmap의 OFFSET_X와 동일) 역보정해서
-  // 경로의 중심을 로드맵 중앙선에 맞춘다.
+  // 부모 노드의 ±72px 오프셋(LessonRoadmap의 OFFSET_X)을 역보정해 경로를 중앙선에 맞춘다.
   const centerXClass =
     direction === 'right-to-left'
       ? 'translate-x-[calc(-50%-72px)]'

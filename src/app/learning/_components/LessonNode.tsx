@@ -25,7 +25,7 @@ export function LessonNode({ order, status, isSelected = false, onPress }: Lesso
         status === 'completed' && 'bg-coral shadow-[0_4px_10px_rgba(0,0,0,0.15)]',
         status === 'current' &&
           'ring-coral text-coral bg-white text-3xl font-extrabold shadow-[0_4px_10px_rgba(0,0,0,0.15)] ring-4',
-        status === 'locked' && 'bg-gray-300',
+        status === 'locked' && 'bg-locked',
         isSelected && 'scale-105',
       )}
     >
@@ -42,7 +42,7 @@ export function LessonNode({ order, status, isSelected = false, onPress }: Lesso
           />
         </>
       )}
-      {status === 'locked' && <Lock size={28} className="text-gray-500" />}
+      {status === 'locked' && <Lock size={28} className="text-locked-icon" />}
     </button>
   );
 }
