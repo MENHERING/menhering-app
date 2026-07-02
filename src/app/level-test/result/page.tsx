@@ -8,7 +8,8 @@ export default async function LevelTestResultPage({
 }) {
   const { step } = await searchParams;
   const parsed = Number(step);
-  const recommendedStep = parsed >= 1 && parsed <= 5 ? parsed : undefined;
+  const recommendedStep =
+    Number.isInteger(parsed) && parsed >= 1 && parsed <= 5 ? parsed : undefined;
 
   return <LevelResultScreen recommendedStep={recommendedStep} />;
 }
