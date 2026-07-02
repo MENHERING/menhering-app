@@ -69,13 +69,18 @@ export async function getMyAvatar(): Promise<Avatar> {
   ]);
 
   if (userResult.error) console.error('[avatar] users 조회 실패:', userResult.error);
-  if (avatarResult.error) console.error('[avatar] avatars 조회 실패:', avatarResult.error);
 
   const nickname = (userResult.data?.nickname as string | undefined) ?? DEFAULT_NICKNAME;
 
+  // 조회 오류는 "row 없음"과 구분한다: 일시적 조회 실패를 새 아바타 생성으로 오인하지 않도록 폴백 반환.
+  if (avatarResult.error) {
+    console.error('[avatar] avatars 조회 실패:', avatarResult.error);
+    return { ...fallbackAvatar(), userId: user.id, nickname };
+  }
+
   if (avatarResult.data) return toAvatar(avatarResult.data as AvatarRow, nickname);
 
-  // 최초 진입: 기본 아바타 생성 (color_theme은 DB 기본값 '클래식')
+  // 조회 성공 + row 없음일 때만 기본 아바타 생성 (color_theme은 DB 기본값 '클래식')
   const { data: inserted, error: insertError } = await supabase
     .from('avatars')
     .insert({ user_id: user.id, character_type: DEFAULT_CHARACTER_TYPE })

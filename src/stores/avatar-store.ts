@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
+import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME, DEFAULT_NICKNAME } from '@/constants/avatar';
 import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';
 
 // 아바타 탭의 편집(draft) 상태. 실제 저장은 Server Action이 담당하고,
@@ -22,7 +22,7 @@ interface AvatarState {
 export const useAvatarStore = create<AvatarState>((set) => ({
   characterType: DEFAULT_CHARACTER_TYPE,
   colorTheme: DEFAULT_COLOR_THEME,
-  nickname: '',
+  nickname: DEFAULT_NICKNAME,
   initial: null,
 
   setCharacterType: (characterType) => set({ characterType }),
