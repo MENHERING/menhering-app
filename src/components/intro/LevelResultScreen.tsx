@@ -42,7 +42,7 @@ export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProp
           <span className="text-primary/70 text-sm font-medium">추천 시작 레벨</span>
           <span className="text-plum text-4xl font-extrabold">{level.title}</span>
           <p className="text-primary/70 mt-1 text-center text-sm leading-6 font-medium">
-            기초는 알고 있지만 꾸준한 연습이 필요한 단계예요.
+            {level.resultDesc}
           </p>
         </div>
 
