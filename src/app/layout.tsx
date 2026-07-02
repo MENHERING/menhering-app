@@ -11,7 +11,8 @@ export const viewport: Viewport = {
   themeColor: '#f7ede0',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // 저시력 사용자 확대 허용 (WCAG 1.4.4)
+  maximumScale: 5,
 };
 
 export default function RootLayout({
