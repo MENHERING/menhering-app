@@ -16,7 +16,7 @@ export function CurriculumBar({
   onStatsPress,
 }: CurriculumBarProps) {
   return (
-    <div className="flex items-center gap-2 px-5">
+    <div className="flex items-stretch gap-2 px-5">
       <button
         type="button"
         className="bg-coral flex flex-1 flex-col items-start gap-0.5 rounded-2xl px-4 py-2.5 text-left text-white shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
@@ -34,7 +34,7 @@ export function CurriculumBar({
         type="button"
         onClick={onStatsPress}
         aria-label="학습 통계"
-        className="bg-coral flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-2xl text-white shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
+        className="bg-coral flex w-[52px] shrink-0 items-center justify-center rounded-2xl text-white shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
       >
         <BarChart3 size={20} />
       </button>

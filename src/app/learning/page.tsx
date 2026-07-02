@@ -9,10 +9,8 @@ import { Footer } from '@/components/common/Footer';
 import { MOCK_CURRICULUM, MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
 
 export default function LearningPage() {
-  const currentLesson = MOCK_LESSONS.find((lesson) => lesson.status === 'current');
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(
-    currentLesson?.id ?? null,
-  );
+  // 이슈 스펙대로 진입 시에는 카드가 닫혀 있고, 현재 스테이지 노드를 탭해야 열린다.
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
 
   const handleSelectLesson = (lessonId: string) => {
     setSelectedLessonId((prev) => (prev === lessonId ? null : lessonId));

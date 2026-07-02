@@ -11,13 +11,14 @@ interface LessonRoadmapProps {
   onSelectLesson: (lessonId: string) => void;
 }
 
-// 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다. (RoadPath, LessonStartCard의 ±96px과 동일하게 유지)
-const OFFSET_X = ['translate-x-24', '-translate-x-24'];
+// 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다. (RoadPath, LessonStartCard의 ±72px과 동일하게 유지)
+// 좌우 폭과 세로 간격 비율(72:80)이 완만한 대각선이 되도록 맞춘 값.
+const OFFSET_X = ['translate-x-[72px]', '-translate-x-[72px]'];
 
-// 아래 상수는 컨테이너의 실제 레이아웃(노드 h-20=80px, gap-12=48px, py-8=32px)과 맞춰
+// 아래 상수는 컨테이너의 실제 레이아웃(노드 h-20=80px, gap-20=80px, py-8=32px)과 맞춰
 // 선택된 레슨 카드의 절대 위치(top)를 계산하는 데 쓰인다.
 const NODE_SIZE_PX = 80;
-const ROW_GAP_PX = 48;
+const ROW_GAP_PX = 80;
 const TOP_PADDING_PX = 32;
 
 export function LessonRoadmap({
@@ -33,7 +34,7 @@ export function LessonRoadmap({
   const selectedLesson = selectedIndex === -1 ? null : displayLessons[selectedIndex];
 
   return (
-    <div className="relative flex flex-col items-center gap-12 py-8">
+    <div className="relative flex flex-col items-center gap-20 py-8">
       {displayLessons.map((lesson, index) => (
         <div key={lesson.id} className={cn('relative', OFFSET_X[index % 2])}>
           {index < displayLessons.length - 1 && (

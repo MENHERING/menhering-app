@@ -5,17 +5,17 @@ interface RoadPathProps {
   direction: 'right-to-left' | 'left-to-right';
 }
 
-const WIDTH = 232;
-const HEIGHT = 48;
-const PATH = `M 212 0 C 212 24, 20 24, 20 ${HEIGHT}`;
+const WIDTH = 184;
+const HEIGHT = 80;
+const PATH = `M 164 0 C 164 40, 20 40, 20 ${HEIGHT}`;
 
 export function RoadPath({ direction }: RoadPathProps) {
-  // 부모 노드가 좌우로 밀려있는 만큼(±96px, LessonRoadmap의 OFFSET_X와 동일) 역보정해서
+  // 부모 노드가 좌우로 밀려있는 만큼(±72px, LessonRoadmap의 OFFSET_X와 동일) 역보정해서
   // 경로의 중심을 로드맵 중앙선에 맞춘다.
   const centerXClass =
     direction === 'right-to-left'
-      ? 'translate-x-[calc(-50%-96px)]'
-      : 'translate-x-[calc(-50%+96px)]';
+      ? 'translate-x-[calc(-50%-72px)]'
+      : 'translate-x-[calc(-50%+72px)]';
 
   return (
     <svg
