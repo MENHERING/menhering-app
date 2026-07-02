@@ -50,12 +50,7 @@
   --shadow-custom: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* 라이트 고정 (#16). TODO: 다크모드 도입 시 :root 다크 오버라이드 복원 (참고 #20) */
 
 body {
   background: var(--sand);
