@@ -11,8 +11,8 @@ interface LessonRoadmapProps {
   onSelectLesson: (lessonId: string) => void;
 }
 
-// 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다. (RoadPath, LessonStartCard의 ±64px과 동일하게 유지)
-const OFFSET_X = ['translate-x-16', '-translate-x-16'];
+// 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다. (RoadPath, LessonStartCard의 ±96px과 동일하게 유지)
+const OFFSET_X = ['translate-x-24', '-translate-x-24'];
 
 // 아래 상수는 컨테이너의 실제 레이아웃(노드 h-20=80px, gap-12=48px, py-8=32px)과 맞춰
 // 선택된 레슨 카드의 절대 위치(top)를 계산하는 데 쓰인다.

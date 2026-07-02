@@ -17,8 +17,8 @@ export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCard
         className={cn(
           'bg-coral absolute -top-2 left-1/2 h-4 w-4 rotate-45 rounded-sm',
           pointerAlign === 'right'
-            ? 'translate-x-[calc(-50%+64px)]'
-            : 'translate-x-[calc(-50%-64px)]',
+            ? 'translate-x-[calc(-50%+96px)]'
+            : 'translate-x-[calc(-50%-96px)]',
         )}
       />
 
