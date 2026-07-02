@@ -46,6 +46,14 @@ const QUESTIONS: Question[] = [
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
+// TODO: 실제 추천 알고리즘으로 교체. 임시: 선택지 인덱스(0~3) 평균 → 레벨 1~5 매핑
+function calcRecommendedStep(answers: number[]): number {
+  if (answers.length === 0) return 2;
+  const avg = answers.reduce((sum, a) => sum + a, 0) / answers.length;
+  const step = Math.round(1 + (avg / 3) * 4);
+  return Math.min(5, Math.max(1, step));
+}
+
 export function LevelTestScreen() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
@@ -74,7 +82,8 @@ export function LevelTestScreen() {
 
   const handleNext = () => {
     if (isLast) {
-      router.push('/level-test/result');
+      const step = calcRecommendedStep(answers);
+      router.push(`/level-test/result?step=${step}`);
       return;
     }
     setIndex((prev) => prev + 1);
