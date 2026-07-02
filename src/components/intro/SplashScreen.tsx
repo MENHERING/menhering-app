@@ -1,7 +1,5 @@
 import Image from 'next/image';
 
-// PWA 최초 진입 스플래시 (brief 1.1)
-// 로딩 중 표시 — 실제 인증 분기는 추후 page.tsx에서 처리
 export function SplashScreen() {
   return (
     <div className="bg-sand relative flex min-h-dvh w-full flex-col items-center overflow-hidden px-6">

@@ -13,7 +13,7 @@ interface Question {
   options: string[];
 }
 
-// 실력테스트 문항 (brief 온보딩 — 목데이터, 추후 questions 테이블 연동)
+// 실력테스트 문항
 const QUESTIONS: Question[] = [
   {
     title: '요즘 감정 상태를 가장 잘 표현하는 문장은?',
@@ -74,7 +74,6 @@ export function LevelTestScreen() {
 
   const handleNext = () => {
     if (isLast) {
-      // TODO: answers 채점 후 추천 레벨 산출
       router.push('/level-test/result');
       return;
     }
@@ -87,7 +86,7 @@ export function LevelTestScreen() {
       <div className="flex w-full max-w-107.5 flex-1 flex-col px-6">
         {/* 진행바 */}
         <div className="mt-6 flex flex-col items-center gap-2">
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-coral-soft/50">
+          <div className="bg-coral-soft/50 h-1.5 w-full overflow-hidden rounded-full">
             <div
               className="bg-coral h-full rounded-full transition-[width]"
               style={{ width: `${progress}%` }}
@@ -116,7 +115,7 @@ export function LevelTestScreen() {
                   aria-pressed={isActive}
                   className={cn(
                     'flex w-full items-center gap-3 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-shadow',
-                    isActive && 'ring-2 ring-coral',
+                    isActive && 'ring-coral ring-2',
                   )}
                 >
                   <span
@@ -134,7 +133,6 @@ export function LevelTestScreen() {
           })}
         </ul>
 
-        {/* CTA */}
         <div className="mt-auto mb-10 pt-6">
           <Button
             variant="primary"

@@ -3,7 +3,7 @@ import Image from 'next/image';
 type LoginVariant = 'new' | 'returning';
 
 interface LoginScreenProps {
-  // 신규(안녕하세요) / 복귀(다시 시작해요) 카피·마스코트 분기
+  // 신규(안녕하세요) / 복귀(다시 시작해요)
   variant?: LoginVariant;
 }
 
@@ -28,7 +28,7 @@ const COPY: Record<
 export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
   const copy = COPY[variant];
 
-  // TODO: OAuth 실구현은 별도 이슈 (Supabase provider·콜백·세션). 현재 UI만.
+  // OAuth 실구현은 추후 진행.
   return (
     <div className="bg-sand relative flex min-h-dvh w-full flex-col items-center overflow-hidden px-6">
       {/* 배경 장식 원 */}

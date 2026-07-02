@@ -13,7 +13,7 @@ interface Level {
   desc: string;
 }
 
-// 실력 단계 (brief 온보딩) — 레벨테스트 결과 칩과 공유
+// 실력 단계
 export const LEVELS: Level[] = [
   { step: 1, title: '입문', desc: 'HTML/CSS 기초부터 천천히' },
   { step: 2, title: '초급', desc: '기본 문법과 화면 구현 중심' },
@@ -27,7 +27,6 @@ export function LevelSelectScreen() {
   const [selected, setSelected] = useState(3);
 
   const handleComplete = () => {
-    // TODO: 선택 레벨 저장(settings) 후 이동
     router.push('/home');
   };
 
@@ -36,7 +35,9 @@ export function LevelSelectScreen() {
       <div className="flex w-full max-w-107.5 flex-1 flex-col">
         {/* 헤더 */}
         <div className="mt-12 flex flex-col gap-2">
-          <h1 className="text-plum text-2xl font-extrabold tracking-tight">내 실력에 맞게 시작하기</h1>
+          <h1 className="text-plum text-2xl font-extrabold tracking-tight">
+            내 실력에 맞게 시작하기
+          </h1>
           <p className="text-primary/70 text-sm leading-6 font-medium">
             직접 1~5단계를 고르거나 실력테스트로 추천 레벨을 받을 수 있어요.
           </p>
@@ -54,7 +55,7 @@ export function LevelSelectScreen() {
                   aria-pressed={isActive}
                   className={cn(
                     'flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-shadow',
-                    isActive && 'ring-2 ring-coral',
+                    isActive && 'ring-coral ring-2',
                   )}
                 >
                   <span className="bg-primary flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white">
