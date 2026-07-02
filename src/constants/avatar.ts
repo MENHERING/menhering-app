@@ -11,7 +11,12 @@ export const NICKNAME_MAX_LENGTH = 20;
 // 세션/닉네임이 없을 때 표시할 폴백 닉네임(로그인 전 미리보기용).
 export const DEFAULT_NICKNAME = '멘헤링이';
 
-export const CHARACTER_TYPES: readonly CharacterType[] = ['레서판다', '토끼', '강아지', '고양이'];
+export const CHARACTER_TYPES = [
+  '레서판다',
+  '토끼',
+  '강아지',
+  '고양이',
+] as const satisfies readonly CharacterType[];
 
 interface ColorThemeConfig {
   value: ColorTheme;
@@ -53,6 +58,12 @@ export const COLOR_THEMES: readonly ColorThemeConfig[] = [
     swatches: ['#E8C15C', '#F1DFA0', '#7A5A1E'],
     roles: { body: '#E8C15C', secondary: '#FBF1CF', accent: '#6E5017' },
   },
+];
+
+// 색상 테마 값만 추출한 목록. 검증(zod) 등에서 재사용하는 단일 출처.
+export const COLOR_THEME_VALUES = COLOR_THEMES.map((theme) => theme.value) as [
+  ColorTheme,
+  ...ColorTheme[],
 ];
 
 const COLOR_THEME_MAP: Record<ColorTheme, ColorThemeConfig> = COLOR_THEMES.reduce(

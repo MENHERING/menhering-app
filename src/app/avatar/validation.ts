@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-import { NICKNAME_MAX_LENGTH } from '@/constants/avatar';
+import { CHARACTER_TYPES, COLOR_THEME_VALUES, NICKNAME_MAX_LENGTH } from '@/constants/avatar';
 
-// 저장 입력 검증. 값은 DB varchar(한글)와 1:1.
+// 저장 입력 검증. enum 값은 상수(단일 출처)에서 파생해 스키마-상수 드리프트를 방지한다.
 export const saveAvatarSchema = z.object({
-  characterType: z.enum(['레서판다', '토끼', '강아지', '고양이']),
-  colorTheme: z.enum(['클래식', '라벤더', '민트', '피치', '스카이', '선샤인']),
+  characterType: z.enum(CHARACTER_TYPES),
+  colorTheme: z.enum(COLOR_THEME_VALUES),
   nickname: z
     .string()
     .trim()

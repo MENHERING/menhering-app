@@ -29,7 +29,7 @@ export function ColorThemePicker() {
             <svg viewBox="0 0 46 22" className="h-[22px] w-[46px] shrink-0" aria-hidden>
               {theme.swatches.map((color, i) => (
                 <circle
-                  key={color}
+                  key={`${color}-${i}`}
                   cx={11 + i * 12}
                   cy={11}
                   r={10}

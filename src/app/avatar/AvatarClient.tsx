@@ -42,16 +42,22 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
     setIsSaving(true);
     setMessage(null);
 
-    const result = await saveAvatar({ characterType, colorTheme, nickname });
+    try {
+      const result = await saveAvatar({ characterType, colorTheme, nickname });
 
-    setIsSaving(false);
-
-    if (result.ok) {
-      // 저장 성공 → dirty 기준선을 현재 값으로 갱신
-      useAvatarStore.getState().initFrom({ characterType, colorTheme, nickname });
-      setMessage({ type: 'success', text: '저장되었어요!' });
-    } else {
-      setMessage({ type: 'error', text: result.error });
+      if (result.ok) {
+        // 저장 성공 → dirty 기준선을 현재 값으로 갱신
+        useAvatarStore.getState().initFrom({ characterType, colorTheme, nickname });
+        setMessage({ type: 'success', text: '저장되었어요!' });
+      } else {
+        setMessage({ type: 'error', text: result.error });
+      }
+    } catch (error) {
+      // 서버 액션 호출 자체가 실패(네트워크/서버 예외)해도 UI가 복구되도록 처리
+      console.error('[avatar] 저장 중 오류:', error);
+      setMessage({ type: 'error', text: '저장 중 오류가 발생했습니다.' });
+    } finally {
+      setIsSaving(false);
     }
   };
 

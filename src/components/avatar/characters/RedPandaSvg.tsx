@@ -1,16 +1,10 @@
-import { Eyes, Mouth } from '@/components/avatar/characters/features';
+import { CharacterSvgFrame, Eyes, Mouth } from '@/components/avatar/characters/features';
 import type { CharacterSvgProps } from '@/components/avatar/characters/types';
 
 // 레서판다: 뾰족한 귀 + 흰 얼굴 무늬가 특징.
 export function RedPandaSvg({ body, secondary, accent, className, title }: CharacterSvgProps) {
   return (
-    <svg
-      viewBox="0 0 200 200"
-      className={className}
-      role={title ? 'img' : undefined}
-      aria-label={title}
-      aria-hidden={title ? undefined : true}
-    >
+    <CharacterSvgFrame className={className} title={title}>
       {/* 꼬리 */}
       <ellipse cx="150" cy="150" rx="18" ry="30" fill={body} transform="rotate(35 150 150)" />
       <ellipse cx="156" cy="162" rx="10" ry="8" fill={secondary} transform="rotate(35 156 162)" />
@@ -35,6 +29,6 @@ export function RedPandaSvg({ body, secondary, accent, className, title }: Chara
       {/* 코 & 입 */}
       <ellipse cx="100" cy="126" rx="6" ry="4.5" fill={accent} />
       <Mouth topY={130} bottomY={138} stroke={accent} />
-    </svg>
+    </CharacterSvgFrame>
   );
 }

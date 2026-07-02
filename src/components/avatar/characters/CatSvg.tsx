@@ -1,16 +1,10 @@
-import { Eyes, Mouth } from '@/components/avatar/characters/features';
+import { CharacterSvgFrame, Eyes, Mouth } from '@/components/avatar/characters/features';
 import type { CharacterSvgProps } from '@/components/avatar/characters/types';
 
 // 고양이: 삼각 귀 + 수염이 특징.
 export function CatSvg({ body, secondary, accent, className, title }: CharacterSvgProps) {
   return (
-    <svg
-      viewBox="0 0 200 200"
-      className={className}
-      role={title ? 'img' : undefined}
-      aria-label={title}
-      aria-hidden={title ? undefined : true}
-    >
+    <CharacterSvgFrame className={className} title={title}>
       {/* 삼각 귀 */}
       <path d="M52 88 L44 34 L92 66 Z" fill={body} />
       <path d="M148 88 L156 34 L108 66 Z" fill={body} />
@@ -38,6 +32,6 @@ export function CatSvg({ body, secondary, accent, className, title }: CharacterS
       {/* 코 & 입 */}
       <path d="M94 124 H106 L100 130 Z" fill={accent} />
       <Mouth topY={130} bottomY={136} width={12} stroke={accent} />
-    </svg>
+    </CharacterSvgFrame>
   );
 }

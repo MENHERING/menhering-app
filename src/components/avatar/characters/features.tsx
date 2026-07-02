@@ -1,3 +1,26 @@
+import type { ReactNode } from 'react';
+
+// 4종 캐릭터 SVG가 공유하는 <svg> 프레임(viewBox + 접근성). 색·내용만 각자 다르다.
+interface CharacterSvgFrameProps {
+  className?: string;
+  title?: string;
+  children: ReactNode;
+}
+
+export function CharacterSvgFrame({ className, title, children }: CharacterSvgFrameProps) {
+  return (
+    <svg
+      viewBox="0 0 200 200"
+      className={className}
+      role={title ? 'img' : undefined}
+      aria-label={title}
+      aria-hidden={title ? undefined : true}
+    >
+      {children}
+    </svg>
+  );
+}
+
 // 캐릭터 SVG 4종이 공유하는 얼굴 요소. 눈은 항상 cx 80/120 대칭, 흰 하이라이트 고정.
 interface EyesProps {
   cy: number;
