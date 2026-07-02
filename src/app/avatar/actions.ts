@@ -2,11 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import {
-  DEFAULT_CHARACTER_TYPE,
-  DEFAULT_COLOR_THEME,
-  DEFAULT_NICKNAME,
-} from '@/constants/avatar';
+import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME, DEFAULT_NICKNAME } from '@/constants/avatar';
 import { ROUTES } from '@/constants/routes';
 import { createClient } from '@/lib/supabase/server';
 import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';

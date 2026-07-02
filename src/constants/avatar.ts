@@ -11,12 +11,7 @@ export const NICKNAME_MAX_LENGTH = 20;
 // 세션/닉네임이 없을 때 표시할 폴백 닉네임(로그인 전 미리보기용).
 export const DEFAULT_NICKNAME = '멘헤링이';
 
-export const CHARACTER_TYPES: readonly CharacterType[] = [
-  '레서판다',
-  '토끼',
-  '강아지',
-  '고양이',
-];
+export const CHARACTER_TYPES: readonly CharacterType[] = ['레서판다', '토끼', '강아지', '고양이'];
 
 interface ColorThemeConfig {
   value: ColorTheme;
