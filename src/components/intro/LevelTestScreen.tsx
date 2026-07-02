@@ -46,6 +46,9 @@ const QUESTIONS: Question[] = [
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
+// 진행바 폭 — 문항 수(QUESTIONS.length)에 맞춘 분수 클래스 (인라인 스타일 대체)
+const PROGRESS_WIDTH = ['w-1/3', 'w-2/3', 'w-full'];
+
 // TODO: 실제 추천 알고리즘으로 교체. 임시: 선택지 인덱스(0~3) 평균 → 레벨 1~5 매핑
 function calcRecommendedStep(answers: number[]): number {
   if (answers.length === 0) return 2;
@@ -62,7 +65,6 @@ export function LevelTestScreen() {
   const question = QUESTIONS[index];
   const selected = answers[index];
   const isLast = index === QUESTIONS.length - 1;
-  const progress = ((index + 1) / QUESTIONS.length) * 100;
 
   const handleSelect = (optionIndex: number) => {
     setAnswers((prev) => {
@@ -97,8 +99,10 @@ export function LevelTestScreen() {
         <div className="mt-6 flex flex-col items-center gap-2">
           <div className="bg-coral-soft/50 h-1.5 w-full overflow-hidden rounded-full">
             <div
-              className="bg-coral h-full rounded-full transition-[width]"
-              style={{ width: `${progress}%` }}
+              className={cn(
+                'bg-coral h-full rounded-full transition-[width]',
+                PROGRESS_WIDTH[index] ?? 'w-full',
+              )}
             />
           </div>
           <span className="text-coral text-xs font-bold">
