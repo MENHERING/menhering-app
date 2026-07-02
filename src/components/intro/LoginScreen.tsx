@@ -1,8 +1,4 @@
-'use client';
-
 import Image from 'next/image';
-
-import { createClient } from '@/lib/supabase/client';
 
 type LoginVariant = 'new' | 'returning';
 
@@ -32,14 +28,7 @@ const COPY: Record<
 export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
   const copy = COPY[variant];
 
-  const handleGoogleLogin = async () => {
-    const supabase = createClient();
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
-    });
-  };
-
+  // TODO: OAuth 실구현은 별도 이슈 (Supabase provider·콜백·세션). 현재 UI만.
   return (
     <div className="bg-sand relative flex min-h-dvh w-full flex-col items-center overflow-hidden px-6">
       {/* 배경 장식 원 */}
@@ -83,7 +72,6 @@ export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
           </p>
         </div>
 
-        {/* 버튼 */}
         <div className="mt-auto mb-10 flex flex-col gap-3">
           {/* 카카오 UI만 */}
           <button
@@ -92,15 +80,16 @@ export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
             aria-disabled="true"
             className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#FEE500] text-base font-bold text-[#191600] opacity-60"
           >
-            <span aria-hidden>💬</span>
+            <KakaoIcon />
             {copy.kakao}
           </button>
 
-          {/* Google 실제 OAuth 배선 */}
+          {/* Google UI만 */}
           <button
             type="button"
-            onClick={handleGoogleLogin}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white text-base font-bold text-[#191600] transition-colors hover:bg-black/3"
+            disabled
+            aria-disabled="true"
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white text-base font-bold text-[#191600] opacity-60"
           >
             <GoogleIcon />
             {copy.google}
@@ -108,6 +97,14 @@ export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
         </div>
       </div>
     </div>
+  );
+}
+
+function KakaoIcon() {
+  return (
+    <svg className="size-5" viewBox="0 0 24 24" aria-hidden fill="#191600">
+      <path d="M12 3.5C6.9 3.5 2.75 6.79 2.75 10.85c0 2.63 1.74 4.94 4.36 6.26-.19.69-.69 2.5-.79 2.89-.12.48.18.47.37.34.15-.1 2.36-1.6 3.32-2.26.65.1 1.31.15 1.99.15 5.1 0 9.25-3.29 9.25-7.35S17.1 3.5 12 3.5Z" />
+    </svg>
   );
 }
 
