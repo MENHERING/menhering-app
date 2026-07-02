@@ -1,14 +1,27 @@
+/* Pretendard (동적 서브셋) — @import는 다른 규칙보다 먼저 와야 함 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
 @import 'tailwindcss';
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
 
-  --cream: #f0d9cc;
+  /* 배경 크림 (brief 섹션 2) — 테두리용 --cream(#f0d9cc)과 별개 */
+  --sand: #f7ede0;
+  --cream: #f0d9cc; /* secondary 버튼/구분선 테두리 */
 
-  --coral: #e8563a;
-  --coral-dark: #d24a30;
-  --coral-soft: #fdd0c4;
+  /* 브랜드 컬러 (brief 섹션 2) */
+  --primary: #d4537e; /* 핑크 (메인) */
+  --primary-soft: #f4c0d1; /* 핑크 (라이트) */
+  --plum: #4b1528; /* 텍스트 */
+  --accent-green: #97c459; /* 성공/긍정 */
+  --accent-magenta: #993556; /* 강조/위기 */
+
+  /* 액션 컬러 — 실제 디자인 CTA는 코랄 (brief primary 핑크와 별개, 팀 정합 필요) */
+  --coral: #e8563a; /* 주 버튼 채움 (Figma Dev Mode 확정값) */
+  --coral-dark: #d24a30; /* hover/pressed */
+  --coral-soft: #fdd0c4; /* 소프트 채움/outline hover */
+
   --linen: #faf0e6;
   --ink: #3d3d3d;
 
@@ -20,7 +33,13 @@
   /* colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sand: var(--sand);
   --color-cream: var(--cream);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-plum: var(--plum);
+  --color-accent-green: var(--accent-green);
+  --color-accent-magenta: var(--accent-magenta);
   --color-coral: var(--coral);
   --color-coral-dark: var(--coral-dark);
   --color-coral-soft: var(--coral-soft);
@@ -28,7 +47,8 @@
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 
   --shadow-custom: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
@@ -42,7 +62,7 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--sand);
+  color: var(--plum);
+  font-family: var(--font-sans);
 }
