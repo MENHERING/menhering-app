@@ -1,3 +1,4 @@
+import { NODE_OFFSET_PX } from '@/app/learning/_components/roadmap-layout';
 import { Button } from '@/components/common/Button';
 import { cn } from '@/lib/cn';
 import type { Lesson } from '@/types/lesson';
@@ -14,12 +15,10 @@ export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCard
     <div className="relative w-full">
       <span
         aria-hidden
-        className={cn(
-          'bg-coral absolute -top-2 left-1/2 h-4 w-4 rotate-45 rounded-sm',
-          pointerAlign === 'right'
-            ? 'translate-x-[calc(-50%+72px)]'
-            : 'translate-x-[calc(-50%-72px)]',
-        )}
+        className="bg-coral absolute -top-2 left-1/2 h-4 w-4 rounded-sm"
+        style={{
+          transform: `translateX(calc(-50% + ${pointerAlign === 'right' ? NODE_OFFSET_PX : -NODE_OFFSET_PX}px)) rotate(45deg)`,
+        }}
       />
 
       <div className="bg-coral relative flex flex-col gap-2.5 rounded-2xl p-4 text-white shadow-[0_8px_20px_rgba(0,0,0,0.18)]">

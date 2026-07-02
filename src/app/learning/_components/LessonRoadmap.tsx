@@ -1,7 +1,7 @@
 import { LessonNode } from '@/app/learning/_components/LessonNode';
 import { LessonStartCard } from '@/app/learning/_components/LessonStartCard';
+import { NODE_OFFSET_PX } from '@/app/learning/_components/roadmap-layout';
 import { RoadPath } from '@/app/learning/_components/RoadPath';
-import { cn } from '@/lib/cn';
 import type { Lesson } from '@/types/lesson';
 
 interface LessonRoadmapProps {
@@ -10,9 +10,6 @@ interface LessonRoadmapProps {
   selectedLessonId: string | null;
   onSelectLesson: (lessonId: string) => void;
 }
-
-// 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다. (RoadPath, LessonStartCard의 ±72px과 동일하게 유지)
-const OFFSET_X = ['translate-x-[72px]', '-translate-x-[72px]'];
 
 // 선택된 레슨 카드의 절대 top 위치 계산용 (노드 h-20, gap-20, py-8과 동일하게 유지)
 const NODE_SIZE_PX = 80;
@@ -30,19 +27,28 @@ export function LessonRoadmap({
 
   return (
     <div className="relative flex flex-col items-center gap-20 py-8">
-      {lessons.map((lesson, index) => (
-        <div key={lesson.id} className={cn('relative', OFFSET_X[index % 2])}>
-          {index < lessons.length - 1 && (
-            <RoadPath direction={index % 2 === 0 ? 'right-to-left' : 'left-to-right'} />
-          )}
-          <LessonNode
-            order={lesson.order}
-            status={lesson.status}
-            isSelected={lesson.id === selectedLessonId}
-            onPress={lesson.status === 'current' ? () => onSelectLesson(lesson.id) : undefined}
-          />
-        </div>
-      ))}
+      {lessons.map((lesson, index) => {
+        // 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다.
+        const offset = index % 2 === 0 ? NODE_OFFSET_PX : -NODE_OFFSET_PX;
+
+        return (
+          <div
+            key={lesson.id}
+            className="relative"
+            style={{ transform: `translateX(${offset}px)` }}
+          >
+            {index < lessons.length - 1 && (
+              <RoadPath direction={index % 2 === 0 ? 'right-to-left' : 'left-to-right'} />
+            )}
+            <LessonNode
+              order={lesson.order}
+              status={lesson.status}
+              isSelected={lesson.id === selectedLessonId}
+              onPress={lesson.status === 'current' ? () => onSelectLesson(lesson.id) : undefined}
+            />
+          </div>
+        );
+      })}
 
       {selectedLesson && (
         <div
