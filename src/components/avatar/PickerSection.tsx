@@ -8,7 +8,8 @@ interface PickerSectionProps {
 export function PickerSection({ title, headingId, children }: PickerSectionProps) {
   return (
     <section aria-labelledby={headingId}>
-      <h2 id={headingId} className="text-ink mb-3 font-bold dark:text-neutral-100">
+      {/* TODO: 다크모드 도입 시 제목 `dark:text-neutral-100` */}
+      <h2 id={headingId} className="text-ink mb-3 font-bold">
         {title}
       </h2>
 

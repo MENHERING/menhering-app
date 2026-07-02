@@ -56,7 +56,8 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
   };
 
   return (
-    <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col dark:bg-neutral-950">
+    // TODO: 다크모드 도입 시 컨테이너 배경 `dark:bg-neutral-950`
+    <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
       <Header title="아바타" leftType="none" />
 
       <main className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
@@ -66,7 +67,8 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
         <CharacterPicker />
       </main>
 
-      <div className="border-cream bg-linen border-t px-4 py-3 dark:border-neutral-800 dark:bg-neutral-950">
+      {/* TODO: 다크모드 도입 시 하단 바 `dark:border-neutral-800 dark:bg-neutral-950` */}
+      <div className="border-cream bg-linen border-t px-4 py-3">
         {message && (
           <p
             role="status"

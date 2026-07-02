@@ -37,11 +37,13 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   };
 
   return (
-    <Section shadow="custom" className="dark:bg-neutral-900" isBorder>
+    // TODO: 다크모드 도입 시 카드 배경 `className="dark:bg-neutral-900"`
+    <Section shadow="custom" isBorder>
       <div className="flex flex-col items-center gap-3 py-6">
         {/* 캐릭터 프리뷰 */}
         <div className="relative">
-          <div className="bg-coral-soft/40 dark:bg-coral/10 flex size-40 items-center justify-center rounded-full">
+          {/* TODO: 다크모드 도입 시 원형 배경 `dark:bg-coral/10` */}
+          <div className="bg-coral-soft/40 flex size-40 items-center justify-center rounded-full">
             <CharacterRenderer
               characterType={characterType}
               colorTheme={colorTheme}
@@ -78,7 +80,7 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
               className={cn(
                 'text-ink w-40 rounded-lg border px-3 py-1 text-center text-lg font-bold',
                 'border-cream focus:border-coral outline-none',
-                'dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100',
+                // TODO: 다크모드 도입 시 `dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`
               )}
             />
             <button
@@ -97,13 +99,14 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
             className="flex items-center gap-1.5"
             aria-label="닉네임 수정"
           >
-            <span className="text-ink text-lg font-bold dark:text-neutral-100">{nickname}</span>
+            {/* TODO: 다크모드 도입 시 닉네임 `dark:text-neutral-100` */}
+            <span className="text-ink text-lg font-bold">{nickname}</span>
             <Pencil size={16} className="text-brown-soft" />
           </button>
         )}
 
-        {/* 캐릭터 종류 */}
-        <span className="text-brown-soft text-sm dark:text-neutral-400">{characterType}</span>
+        {/* 캐릭터 종류. TODO: 다크모드 도입 시 `dark:text-neutral-400` */}
+        <span className="text-brown-soft text-sm">{characterType}</span>
       </div>
     </Section>
   );

@@ -44,7 +44,8 @@ export function ColorThemePicker() {
                 ))}
               </svg>
 
-              <span className="text-ink flex-1 text-left text-sm font-semibold dark:text-neutral-100">
+              {/* TODO: 다크모드 도입 시 라벨 `dark:text-neutral-100` */}
+              <span className="text-ink flex-1 text-left text-sm font-semibold">
                 {theme.value}
               </span>
 
