@@ -83,7 +83,7 @@ export function LevelTestScreen() {
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center">
       <Header title="레벨 테스트" leftType="back" onLeftPress={handleBack} />
-      <div className="flex w-full max-w-107.5 flex-1 flex-col px-6">
+      <div className="flex w-full max-w-[430px] flex-1 flex-col px-6">
         {/* 진행바 */}
         <div className="mt-6 flex flex-col items-center gap-2">
           <div className="bg-coral-soft/50 h-1.5 w-full overflow-hidden rounded-full">

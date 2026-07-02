@@ -3,7 +3,7 @@ import Image from 'next/image';
 export function SplashScreen() {
   return (
     <div className="bg-sand relative flex min-h-dvh w-full flex-col items-center overflow-hidden px-6">
-      <div className="flex w-full max-w-107.5 flex-1 flex-col items-center justify-center gap-10">
+      <div className="flex w-full max-w-[430px] flex-1 flex-col items-center justify-center gap-10">
         {/* 브랜드 */}
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-plum text-4xl font-extrabold tracking-tight">멘헤링</h1>

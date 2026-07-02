@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 type LoginVariant = 'new' | 'returning';
 
@@ -36,7 +37,7 @@ export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
       <div className="bg-primary-soft/30 absolute top-32 -right-12 size-32 rounded-full" />
       <div className="bg-primary-soft/30 absolute top-1/2 -left-16 size-36 rounded-full" />
 
-      <div className="relative flex w-full max-w-107.5 flex-1 flex-col">
+      <div className="relative flex w-full max-w-[430px] flex-1 flex-col">
         {/* 브랜드 */}
         <div className="flex flex-col items-center gap-2 pt-12">
           <div className="flex items-center gap-2">
@@ -94,6 +95,13 @@ export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
             <GoogleIcon />
             {copy.google}
           </button>
+
+          {/* 개발용 임시 이동 - OAuth 미구현 상태 우회  */}
+          {process.env.NODE_ENV === 'development' && (
+            <Link href="/level" className="text-primary/90 mt-1 text-center text-xl font-medium">
+              [개발용] 로그인 패스(레벨 테스트)
+            </Link>
+          )}
         </div>
       </div>
     </div>

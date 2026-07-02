@@ -32,7 +32,7 @@ export function LevelSelectScreen() {
 
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center px-6">
-      <div className="flex w-full max-w-107.5 flex-1 flex-col">
+      <div className="flex w-full max-w-[430px] flex-1 flex-col">
         {/* 헤더 */}
         <div className="mt-12 flex flex-col gap-2">
           <h1 className="text-plum text-2xl font-extrabold tracking-tight">

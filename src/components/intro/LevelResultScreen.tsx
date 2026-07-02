@@ -24,7 +24,7 @@ export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProp
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center">
       <Header title="테스트 결과" leftType="none" />
-      <div className="flex w-full max-w-107.5 flex-1 flex-col px-6">
+      <div className="flex w-full max-w-[430px] flex-1 flex-col px-6">
         <div className="relative mx-auto mt-8 h-40 w-40">
           {/* 뒷배경 장식 도트 */}
           <div className="bg-coral-soft/40 absolute inset-0 m-auto size-32 rounded-full blur-[2px]" />
