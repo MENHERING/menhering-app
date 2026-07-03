@@ -86,7 +86,9 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
                   // 다시 입력하는 즉시 에러 안내를 제거한다.
                   if (error) setError(null);
                 }}
-                onBlur={commit}
+                // 포커스 아웃(탭 아웃)은 "취소"로 간주해 기존 닉네임으로 복원한다.
+                // 빈값 안내는 명시적 저장(Enter/체크 버튼)에서만 표시한다.
+                onBlur={cancelEdit}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') commit();
                   if (e.key === 'Escape') cancelEdit();
@@ -101,6 +103,8 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
               />
               <button
                 type="button"
+                // 버튼 클릭 시 input의 onBlur(cancelEdit)가 먼저 발생해 commit이 취소되는 것을 막는다.
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={commit}
                 aria-label="닉네임 저장"
                 className="text-coral flex size-7 items-center justify-center rounded-full"
