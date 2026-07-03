@@ -11,8 +11,8 @@ export default function TestRankingPage() {
   if (process.env.NODE_ENV !== 'development') notFound();
 
   const [first, second, third] = MOCK_RANKING;
-  const me = MOCK_RANKING.find((entry) => entry.isMe)!;
-  const others = MOCK_RANKING.find((entry) => !entry.isMe && entry.rank > 3)!;
+  const me = MOCK_RANKING.find((entry) => entry.isMe);
+  const others = MOCK_RANKING.find((entry) => !entry.isMe && entry.rank > 3);
 
   return (
     <main className="flex min-h-screen flex-col gap-8 bg-gray-50 px-4 py-16">
@@ -23,8 +23,8 @@ export default function TestRankingPage() {
 
       {/* case 02: RankingListItem - 본인(강조) / 일반 */}
       <ul className="flex flex-col gap-3">
-        <RankingListItem entry={me} />
-        <RankingListItem entry={others} />
+        {me && <RankingListItem entry={me} />}
+        {others && <RankingListItem entry={others} />}
       </ul>
 
       {/* case 03: RankingEmptyState - 친구 없음 / 학습 미시작 */}

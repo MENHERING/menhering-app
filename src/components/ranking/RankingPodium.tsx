@@ -35,9 +35,7 @@ function PodiumSlot({ entry, position }: PodiumSlotProps) {
         {position === 1 && (
           <Crown
             size={24}
-            // var()를 fill/color 속성값으로 바로 넘기면 브라우저별로 해석이 안 될 수 있어 style로 지정한다.
-            style={{ fill: 'var(--gold)', color: 'var(--gold)' }}
-            className="absolute -top-6 left-1/2 -translate-x-1/2"
+            className="absolute -top-6 left-1/2 -translate-x-1/2 fill-[var(--gold)] text-[var(--gold)]"
           />
         )}
         <div

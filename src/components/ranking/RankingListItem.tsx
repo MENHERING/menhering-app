@@ -37,7 +37,9 @@ export function RankingListItem({ entry }: RankingListItemProps) {
         </div>
 
         <span className="text-brown-soft text-xs">
-          {entry.isMe ? `${entry.streakDays}일 연속 학습 중` : entry.lastActiveLabel}
+          {entry.isMe
+            ? entry.streakDays != null && `${entry.streakDays}일 연속 학습 중`
+            : entry.lastActiveLabel}
         </span>
       </div>
 
