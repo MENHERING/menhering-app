@@ -6,11 +6,17 @@ import { useRouter } from 'next/navigation';
 
 import { Footer } from '@/components/common/Footer';
 import { Header } from '@/components/common/Header';
+import { RankingEmptyState } from '@/components/ranking/RankingEmptyState';
 import { RankingList } from '@/components/ranking/RankingList';
 import { RankingPeriodTabs } from '@/components/ranking/RankingPeriodTabs';
 import { RankingPodium } from '@/components/ranking/RankingPodium';
+import { ROUTES } from '@/constants/routes';
 import { MOCK_RANKING, MOCK_RANKING_WEEK } from '@/mocks/ranking';
 import type { RankingPeriod } from '@/types/ranking';
+
+// TODO: 실제 유저 진행도·친구 목록 연동 후 서버 조회 결과로 교체한다.
+const HAS_STARTED_LEARNING = true;
+const HAS_FRIENDS = true;
 
 export default function RankingPage() {
   const router = useRouter();
@@ -25,8 +31,22 @@ export default function RankingPage() {
 
       <main className="flex-1 space-y-6 py-4">
         <RankingPeriodTabs selected={period} onSelect={setPeriod} />
-        {first && second && third && <RankingPodium first={first} second={second} third={third} />}
-        <RankingList entries={rest} />
+
+        {!HAS_STARTED_LEARNING ? (
+          <RankingEmptyState
+            variant="not-started"
+            onStartLearning={() => router.push(ROUTES.LEARNING)}
+          />
+        ) : !HAS_FRIENDS ? (
+          <RankingEmptyState variant="no-friends" />
+        ) : (
+          <>
+            {first && second && third && (
+              <RankingPodium first={first} second={second} third={third} />
+            )}
+            <RankingList entries={rest} />
+          </>
+        )}
       </main>
 
       <Footer />

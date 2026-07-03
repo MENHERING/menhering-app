@@ -2,6 +2,7 @@
 
 import { notFound } from 'next/navigation';
 
+import { RankingEmptyState } from '@/components/ranking/RankingEmptyState';
 import { RankingListItem } from '@/components/ranking/RankingListItem';
 import { RankingPodium } from '@/components/ranking/RankingPodium';
 import { MOCK_RANKING } from '@/mocks/ranking';
@@ -25,6 +26,13 @@ export default function TestRankingPage() {
         <RankingListItem entry={me} />
         <RankingListItem entry={others} />
       </ul>
+
+      {/* case 03: RankingEmptyState - 친구 없음 / 학습 미시작 */}
+      <RankingEmptyState variant="no-friends" />
+      <RankingEmptyState
+        variant="not-started"
+        onStartLearning={() => alert('학습 화면으로 이동')}
+      />
     </main>
   );
 }
