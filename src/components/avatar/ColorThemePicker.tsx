@@ -43,7 +43,7 @@ export function ColorThemePicker() {
             {/* TODO: 다크모드 도입 시 라벨 `dark:text-neutral-100` */}
             <span className="text-ink flex-1 text-left text-sm font-semibold">{theme.value}</span>
 
-            {selected && <Check size={16} className="text-coral shrink-0" />}
+            {selected && <Check size={16} className="text-coral shrink-0" aria-hidden />}
           </button>
         );
       })}

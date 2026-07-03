@@ -52,7 +52,8 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   return (
     // TODO: 다크모드 도입 시 카드 배경 `className="dark:bg-neutral-900"`
     <Section shadow="custom" isBorder>
-      <div className="flex flex-col items-center gap-3 py-6">
+      {/* 간격 설계: 아바타↔닉네임은 gap-4(넉넉히), 닉네임↔종류는 종류의 -mt-3로 좁혀(≈4px) 이름 블록처럼 묶는다 */}
+      <div className="flex flex-col items-center gap-4 py-5">
         {/* 캐릭터 프리뷰 */}
         <div className="relative">
           {/* TODO: 다크모드 도입 시 원형 배경 `dark:bg-coral/10` */}
@@ -75,7 +76,9 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
         {/* 닉네임 (편집 가능) */}
         {isEditing ? (
           <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
+              {/* 우측 저장(체크) 버튼과 대칭인 좌측 여백 → 입력이 카드 정중앙에 오도록 */}
+              <span className="size-7 shrink-0" aria-hidden />
               <input
                 type="text"
                 value={draft}
@@ -107,9 +110,9 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={commit}
                 aria-label="닉네임 저장"
-                className="text-coral flex size-7 items-center justify-center rounded-full"
+                className="text-coral focus-visible:ring-coral flex size-7 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
               >
-                <Check size={18} />
+                <Check size={18} aria-hidden />
               </button>
             </div>
             {error && (
@@ -122,17 +125,19 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
           <button
             type="button"
             onClick={startEdit}
-            className="flex items-center gap-1.5"
+            className="focus-visible:ring-coral flex items-center justify-center gap-1.5 rounded-md px-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             aria-label="닉네임 수정"
           >
+            {/* 우측 연필과 대칭인 좌측 여백 → 닉네임 길이와 무관하게 카드 정중앙 정렬 */}
+            <span className="w-4 shrink-0" aria-hidden />
             {/* TODO: 다크모드 도입 시 닉네임 `dark:text-neutral-100` */}
             <span className="text-ink text-lg font-bold">{nickname}</span>
-            <Pencil size={16} className="text-brown-soft" />
+            <Pencil size={16} className="text-brown-soft shrink-0" aria-hidden />
           </button>
         )}
 
-        {/* 캐릭터 종류. TODO: 다크모드 도입 시 `dark:text-neutral-400` */}
-        <span className="text-brown-soft text-sm">{characterType}</span>
+        {/* 캐릭터 종류. -mt-3로 닉네임에 붙임(간격 설계 주석 참고). TODO: 다크모드 `dark:text-neutral-400` */}
+        <span className="text-brown-soft -mt-3 text-sm">{characterType}</span>
       </div>
     </Section>
   );

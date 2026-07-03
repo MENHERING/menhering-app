@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { AvatarPreview } from '@/components/avatar/AvatarPreview';
 import { CharacterPicker } from '@/components/avatar/CharacterPicker';
@@ -10,6 +10,7 @@ import { Footer } from '@/components/common/Footer';
 import { Header } from '@/components/common/Header';
 import { Toast } from '@/components/common/Toast';
 import { selectIsDirty, useAvatarStore } from '@/stores/avatar-store';
+import { useUnsavedChangesStore } from '@/stores/unsaved-changes-store';
 import type { Avatar } from '@/types/avatar';
 
 import { saveAvatar } from './actions';
@@ -42,8 +43,33 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
 
   const [isSaving, setIsSaving] = useState(false);
   // 성공/에러를 단일 상태로 관리해 두 피드백이 동시에 뜨지 않게 한다.
-  // 성공은 자동으로 사라지고(Toast 기본 duration), 에러는 다음 저장/되돌리기 전까지 유지(duration 0).
+  // 성공은 자동으로 사라지고(Toast 기본 duration), 에러는 다음 저장 전까지 유지(duration 0).
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+
+  // 미저장 변경(dirty)을 전역 플래그에 반영 → Footer 탭 이동 시 이탈 경고에 사용.
+  useEffect(() => {
+    useUnsavedChangesStore.getState().setHasUnsavedChanges(isDirty);
+  }, [isDirty]);
+
+  // 페이지를 떠날 때(언마운트) 플래그를 반드시 해제해 다른 화면에 경고가 새지 않게 한다.
+  useEffect(() => {
+    return () => useUnsavedChangesStore.getState().setHasUnsavedChanges(false);
+  }, []);
+
+  // 새로고침·탭 닫기·외부 이동: dirty일 때만 브라우저 기본 이탈 경고를 띄운다.
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      // 일부 브라우저는 returnValue가 설정돼야 경고를 표시한다.
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -68,11 +94,6 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
     }
   };
 
-  const handleRevert = () => {
-    useAvatarStore.getState().revert();
-    setFeedback(null);
-  };
-
   return (
     // TODO: 다크모드 도입 시 컨테이너 배경 `dark:bg-neutral-950`
     <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
@@ -85,30 +106,19 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
         <CharacterPicker />
       </main>
 
-      {/* TODO: 다크모드 도입 시 하단 바 `dark:border-neutral-800 dark:bg-neutral-950` */}
-      <div className="border-cream bg-linen border-t px-4 py-3">
-        <div className="flex gap-3">
-          <Button
-            variant="secondary"
-            size="lg"
-            isFullWidth
-            disabled={!isDirty || isSaving}
-            onClick={handleRevert}
-          >
-            되돌리기
-          </Button>
-
-          <Button
-            variant="primary"
-            size="lg"
-            isFullWidth
-            isLoading={isSaving}
-            disabled={!isDirty}
-            onClick={handleSave}
-          >
-            저장하기
-          </Button>
-        </div>
+      {/* TODO: 다크모드 도입 시 하단 바 `dark:bg-neutral-950` */}
+      <div className="bg-linen px-4 py-3">
+        {/* TODO: 코인 사용 '구매하기'로 전환 예정 */}
+        <Button
+          variant="primary"
+          size="lg"
+          isFullWidth
+          isLoading={isSaving}
+          disabled={!isDirty}
+          onClick={handleSave}
+        >
+          저장하기
+        </Button>
       </div>
 
       <Footer />

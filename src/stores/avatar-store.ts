@@ -17,8 +17,6 @@ interface AvatarState {
   setNickname: (nickname: string) => void;
   // 서버 조회값으로 초기화(저장 성공 시 baseline 갱신에도 사용)
   initFrom: (avatar: Pick<Avatar, 'characterType' | 'colorTheme' | 'nickname'>) => void;
-  // 편집값을 마지막 baseline(initial)으로 되돌린다. initial이 없으면 no-op.
-  revert: () => void;
 }
 
 export const useAvatarStore = create<AvatarState>((set) => ({
@@ -38,17 +36,6 @@ export const useAvatarStore = create<AvatarState>((set) => ({
       nickname: avatar.nickname,
       initial: avatar,
     }),
-
-  revert: () =>
-    set((state) =>
-      state.initial
-        ? {
-            characterType: state.initial.characterType,
-            colorTheme: state.initial.colorTheme,
-            nickname: state.initial.nickname,
-          }
-        : {},
-    ),
 }));
 
 // 초기값 대비 변경 여부. 컴포넌트에서 useAvatarStore(selectIsDirty)로 구독.

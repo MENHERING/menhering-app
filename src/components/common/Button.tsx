@@ -16,7 +16,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const BASE =
-  'inline-flex select-none items-center justify-center font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex select-none items-center justify-center font-bold transition-colors focus-visible:ring-coral focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50';
 
 const VARIANT: Record<ButtonVariant, string> = {
   // 채움 #E8563A + 그림자: 다음 / 저장하기 / 초급으로 시작

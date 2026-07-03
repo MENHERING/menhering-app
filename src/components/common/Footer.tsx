@@ -1,11 +1,14 @@
 'use client';
 
+import { type MouseEvent } from 'react';
+
 import { BookOpen, Home, Shirt, UserRound, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
+import { useUnsavedChangesStore } from '@/stores/unsaved-changes-store';
 
 interface NavItem {
   label: string;
@@ -49,6 +52,24 @@ interface FooterProps {
 export function Footer({ className }: FooterProps) {
   const pathname = usePathname();
 
+  // 미저장 변경이 있는 화면(예: 아바타 탭)에서 다른 탭으로 이동 시 이탈 경고.
+  // 현재 탭(활성) 재클릭은 이탈이 아니므로 통과한다.
+  const handleNavClick = (event: MouseEvent<HTMLAnchorElement>, isActive: boolean) => {
+    if (isActive) return;
+    if (!useUnsavedChangesStore.getState().hasUnsavedChanges) return;
+
+    const canLeave = window.confirm('저장하지 않은 변경이 있어요. 나가시겠어요?');
+
+    if (!canLeave) {
+      // Link는 defaultPrevented면 클라이언트 내비게이션을 건너뛴다.
+      event.preventDefault();
+      return;
+    }
+
+    // 나가기로 확정 → 플래그 해제(다음 화면에 경고가 새지 않게)
+    useUnsavedChangesStore.getState().setHasUnsavedChanges(false);
+  };
+
   return (
     <nav
       aria-label="하단 탭 내비게이션"
@@ -65,6 +86,7 @@ export function Footer({ className }: FooterProps) {
           <Link
             key={href}
             href={href}
+            onClick={(event) => handleNavClick(event, active)}
             aria-current={active ? 'page' : undefined}
             className={cn(
               'flex flex-col items-center gap-1 py-1.5 text-xs font-bold transition-colors',
