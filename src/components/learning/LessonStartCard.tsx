@@ -1,5 +1,5 @@
-import { NODE_OFFSET_PX } from '@/app/learning/_components/roadmap-layout';
 import { Button } from '@/components/common/Button';
+import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
 import { cn } from '@/lib/cn';
 import type { Lesson } from '@/types/lesson';
 

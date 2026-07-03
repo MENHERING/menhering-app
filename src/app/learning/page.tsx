@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 
-import { CurriculumBar } from '@/app/learning/_components/CurriculumBar';
-import { LessonRoadmap } from '@/app/learning/_components/LessonRoadmap';
-import { UserStatusBar } from '@/app/learning/_components/UserStatusBar';
 import { Footer } from '@/components/common/Footer';
+import { CurriculumBar } from '@/components/learning/CurriculumBar';
+import { LessonRoadmap } from '@/components/learning/LessonRoadmap';
+import { UserStatusBar } from '@/components/learning/UserStatusBar';
 import { MOCK_CURRICULUM, MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
 
 export default function LearningPage() {

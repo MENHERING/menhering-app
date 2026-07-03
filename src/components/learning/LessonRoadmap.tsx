@@ -1,7 +1,7 @@
-import { LessonNode } from '@/app/learning/_components/LessonNode';
-import { LessonStartCard } from '@/app/learning/_components/LessonStartCard';
-import { NODE_OFFSET_PX } from '@/app/learning/_components/roadmap-layout';
-import { RoadPath } from '@/app/learning/_components/RoadPath';
+import { LessonNode } from '@/components/learning/LessonNode';
+import { LessonStartCard } from '@/components/learning/LessonStartCard';
+import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
+import { RoadPath } from '@/components/learning/RoadPath';
 import type { Lesson } from '@/types/lesson';
 
 interface LessonRoadmapProps {

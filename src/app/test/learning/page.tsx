@@ -2,9 +2,9 @@
 
 import { notFound } from 'next/navigation';
 
-import { LessonNode } from '@/app/learning/_components/LessonNode';
-import { LessonStartCard } from '@/app/learning/_components/LessonStartCard';
-import { UserStatusBar } from '@/app/learning/_components/UserStatusBar';
+import { LessonNode } from '@/components/learning/LessonNode';
+import { LessonStartCard } from '@/components/learning/LessonStartCard';
+import { UserStatusBar } from '@/components/learning/UserStatusBar';
 import { MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
 
 export default function TestLearningPage() {

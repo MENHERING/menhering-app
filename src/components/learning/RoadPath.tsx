@@ -1,4 +1,4 @@
-import { NODE_OFFSET_PX } from '@/app/learning/_components/roadmap-layout';
+import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
 
 interface RoadPathProps {
   // 'left-to-right'는 기본 도형을 좌우 반전해서 재사용한다.
