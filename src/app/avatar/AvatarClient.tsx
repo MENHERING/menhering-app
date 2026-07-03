@@ -8,11 +8,16 @@ import { ColorThemePicker } from '@/components/avatar/ColorThemePicker';
 import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Header } from '@/components/common/Header';
-import { cn } from '@/lib/cn';
+import { Toast } from '@/components/common/Toast';
 import { selectIsDirty, useAvatarStore } from '@/stores/avatar-store';
 import type { Avatar } from '@/types/avatar';
 
 import { saveAvatar } from './actions';
+
+interface Feedback {
+  variant: 'success' | 'error';
+  message: string;
+}
 
 interface AvatarClientProps {
   initialAvatar: Avatar;
@@ -36,11 +41,13 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
   const isDirty = useAvatarStore(selectIsDirty);
 
   const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  // 성공/에러를 단일 상태로 관리해 두 피드백이 동시에 뜨지 않게 한다.
+  // 성공은 자동으로 사라지고(Toast 기본 duration), 에러는 다음 저장/되돌리기 전까지 유지(duration 0).
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
 
   const handleSave = async () => {
     setIsSaving(true);
-    setMessage(null);
+    setFeedback(null);
 
     try {
       const result = await saveAvatar({ characterType, colorTheme, nickname });
@@ -48,17 +55,22 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
       if (result.ok) {
         // 저장 성공 → dirty 기준선을 현재 값으로 갱신
         useAvatarStore.getState().initFrom({ characterType, colorTheme, nickname });
-        setMessage({ type: 'success', text: '저장되었어요!' });
+        setFeedback({ variant: 'success', message: '저장되었어요!' });
       } else {
-        setMessage({ type: 'error', text: result.error });
+        setFeedback({ variant: 'error', message: result.error });
       }
     } catch (error) {
       // 서버 액션 호출 자체가 실패(네트워크/서버 예외)해도 UI가 복구되도록 처리
       console.error('[avatar] 저장 중 오류:', error);
-      setMessage({ type: 'error', text: '저장 중 오류가 발생했습니다.' });
+      setFeedback({ variant: 'error', message: '저장 중 오류가 발생했습니다.' });
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleRevert = () => {
+    useAvatarStore.getState().revert();
+    setFeedback(null);
   };
 
   return (
@@ -75,31 +87,41 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
 
       {/* TODO: 다크모드 도입 시 하단 바 `dark:border-neutral-800 dark:bg-neutral-950` */}
       <div className="border-cream bg-linen border-t px-4 py-3">
-        {message && (
-          <p
-            role="status"
-            className={cn(
-              'mb-2 text-center text-sm font-semibold',
-              message.type === 'success' ? 'text-coral' : 'text-red-500',
-            )}
+        <div className="flex gap-3">
+          <Button
+            variant="secondary"
+            size="lg"
+            isFullWidth
+            disabled={!isDirty || isSaving}
+            onClick={handleRevert}
           >
-            {message.text}
-          </p>
-        )}
+            되돌리기
+          </Button>
 
-        <Button
-          variant="primary"
-          size="lg"
-          isFullWidth
-          isLoading={isSaving}
-          disabled={!isDirty}
-          onClick={handleSave}
-        >
-          저장하기
-        </Button>
+          <Button
+            variant="primary"
+            size="lg"
+            isFullWidth
+            isLoading={isSaving}
+            disabled={!isDirty}
+            onClick={handleSave}
+          >
+            저장하기
+          </Button>
+        </div>
       </div>
 
       <Footer />
+
+      <Toast
+        isOpen={feedback !== null}
+        message={feedback?.message ?? ''}
+        variant={feedback?.variant ?? 'success'}
+        duration={feedback?.variant === 'error' ? 0 : undefined}
+        onClose={() => setFeedback(null)}
+        // 저장 바(하단 ~142px)를 가리지 않도록 그 위로 올린다.
+        className="bottom-40"
+      />
     </div>
   );
 }
