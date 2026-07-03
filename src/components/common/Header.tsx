@@ -20,7 +20,7 @@ export function Header({
   rightElement,
 }: HeaderProps) {
   return (
-    <header className="bg-linen relative flex h-14 w-full items-center justify-between px-5">
+    <header className="bg-sand relative flex h-14 w-full items-center justify-between px-5">
       <div className="flex h-10 w-10 items-center justify-center">
         {leftType === 'back' && (
           <button
