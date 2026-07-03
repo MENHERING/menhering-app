@@ -4,4 +4,5 @@ export const ROUTES = {
   LEARNING: '/learning',
   AVATAR: '/avatar',
   MYPAGE: '/mypage',
+  RANKING: '/learning/ranking',
 } as const;
