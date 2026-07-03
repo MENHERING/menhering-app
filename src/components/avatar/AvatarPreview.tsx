@@ -23,16 +23,29 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(nickname);
+  const [error, setError] = useState<string | null>(null);
 
   const startEdit = () => {
     setDraft(nickname);
+    setError(null);
     setIsEditing(true);
+  };
+
+  const cancelEdit = () => {
+    setDraft(nickname);
+    setError(null);
+    setIsEditing(false);
   };
 
   const commit = () => {
     const next = draft.trim();
-    if (next) setNickname(next);
-    else setDraft(nickname);
+    // 빈 닉네임은 저장하지 않고 편집 상태를 유지한 채 안내를 표시한다.
+    if (!next) {
+      setError('닉네임을 입력해주세요.');
+      return;
+    }
+    setNickname(next);
+    setError(null);
     setIsEditing(false);
   };
 
@@ -61,36 +74,45 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
 
         {/* 닉네임 (편집 가능) */}
         {isEditing ? (
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={draft}
-              maxLength={NICKNAME_MAX_LENGTH}
-              autoFocus
-              onChange={(e) => setDraft(e.target.value)}
-              onBlur={commit}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') commit();
-                if (e.key === 'Escape') {
-                  setDraft(nickname);
-                  setIsEditing(false);
-                }
-              }}
-              aria-label="닉네임"
-              className={cn(
-                'text-ink w-40 rounded-lg border px-3 py-1 text-center text-lg font-bold',
-                'border-cream focus:border-coral outline-none',
-                // TODO: 다크모드 도입 시 `dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`
-              )}
-            />
-            <button
-              type="button"
-              onClick={commit}
-              aria-label="닉네임 저장"
-              className="text-coral flex size-7 items-center justify-center rounded-full"
-            >
-              <Check size={18} />
-            </button>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={draft}
+                maxLength={NICKNAME_MAX_LENGTH}
+                autoFocus
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  // 다시 입력하는 즉시 에러 안내를 제거한다.
+                  if (error) setError(null);
+                }}
+                onBlur={commit}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') commit();
+                  if (e.key === 'Escape') cancelEdit();
+                }}
+                aria-label="닉네임"
+                aria-invalid={error !== null}
+                className={cn(
+                  'text-ink w-40 rounded-lg border px-3 py-1 text-center text-lg font-bold outline-none',
+                  error ? 'border-red-500 focus:border-red-500' : 'border-cream focus:border-coral',
+                  // TODO: 다크모드 도입 시 `dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`
+                )}
+              />
+              <button
+                type="button"
+                onClick={commit}
+                aria-label="닉네임 저장"
+                className="text-coral flex size-7 items-center justify-center rounded-full"
+              >
+                <Check size={18} />
+              </button>
+            </div>
+            {error && (
+              <p role="alert" className="text-xs font-medium text-red-500">
+                {error}
+              </p>
+            )}
           </div>
         ) : (
           <button
