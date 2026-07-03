@@ -53,7 +53,8 @@ export function Footer({ className }: FooterProps) {
     <nav
       aria-label="하단 탭 내비게이션"
       className={cn(
-        'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[env(safe-area-inset-bottom)] dark:border-neutral-800 dark:bg-neutral-900',
+        // TODO: 다크모드 도입 시 `dark:border-neutral-800 dark:bg-neutral-900` 추가
+        'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[env(safe-area-inset-bottom)]',
         className,
       )}
     >
@@ -69,13 +70,15 @@ export function Footer({ className }: FooterProps) {
               'flex flex-col items-center gap-1 py-1.5 text-xs font-bold transition-colors',
               // 탭 누르는 순간 피드백(모바일 탭 하이라이트)
               'active:opacity-70',
-              active ? 'text-coral' : 'text-brown-soft dark:text-neutral-400',
+              // TODO: 다크모드 도입 시 비활성 탭 `dark:text-neutral-400`
+              active ? 'text-coral' : 'text-brown-soft',
             )}
           >
             <span
               className={cn(
                 'flex size-8 items-center justify-center rounded-full transition-colors',
-                active && 'bg-coral-soft dark:bg-coral/20',
+                // TODO: 다크모드 도입 시 활성 탭 원형 배경 `dark:bg-coral/20`
+                active && 'bg-coral-soft',
               )}
             >
               <Icon className="h-5 w-5" aria-hidden />
