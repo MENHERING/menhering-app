@@ -15,7 +15,7 @@ export interface HomeSummary {
 }
 
 export const HOME_SUMMARY: HomeSummary = {
-  greeting: '오늘도 같이 달려보자! 🌟',
+  greeting: '오늘도 같이 달려보자!',
   accessStreak: 1,
   accessStreakMax: 7,
   stage: 3,

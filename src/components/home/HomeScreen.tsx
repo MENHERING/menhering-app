@@ -1,6 +1,16 @@
 'use client';
 
-import { Bell, ChevronRight } from 'lucide-react';
+import {
+  Bell,
+  ChevronRight,
+  CircleCheck,
+  Flame,
+  PawPrint,
+  Sparkles,
+  Star,
+  Target,
+  type LucideIcon,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
@@ -9,7 +19,15 @@ import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import { ROUTES } from '@/constants/routes';
+import { cn } from '@/lib/cn';
 import { HOME_SUMMARY } from '@/mocks/home';
+
+interface HomeStat {
+  Icon: LucideIcon;
+  iconClass: string;
+  value: number | string;
+  label: string;
+}
 
 export function HomeScreen() {
   const router = useRouter();
@@ -19,10 +37,20 @@ export function HomeScreen() {
   const accessPercent = Math.min(100, (summary.accessStreak / summary.accessStreakMax) * 100);
   const xpPercent = Math.min(100, (summary.xp / summary.xpForNextLevel) * 100);
 
-  const stats = [
-    { emoji: '✅', value: summary.todayCompleted, label: '오늘 완료' },
-    { emoji: '🔥', value: summary.learnStreak, label: '연속 일수' },
-    { emoji: '🎯', value: `${summary.accuracyPercent}%`, label: '정답률' },
+  const stats: HomeStat[] = [
+    {
+      Icon: CircleCheck,
+      iconClass: 'text-accent-green',
+      value: summary.todayCompleted,
+      label: '오늘 완료',
+    },
+    { Icon: Flame, iconClass: 'text-coral', value: summary.learnStreak, label: '연속 일수' },
+    {
+      Icon: Target,
+      iconClass: 'text-accent-magenta',
+      value: `${summary.accuracyPercent}%`,
+      label: '정답률',
+    },
   ];
 
   const handleStart = () => {
@@ -42,7 +70,7 @@ export function HomeScreen() {
                 className="size-8 translate-y-1"
               />
             </span>
-            <span className="text-plum text-xl font-extrabold">멘헤링</span>
+            <h1 className="text-plum text-xl font-extrabold">멘헤링</h1>
           </div>
           <button
             type="button"
@@ -56,7 +84,10 @@ export function HomeScreen() {
         {/* 말풍선 */}
         <div className="mt-4 flex justify-center">
           <div className="border-coral/30 relative rounded-full border-2 bg-white px-5 py-2.5 shadow-sm">
-            <p className="text-plum text-sm font-bold">{summary.greeting}</p>
+            <p className="text-plum flex items-center gap-1 text-sm font-bold">
+              {summary.greeting}
+              <Sparkles className="text-coral size-4" aria-hidden />
+            </p>
             <span className="border-coral/30 absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-r-2 border-b-2 bg-white" />
           </div>
         </div>
@@ -73,10 +104,11 @@ export function HomeScreen() {
 
         {/* 마지막 접속 */}
         <Section isBorder className="mt-6 bg-white/60 py-3">
-          <p className="text-coral text-center text-xs font-bold">마지막 접속 — 오늘</p>
+          <p className="text-coral text-center text-xs font-bold">마지막 접속 - 오늘</p>
           <div className="mt-2 flex items-center gap-2">
             <span className="text-brown-soft text-[10px] font-bold">오늘</span>
             <div className="bg-coral-soft/40 relative h-1.5 flex-1 rounded-full">
+              {/* 진행률·knob 위치는 런타임 동적 값 — Tailwind 정적 클래스로 표현 불가해 인라인 스타일 예외 */}
               <div
                 className="bg-coral absolute inset-y-0 left-0 rounded-full"
                 style={{ width: `${accessPercent}%` }}
@@ -95,12 +127,13 @@ export function HomeScreen() {
           <div className="flex items-start justify-between">
             <div className="flex flex-col gap-0.5">
               <span className="text-brown-soft text-xs font-bold">현재 스테이지</span>
-              <span className="text-plum text-2xl font-extrabold">
-                Stage {summary.stage} <span aria-hidden>🐾</span>
+              <span className="text-plum inline-flex items-center gap-1.5 text-2xl font-extrabold">
+                Stage {summary.stage}
+                <PawPrint className="text-coral/50 size-5" aria-hidden />
               </span>
             </div>
             <span className="bg-coral-soft/50 text-coral flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-extrabold">
-              <span aria-hidden>⭐</span> {summary.xp} XP
+              <Star className="fill-coral size-4" aria-hidden /> {summary.xp} XP
             </span>
           </div>
 
@@ -111,6 +144,7 @@ export function HomeScreen() {
             </span>
           </div>
           <div className="bg-coral-soft/40 mt-1.5 h-2 w-full overflow-hidden rounded-full">
+            {/* XP 진행률은 런타임 동적 값 — Tailwind 정적 클래스로 표현 불가해 인라인 스타일 예외 */}
             <div
               className="bg-coral h-full rounded-full transition-[width]"
               style={{ width: `${xpPercent}%` }}
@@ -118,11 +152,9 @@ export function HomeScreen() {
           </div>
 
           <div className="border-cream mt-4 grid grid-cols-3 gap-2 border-t pt-4 text-center">
-            {stats.map(({ emoji, value, label }) => (
+            {stats.map(({ Icon, iconClass, value, label }) => (
               <div key={label} className="flex flex-col items-center gap-1">
-                <span className="text-lg" aria-hidden>
-                  {emoji}
-                </span>
+                <Icon className={cn('size-5', iconClass)} aria-hidden />
                 <span className="text-plum text-base font-extrabold">{value}</span>
                 <span className="text-brown-soft text-[11px] font-medium">{label}</span>
               </div>
