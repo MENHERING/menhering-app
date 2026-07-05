@@ -117,7 +117,7 @@ export function HomeScreen() {
               <div className="bg-coral absolute inset-y-0 left-0 w-(--access-pct) rounded-full" />
               <span className="border-coral absolute top-1/2 left-(--access-pct) size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white" />
             </div>
-            <span className="text-brown-soft text-[10px] font-bold">7일+</span>
+            <span className="text-brown-soft text-[10px] font-bold">{summary.accessStreakMax}일+</span>
           </div>
         </Section>
 
