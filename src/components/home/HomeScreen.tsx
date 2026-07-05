@@ -1,5 +1,7 @@
 'use client';
 
+import type { CSSProperties } from 'react';
+
 import {
   Bell,
   ChevronRight,
@@ -107,16 +109,13 @@ export function HomeScreen() {
           <p className="text-coral text-center text-xs font-bold">마지막 접속 - 오늘</p>
           <div className="mt-2 flex items-center gap-2">
             <span className="text-brown-soft text-[10px] font-bold">오늘</span>
-            <div className="bg-coral-soft/40 relative h-1.5 flex-1 rounded-full">
-              {/* 진행률·knob 위치는 런타임 동적 값 — Tailwind 정적 클래스로 표현 불가해 인라인 스타일 예외 */}
-              <div
-                className="bg-coral absolute inset-y-0 left-0 rounded-full"
-                style={{ width: `${accessPercent}%` }}
-              />
-              <span
-                className="border-coral absolute top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white"
-                style={{ left: `${accessPercent}%` }}
-              />
+            {/* 진행률(--access-pct)은 런타임 동적 값이라 CSS 변수로 주입, 폭·위치는 Tailwind 클래스가 참조 */}
+            <div
+              className="bg-coral-soft/40 relative h-1.5 flex-1 rounded-full"
+              style={{ '--access-pct': `${accessPercent}%` } as CSSProperties}
+            >
+              <div className="bg-coral absolute inset-y-0 left-0 w-(--access-pct) rounded-full" />
+              <span className="border-coral absolute top-1/2 left-(--access-pct) size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-white" />
             </div>
             <span className="text-brown-soft text-[10px] font-bold">7일+</span>
           </div>
@@ -143,12 +142,12 @@ export function HomeScreen() {
               {summary.xp} / {summary.xpForNextLevel} XP
             </span>
           </div>
-          <div className="bg-coral-soft/40 mt-1.5 h-2 w-full overflow-hidden rounded-full">
-            {/* XP 진행률은 런타임 동적 값 — Tailwind 정적 클래스로 표현 불가해 인라인 스타일 예외 */}
-            <div
-              className="bg-coral h-full rounded-full transition-[width]"
-              style={{ width: `${xpPercent}%` }}
-            />
+          {/* 진행률(--xp-pct)은 런타임 동적 값이라 CSS 변수로 주입, 폭은 Tailwind 클래스가 참조 */}
+          <div
+            className="bg-coral-soft/40 mt-1.5 h-2 w-full overflow-hidden rounded-full"
+            style={{ '--xp-pct': `${xpPercent}%` } as CSSProperties}
+          >
+            <div className="bg-coral h-full w-(--xp-pct) rounded-full transition-[width]" />
           </div>
 
           <div className="border-cream mt-4 grid grid-cols-3 gap-2 border-t pt-4 text-center">
