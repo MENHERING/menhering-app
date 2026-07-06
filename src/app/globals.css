@@ -11,6 +11,19 @@
   --coral-soft: #fdd0c4;
   --linen: #faf0e6;
   --ink: #3d3d3d;
+  --brown-ink: #3d2b1f;
+  --brown-muted: #9e8070;
+  --yellow-soft: #fff3d0;
+  --green-soft: #d8f3e5;
+  --blue-soft: #d2d4ee;
+  --purple-soft: #f5e8f9;
+  --red-soft: #f8d9d9;
+  --cream-toggle: #f5e6df;
+  --peach-surface: #fff6f2;
+  --coral-highlight: #d4573d;
+  --green-accent: #52c97a;
+  --coral-accent: #e8725a;
+  --sand: #f0ede8;
 
   /* 하단 탭바 비활성 텍스트 (공용 토큰 없음) */
   --brown-soft: #c27a5a;
@@ -27,6 +40,21 @@
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
+  --color-brown-ink: var(--brown-ink);
+  --color-brown-muted: var(--brown-muted);
+  --color-yellow-soft: var(--yellow-soft);
+  --color-green-soft: var(--green-soft);
+  --color-blue-soft: var(--blue-soft);
+  --color-purple-soft: var(--purple-soft);
+  --color-red-soft: var(--red-soft);
+  --color-cream-toggle: var(--cream-toggle);
+  --color-peach-surface: var(--peach-surface);
+  --color-coral-highlight: var(--coral-highlight);
+  --color-green-accent: var(--green-accent);
+  --color-coral-accent: var(--coral-accent);
+  --color-sand: var(--sand);
+
+  --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
