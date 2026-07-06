@@ -10,7 +10,7 @@ interface ProfileSectionProps {
 
 const MOOD_STYLE: Record<Mood, { Icon: LucideIcon; badge: string }> = {
   행복: { Icon: Smile, badge: 'bg-yellow-soft text-brown-ink' },
-  보통: { Icon: Meh, badge: 'bg-sand text-brown-ink' },
+  보통: { Icon: Meh, badge: 'bg-sand-line text-brown-ink' },
   우울: { Icon: Frown, badge: 'bg-blue-soft text-brown-ink' },
   지침: { Icon: BatteryLow, badge: 'bg-purple-soft text-brown-ink' },
   화남: { Icon: Angry, badge: 'bg-red-soft text-brown-ink' },

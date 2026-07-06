@@ -60,7 +60,7 @@ function LearningChart({ data }: { data: ChartBar[] }) {
         <span>0</span>
       </div>
 
-      <div className="border-sand ml-5 flex h-[110px] items-end justify-between gap-1 border-b pt-1">
+      <div className="border-sand-line ml-5 flex h-[110px] items-end justify-between gap-1 border-b pt-1">
         {data.map((bar) => {
           const heightPercent = (bar.value / CHART_MAX) * 100;
 
