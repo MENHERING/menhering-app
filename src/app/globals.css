@@ -1,3 +1,4 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
 @import 'tailwindcss';
 @source '../**/*.{ts,tsx}';
 
@@ -5,11 +6,22 @@
   --background: #ffffff;
   --foreground: #171717;
 
+  /* 배경 */
+  --sand: #f7ede0;
+  --sand-line: #f0ede8;
   --cream: #f0d9cc;
+
+  /* 브랜드 컬러  */
+  --primary: #d4537e;
+  --primary-soft: #f4c0d1;
+  --plum: #4b1528;
+  --accent-green: #97c459;
+  --accent-magenta: #993556;
 
   --coral: #e8563a;
   --coral-dark: #d24a30;
   --coral-soft: #fdd0c4;
+
   --linen: #faf0e6;
   --ink: #3d3d3d;
   --brown-ink: #3d2b1f;
@@ -24,9 +36,7 @@
   --coral-highlight: #d4573d;
   --green-accent: #52c97a;
   --coral-accent: #e8725a;
-  --sand: #f0ede8;
 
-  /* 하단 탭바 비활성 텍스트 (공용 토큰 없음) */
   --brown-soft: #c27a5a;
 
   /* 퀴즈 오답 노트 — 보기 상태 */
@@ -51,19 +61,31 @@
   --subject-js: #f59e0b;
   --subject-react-surface: #e0f7f4;
   --subject-react: #00897b;
+
+  --gold: #fbbf24;
+
+  --locked: #d1d5db;
+  --locked-icon: #6b7280;
 }
 
 @theme inline {
-  /* colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sand: var(--sand);
+  --color-sand-line: var(--sand-line);
   --color-cream: var(--cream);
+  --color-primary: var(--primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-plum: var(--plum);
+  --color-accent-green: var(--accent-green);
+  --color-accent-magenta: var(--accent-magenta);
   --color-coral: var(--coral);
   --color-coral-dark: var(--coral-dark);
   --color-coral-soft: var(--coral-soft);
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
+
   --color-brown-ink: var(--brown-ink);
   --color-brown-muted: var(--brown-muted);
   --color-yellow-soft: var(--yellow-soft);
@@ -76,7 +98,6 @@
   --color-coral-highlight: var(--coral-highlight);
   --color-green-accent: var(--green-accent);
   --color-coral-accent: var(--coral-accent);
-  --color-sand: var(--sand);
 
   /* 퀴즈 오답 노트 — 보기 상태 */
   --color-answer-wrong-soft: var(--answer-wrong-soft);
@@ -103,21 +124,21 @@
 
   --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
-  --font-sans: var(--font-geist-sans);
+  --color-gold: var(--gold);
+  --color-locked: var(--locked);
+  --color-locked-icon: var(--locked-icon);
+
+  --font-sans:
+    'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 
   --shadow-custom: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* 라이트 고정 (#16). TODO: 다크모드 도입 시 :root 다크 오버라이드 복원 (참고 #20) */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--sand);
+  color: var(--plum);
+  font-family: var(--font-sans);
 }
