@@ -20,13 +20,12 @@ const BASE =
 
 const VARIANT: Record<ButtonVariant, string> = {
   // 채움 #E8563A + 그림자: 다음 / 저장하기 / 초급으로 시작
-  primary: 'bg-coral text-white shadow-[0_3px_10px_rgba(0,0,0,0.12)] hover:bg-coral-dark',
+  primary: 'bg-coral text-white shadow-[0_3px_10px_rgba(0,0,0,0.12)]',
   // 흰 배경 + 코랄 텍스트 + 옅은 테두리: 직접 다시 고르기
-  secondary:
-    'border border-cream bg-white text-coral shadow-[0_4px_12px_rgba(0,0,0,0.06)] hover:bg-coral-soft/40',
+  secondary: 'border border-cream bg-white text-coral shadow-[0_4px_12px_rgba(0,0,0,0.06)]',
   // 코랄 테두리: 복사 / 거절
-  outline: 'border border-coral bg-transparent text-coral hover:bg-coral-soft/50',
-  ghost: 'bg-transparent text-coral hover:bg-coral-soft/50',
+  outline: 'border border-coral bg-transparent text-coral',
+  ghost: 'bg-transparent text-coral',
 };
 
 // radius 14px (CTA 확정값), sm은 pill

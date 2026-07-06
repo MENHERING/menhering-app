@@ -64,7 +64,7 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
           {isReviewed ? '복습 완료' : '미복습'}
         </span>
         {!isReviewed && (
-          <Button size="sm" className="bg-coral-accent hover:bg-coral-accent">
+          <Button size="sm" className="bg-coral-accent shadow-none">
             다시 풀기
           </Button>
         )}

@@ -50,7 +50,7 @@ export function WrongNoteScreen() {
           ))}
         </div>
         {MOCK_WRONG_NOTE_STATS.unreviewed > 0 && (
-          <div className="px-4 pt-6">
+          <div className="sticky bottom-4 px-4 pt-6">
             <Button
               isFullWidth
               rightIcon={<ArrowRight className="size-4" strokeWidth={3} aria-hidden />}
