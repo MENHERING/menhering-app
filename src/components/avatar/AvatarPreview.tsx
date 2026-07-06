@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Check, Pencil } from 'lucide-react';
 
-import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
+import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { Section } from '@/components/common/Section';
 import { NICKNAME_MAX_LENGTH } from '@/constants/avatar';
 import { cn } from '@/lib/cn';
@@ -58,10 +58,11 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
         <div className="relative">
           {/* TODO: 다크모드 도입 시 원형 배경 `dark:bg-coral/10` */}
           <div className="bg-coral-soft/40 flex size-40 items-center justify-center rounded-full">
-            <CharacterRenderer
+            <AvatarHero
               characterType={characterType}
               colorTheme={colorTheme}
               className="size-32"
+              size={128}
               title={`${nickname} (${characterType})`}
             />
           </div>

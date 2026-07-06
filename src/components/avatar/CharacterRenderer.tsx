@@ -1,19 +1,6 @@
-import { CatSvg } from '@/components/avatar/characters/CatSvg';
-import { DogSvg } from '@/components/avatar/characters/DogSvg';
-import { RabbitSvg } from '@/components/avatar/characters/RabbitSvg';
-import { RedPandaSvg } from '@/components/avatar/characters/RedPandaSvg';
-import type { CharacterSvgProps } from '@/components/avatar/characters/types';
-import { getThemeRoles } from '@/constants/avatar';
+import { DEFAULT_CHARACTER_TYPE, getThemeRoles } from '@/constants/avatar';
+import { CHARACTER_REGISTRY } from '@/constants/character-registry';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
-
-type CharacterSvg = (props: CharacterSvgProps) => React.ReactElement;
-
-const CHARACTER_SVG: Record<CharacterType, CharacterSvg> = {
-  레서판다: RedPandaSvg,
-  토끼: RabbitSvg,
-  강아지: DogSvg,
-  고양이: CatSvg,
-};
 
 interface CharacterRendererProps {
   characterType: CharacterType;
@@ -33,7 +20,7 @@ export function CharacterRenderer({
   className,
   title,
 }: CharacterRendererProps) {
-  const Svg = CHARACTER_SVG[characterType] ?? RedPandaSvg;
+  const { Svg } = CHARACTER_REGISTRY[characterType] ?? CHARACTER_REGISTRY[DEFAULT_CHARACTER_TYPE];
   const roles = getThemeRoles(colorTheme);
 
   return <Svg {...roles} className={className} title={title} />;
