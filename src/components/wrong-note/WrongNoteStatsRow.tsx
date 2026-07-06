@@ -1,3 +1,4 @@
+import { Section } from '@/components/common/Section';
 import { cn } from '@/lib/cn';
 import type { WrongNoteStats } from '@/types/wrong-note';
 
@@ -13,7 +14,7 @@ interface StatBoxProps {
 
 function StatBox({ value, label, highlight = false }: StatBoxProps) {
   return (
-    <div className="shadow-card flex flex-col items-center rounded-2xl bg-white py-3">
+    <Section className="shadow-card flex flex-col items-center px-0 py-3">
       <span
         className={cn(
           'text-xl leading-7 font-bold',
@@ -23,7 +24,7 @@ function StatBox({ value, label, highlight = false }: StatBoxProps) {
         {value}
       </span>
       <span className="text-brown-muted mt-0.5 text-[10px] leading-[15px]">{label}</span>
-    </div>
+    </Section>
   );
 }
 

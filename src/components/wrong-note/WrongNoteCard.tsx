@@ -1,5 +1,7 @@
 import { Check } from 'lucide-react';
 
+import { Button } from '@/components/common/Button';
+import { Section } from '@/components/common/Section';
 import { WrongNoteOptionRow } from '@/components/wrong-note/WrongNoteOptionRow';
 import { cn } from '@/lib/cn';
 import type { WrongNoteItem, WrongNoteSubject } from '@/types/wrong-note';
@@ -22,7 +24,7 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
   const isReviewed = item.reviewStatus === 'reviewed';
 
   return (
-    <div className="shadow-card rounded-2xl bg-white p-4">
+    <Section className="shadow-card p-4">
       <div className="flex items-center justify-between">
         <div className="flex gap-1.5">
           <span
@@ -62,14 +64,11 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
           {isReviewed ? '복습 완료' : '미복습'}
         </span>
         {!isReviewed && (
-          <button
-            type="button"
-            className="bg-coral-accent rounded-full px-4 py-1 text-[11px] leading-5.5 font-bold text-white"
-          >
+          <Button size="sm" className="bg-coral-accent hover:bg-coral-accent">
             다시 풀기
-          </button>
+          </Button>
         )}
       </div>
-    </div>
+    </Section>
   );
 }

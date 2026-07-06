@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
 import { WrongNoteCard } from '@/components/wrong-note/WrongNoteCard';
 import { WrongNoteFilterBar } from '@/components/wrong-note/WrongNoteFilterBar';
@@ -50,12 +51,13 @@ export function WrongNoteScreen() {
         </div>
         {MOCK_WRONG_NOTE_STATS.unreviewed > 0 && (
           <div className="px-4 pt-6">
-            <button
-              type="button"
-              className="bg-coral-accent flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm leading-5 font-bold text-white shadow-md"
+            <Button
+              isFullWidth
+              rightIcon={<ArrowRight className="size-4" strokeWidth={3} aria-hidden />}
+              className="bg-coral-accent hover:bg-coral-accent"
             >
-              미복습 문제 한 번에 풀기 <ArrowRight className="size-4" strokeWidth={3} aria-hidden />
-            </button>
+              미복습 문제 한 번에 풀기
+            </Button>
           </div>
         )}
       </main>
