@@ -7,7 +7,7 @@ import type { StatCardVariant } from '@/types/mypage/model';
 interface StatCardProps {
   value: string;
   label: string;
-  variant?: StatCardVariant;
+  variant: StatCardVariant;
   className?: string;
 }
 
@@ -20,7 +20,7 @@ const STAT_CARD_ICON: Record<StatCardVariant, { Icon: LucideIcon; bg: string }> 
 };
 
 export function StatCard({ value, label, variant, className }: StatCardProps) {
-  const { Icon, bg } = STAT_CARD_ICON[variant ?? 'continuous_learning'];
+  const { Icon, bg } = STAT_CARD_ICON[variant];
 
   return (
     <Section shadow="sm" className="overflow-hidden p-0">

@@ -24,8 +24,8 @@ function PeriodToggle({
     <div className="flex gap-1" role="group" aria-label="학습 통계 기간">
       {(
         [
-          { id: 'daily' as const, label: '일별' },
-          { id: 'weekly' as const, label: '주별' },
+          { id: 'daily', label: '일별' },
+          { id: 'weekly', label: '주별' },
         ] as const
       ).map(({ id, label }) => {
         const isActive = period === id;

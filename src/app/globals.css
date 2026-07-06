@@ -27,6 +27,29 @@
 
   /* 하단 탭바 비활성 텍스트 (공용 토큰 없음) */
   --brown-soft: #c27a5a;
+
+  /* 퀴즈 오답 노트 — 보기 상태 */
+  --option-wrong-surface: #ffebee;
+  --option-wrong: #e57373;
+  --option-correct-surface: #e8f5e9;
+  --option-correct: #4caf50;
+  --option-neutral-surface: #f7f4f0;
+
+  /* 퀴즈 오답 노트 — 공통 UI */
+  --gray-mid: #555555;
+  --gray-light: #f0f0f0;
+  --warm-line: #e0d6cf;
+  --coral-tint: #fff0ed;
+
+  /* 과목 라벨 */
+  --subject-html-surface: #fff3e0;
+  --subject-html: #e65100;
+  --subject-css-surface: #e3f0ff;
+  --subject-css: #2979cc;
+  --subject-js-surface: #fff8e1;
+  --subject-js: #f59e0b;
+  --subject-react-surface: #e0f7f4;
+  --subject-react: #00897b;
 }
 
 @theme inline {
@@ -53,6 +76,29 @@
   --color-green-accent: var(--green-accent);
   --color-coral-accent: var(--coral-accent);
   --color-sand: var(--sand);
+
+  /* 퀴즈 오답 노트 — 보기 상태 */
+  --color-option-wrong-surface: var(--option-wrong-surface);
+  --color-option-wrong: var(--option-wrong);
+  --color-option-correct-surface: var(--option-correct-surface);
+  --color-option-correct: var(--option-correct);
+  --color-option-neutral-surface: var(--option-neutral-surface);
+
+  /* 퀴즈 오답 노트 — 공통 UI */
+  --color-gray-mid: var(--gray-mid);
+  --color-gray-light: var(--gray-light);
+  --color-warm-line: var(--warm-line);
+  --color-coral-tint: var(--coral-tint);
+
+  /* 과목 라벨 */
+  --color-subject-html-surface: var(--subject-html-surface);
+  --color-subject-html: var(--subject-html);
+  --color-subject-css-surface: var(--subject-css-surface);
+  --color-subject-css: var(--subject-css);
+  --color-subject-js-surface: var(--subject-js-surface);
+  --color-subject-js: var(--subject-js);
+  --color-subject-react-surface: var(--subject-react-surface);
+  --color-subject-react: var(--subject-react);
 
   --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
