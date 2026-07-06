@@ -23,7 +23,7 @@ export function WrongNoteFilterBar({
     { value: 'all', label: `전체 ${stats.total}` },
     { value: 'unreviewed', label: `미복습 ${stats.unreviewed}` },
     { value: 'reviewed', label: `복습 완료 ${stats.reviewed}` },
-    ...subjects.map((s) => ({ value: s as WrongNoteFilter, label: s })),
+    ...subjects.map((s) => ({ value: s, label: s })),
   ];
 
   return (

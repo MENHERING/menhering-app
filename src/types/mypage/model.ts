@@ -16,7 +16,7 @@ export interface Profile {
 export interface StatCardItem {
   value: string;
   label: string;
-  variant?: StatCardVariant;
+  variant: StatCardVariant;
 }
 
 export type StatCardVariant =

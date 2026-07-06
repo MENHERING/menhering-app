@@ -18,7 +18,6 @@ import {
   MOCK_MYPAGE_WEEKLY_CHART,
   MOCK_MYPAGE_WRONG_NOTE,
 } from '@/mocks/mypage.mock';
-import type { StatCardVariant } from '@/types/mypage/model';
 
 export function MyPageScreen() {
   const router = useRouter();
@@ -31,23 +30,13 @@ export function MyPageScreen() {
 
       <section className="grid grid-cols-3 gap-2 px-5">
         {MOCK_MYPAGE_STATS_ROW1.map((stat) => (
-          <StatCard
-            key={stat.label}
-            value={stat.value}
-            label={stat.label}
-            variant={stat.variant as StatCardVariant}
-          />
+          <StatCard key={stat.label} value={stat.value} label={stat.label} variant={stat.variant} />
         ))}
       </section>
 
       <section className="mt-2 grid grid-cols-2 gap-2 px-5">
         {MOCK_MYPAGE_STATS_ROW2.map((stat) => (
-          <StatCard
-            key={stat.label}
-            value={stat.value}
-            label={stat.label}
-            variant={stat.variant as StatCardVariant}
-          />
+          <StatCard key={stat.label} value={stat.value} label={stat.label} variant={stat.variant} />
         ))}
       </section>
 
