@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source '../**/*.{ts,tsx}';
 
 :root {
   --background: #ffffff;
@@ -29,16 +30,16 @@
   --brown-soft: #c27a5a;
 
   /* 퀴즈 오답 노트 — 보기 상태 */
-  --option-wrong-surface: #ffebee;
-  --option-wrong: #e57373;
-  --option-correct-surface: #e8f5e9;
-  --option-correct: #4caf50;
-  --option-neutral-surface: #f7f4f0;
+  --answer-wrong-soft: #ffebee;
+  --answer-wrong: #e57373;
+  --answer-correct-soft: #e8f5e9;
+  --answer-correct: #4caf50;
+  --answer-neutral-soft: #f7f4f0;
+  --answer-neutral: #555555;
 
   /* 퀴즈 오답 노트 — 공통 UI */
-  --gray-mid: #555555;
-  --gray-light: #f0f0f0;
-  --warm-line: #e0d6cf;
+  --note-gray-soft: #f0f0f0;
+  --note-line: #e0d6cf;
   --coral-tint: #fff0ed;
 
   /* 과목 라벨 */
@@ -78,16 +79,16 @@
   --color-sand: var(--sand);
 
   /* 퀴즈 오답 노트 — 보기 상태 */
-  --color-option-wrong-surface: var(--option-wrong-surface);
-  --color-option-wrong: var(--option-wrong);
-  --color-option-correct-surface: var(--option-correct-surface);
-  --color-option-correct: var(--option-correct);
-  --color-option-neutral-surface: var(--option-neutral-surface);
+  --color-answer-wrong-soft: var(--answer-wrong-soft);
+  --color-answer-wrong: var(--answer-wrong);
+  --color-answer-correct-soft: var(--answer-correct-soft);
+  --color-answer-correct: var(--answer-correct);
+  --color-answer-neutral-soft: var(--answer-neutral-soft);
+  --color-answer-neutral: var(--answer-neutral);
 
   /* 퀴즈 오답 노트 — 공통 UI */
-  --color-gray-mid: var(--gray-mid);
-  --color-gray-light: var(--gray-light);
-  --color-warm-line: var(--warm-line);
+  --color-note-gray-soft: var(--note-gray-soft);
+  --color-note-line: var(--note-line);
   --color-coral-tint: var(--coral-tint);
 
   /* 과목 라벨 */
