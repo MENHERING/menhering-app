@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { FriendsSection } from '@/components/mypage/FriendsSection';
 import { LearningStatsSection } from '@/components/mypage/LearningStatsSection';
 import { MenuRow } from '@/components/mypage/MenuRow';
@@ -16,8 +18,11 @@ import {
   MOCK_MYPAGE_WEEKLY_CHART,
   MOCK_MYPAGE_WRONG_NOTE,
 } from '@/mocks/mypage.mock';
+import type { StatCardVariant } from '@/types/mypage/model';
 
 export function MyPageScreen() {
+  const router = useRouter();
+
   return (
     <main className="flex-1 pb-6">
       <h1 className="text-brown-ink px-5 pt-5 pb-3 text-xl leading-7 font-bold">마이페이지</h1>
@@ -26,13 +31,23 @@ export function MyPageScreen() {
 
       <section className="grid grid-cols-3 gap-2 px-5">
         {MOCK_MYPAGE_STATS_ROW1.map((stat) => (
-          <StatCard key={stat.label} value={stat.value} label={stat.label} variant={stat.variant} />
+          <StatCard
+            key={stat.label}
+            value={stat.value}
+            label={stat.label}
+            variant={stat.variant as StatCardVariant}
+          />
         ))}
       </section>
 
       <section className="mt-2 grid grid-cols-2 gap-2 px-5">
         {MOCK_MYPAGE_STATS_ROW2.map((stat) => (
-          <StatCard key={stat.label} value={stat.value} label={stat.label} variant={stat.variant} />
+          <StatCard
+            key={stat.label}
+            value={stat.value}
+            label={stat.label}
+            variant={stat.variant as StatCardVariant}
+          />
         ))}
       </section>
 
@@ -46,6 +61,7 @@ export function MyPageScreen() {
           icon={MOCK_MYPAGE_WRONG_NOTE.icon}
           title={MOCK_MYPAGE_WRONG_NOTE.title}
           description={MOCK_MYPAGE_WRONG_NOTE.description}
+          onClick={() => router.push('/mypage/wrong-note')}
         />
       </div>
 
