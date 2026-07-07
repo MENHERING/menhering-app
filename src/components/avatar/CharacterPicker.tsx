@@ -8,7 +8,7 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { PickerSection } from '@/components/avatar/PickerSection';
 import { selectableCardClass } from '@/components/avatar/selectable-card';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
-import { CHARACTER_COST, CHARACTER_TYPES } from '@/constants/avatar';
+import { CHARACTER_TYPES } from '@/constants/avatar';
 import { AVATAR_SELECT_SOUND } from '@/constants/sounds';
 import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
@@ -25,18 +25,16 @@ export function CharacterPicker() {
   // 미보유 캐릭터는 아직 미구현 → 구매 대신 "준비중" 안내 모달만 띄운다.
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
 
+  // 캐릭터는 아직 구매 불가(준비중)라 섹션 가격 배지(cost)를 표시하지 않는다.
   return (
-    <PickerSection title="캐릭터 선택" headingId="character-heading" cost={CHARACTER_COST}>
+    <PickerSection title="캐릭터 선택" headingId="character-heading">
       {CHARACTER_TYPES.map((type) => {
         const owned = ownedCharacters.includes(type);
         const selected = owned && type === characterType;
-        // 보유=선택(무료)/현재 장착=사용 중. 미보유=구매(현재는 준비중 안내).
-        const statusLabel = owned ? (selected ? '사용 중' : '선택') : '구매';
-        const statusClass = owned
-          ? selected
-            ? 'bg-coral text-white'
-            : 'bg-cream/60 text-brown-soft'
-          : 'bg-coral-soft text-coral-dark';
+        // 보유=선택(무료)/현재 장착=사용 중. 미보유=준비중(구매 불가).
+        const statusLabel = owned ? (selected ? '사용 중' : '선택') : '준비중';
+        // 준비중은 구매 불가라 액션 유도색(coral) 대신 muted 배지로 표시.
+        const statusClass = selected ? 'bg-coral text-white' : 'bg-cream/60 text-brown-soft';
 
         return (
           <button
