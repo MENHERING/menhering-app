@@ -3,26 +3,41 @@
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { PickerSection } from '@/components/avatar/PickerSection';
 import { selectableCardClass } from '@/components/avatar/selectable-card';
-import { CHARACTER_TYPES } from '@/constants/avatar';
+import { CHARACTER_COST, CHARACTER_TYPES } from '@/constants/avatar';
 import { cn } from '@/lib/cn';
+import { useAvatarEconomyStore } from '@/stores/avatar-economy-store';
 import { useAvatarStore } from '@/stores/avatar-store';
 
 export function CharacterPicker() {
   const characterType = useAvatarStore((s) => s.characterType);
   const colorTheme = useAvatarStore((s) => s.colorTheme);
   const setCharacterType = useAvatarStore((s) => s.setCharacterType);
+  const ownedCharacters = useAvatarEconomyStore((s) => s.ownedCharacters);
+  const requestBuy = useAvatarEconomyStore((s) => s.requestBuy);
 
   return (
-    <PickerSection title="캐릭터 선택" headingId="character-heading">
+    <PickerSection title="캐릭터 선택" headingId="character-heading" cost={CHARACTER_COST}>
       {CHARACTER_TYPES.map((type) => {
-        const selected = type === characterType;
+        const owned = ownedCharacters.includes(type);
+        const selected = owned && type === characterType;
+        // 보유=선택(무료)/현재 장착=사용 중. 미보유=구매(코스트 결제).
+        const statusLabel = owned ? (selected ? '사용 중' : '선택') : '구매';
+        const statusClass = owned
+          ? selected
+            ? 'bg-coral text-white'
+            : 'bg-cream/60 text-brown-soft'
+          : 'bg-coral-soft text-coral-dark';
 
         return (
           <button
             key={type}
             type="button"
-            onClick={() => setCharacterType(type)}
-            aria-pressed={selected}
+            onClick={() => {
+              if (owned) setCharacterType(type);
+              else requestBuy({ kind: 'character', value: type, cost: CHARACTER_COST });
+            }}
+            aria-pressed={owned ? selected : undefined}
+            aria-label={owned ? undefined : `${type} 구매`}
             className={cn(
               selectableCardClass(selected),
               'flex flex-col items-center gap-2 px-3 py-4',
@@ -40,10 +55,10 @@ export function CharacterPicker() {
               className={cn(
                 'rounded-full px-3 py-0.5 text-xs font-bold',
                 // TODO: 다크모드 도입 시 비선택 배지 `dark:bg-neutral-800 dark:text-neutral-400`
-                selected ? 'bg-coral text-white' : 'bg-cream/60 text-brown-soft',
+                statusClass,
               )}
             >
-              {selected ? '사용 중' : '선택'}
+              {statusLabel}
             </span>
           </button>
         );

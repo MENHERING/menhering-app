@@ -18,6 +18,18 @@ export const CHARACTER_TYPES = [
   '고양이',
 ] as const satisfies readonly CharacterType[];
 
+// 코인 경제(모델: 한 번 구매하면 보유, 재선택 무료). 미보유 선택분만 결제한다.
+export const CHARACTER_COST = 1000;
+export const THEME_COST = 100;
+
+// 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용. 기본 지급분만 보유.
+// TODO: 보유 테이블/컬럼 연동 시 서버 조회값으로 교체.
+export const OWNED_CHARACTERS: readonly CharacterType[] = [DEFAULT_CHARACTER_TYPE];
+export const OWNED_THEMES: readonly ColorTheme[] = [DEFAULT_COLOR_THEME];
+
+// 헤더 코인 잔액 placeholder. TODO: users.coin 실조회로 교체(auth 연동 후).
+export const PLACEHOLDER_COIN = 1000;
+
 interface ColorThemeConfig {
   value: ColorTheme;
   // 프리셋 스와치 미리보기(밝은 → 어두운). roles와 별개로 UI 표시용.
