@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
-import type { Live2DModel } from 'pixi-live2d-display/cubism4';
-import { Application, filters, settings, Ticker, UPDATE_PRIORITY } from 'pixi.js';
+import type { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism4';
+import { Application, settings, Ticker, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
 import type { ColorTheme } from '@/types/avatar';
@@ -12,12 +12,13 @@ import type { ColorTheme } from '@/types/avatar';
 // (자동 깜빡임·귀/꼬리/하트 흔들림·호흡·포인터 반응)을 구동한다. 리깅 파라미터는
 // "모양"만 제공하고 실제 움직임 값은 여기서 흔들어 만든다.
 //
-// ⚠️ 색은 현재 전체 틴트(임시). 부위별 정확한 색은 B(색 리워크)에서 per-part Multiply로 교체한다.
+// 색은 드로어블별 Multiply(per-part)로 칠한다 — 털(body_fur/tail/arm)만 테마색을 곱하고
+// 크림 무늬·눈·하트(body_base/eye/heart)는 원본 텍스처 색을 유지한다. applyTint 참고.
 
 // 자체 호스팅한 Cubism Core 런타임(프로퍼티어리라 npm 미배포). registerTicker 전에 로드돼야 한다.
 const CUBISM_CORE_SRC = '/live2d/core/live2dcubismcore.min.js';
 
-// Pixi6 + 번들러(Turbopack) 조합에서 settings 사이드이펙트가 누락되면 batch 렌더러가
+// 번들러(Turbopack) 조합에서 settings 사이드이펙트가 누락되면 batch 렌더러가
 // maxTextures=0으로 초기화되며 셰이더 검증에서 죽는다. 모듈 로드 시 1회 방어(전역 설정이라
 // 렌더 컴포넌트 effect가 아니라 여기서 한 번만 보정).
 if (!settings.SPRITE_MAX_TEXTURES) settings.SPRITE_MAX_TEXTURES = 16;
@@ -25,7 +26,17 @@ if (!settings.SPRITE_MAX_TEXTURES) settings.SPRITE_MAX_TEXTURES = 16;
 // 우리가 호출하는 코어 모델 API만 좁게 선언(플러그인 타입상 coreModel은 object로 노출됨).
 interface CubismCoreModel {
   setParameterValueById(id: string, value: number, weight?: number): void;
+  // 드로어블 id 목록(인덱스 순). Multiply/overwrite API의 index와 순서가 일치한다.
+  getDrawableIds(): string[];
+  // 드로어블별 Multiply 색(0~1). overwrite 플래그가 켜져 있어야 렌더에 반영된다.
+  setMultiplyColorByRGBA(index: number, r: number, g: number, b: number, a?: number): void;
+  // 이 드로어블의 Multiply를 코드 값으로 덮어쓸지. 꺼져 있으면 매 프레임 moc3 원본값을 쓴다.
+  setOverwriteFlagForDrawableMultiplyColors(index: number, value: boolean): void;
 }
+
+// 테마색을 곱할 "털" 드로어블(재리깅으로 크림과 분리됨). 나머지는 흰색(1,1,1)으로 덮어써
+// 원본 텍스처 색을 그대로 유지한다.
+const FUR_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
 
 // 플러그인 자동 업데이트가 PIXI.Ticker를 쓰도록 1회만 등록.
 let tickerRegistered = false;
@@ -125,7 +136,7 @@ export function Live2DCharacter({
         // Core를 먼저 로드한 뒤 동적 import 해야 한다.
         await loadCubismCore();
         if (disposed || !containerRef.current) return;
-        const { Live2DModel } = await import('pixi-live2d-display/cubism4');
+        const { Live2DModel } = await import('pixi-live2d-display-lipsyncpatch/cubism4');
         if (!tickerRegistered) {
           Live2DModel.registerTicker(Ticker);
           tickerRegistered = true;
@@ -143,19 +154,32 @@ export function Live2DCharacter({
         });
         containerRef.current.appendChild(app.view as HTMLCanvasElement);
 
-        const model = await Live2DModel.from(modelUrl, { autoInteract: false });
+        // 포인터 반응은 코드로 직접 처리하므로 플러그인 내장 히트테스트·포커스는 끈다.
+        // (v0.5.0에서 autoInteract → autoHitTest/autoFocus로 분리됨)
+        const model = await Live2DModel.from(modelUrl, { autoHitTest: false, autoFocus: false });
         if (disposed || !app) {
           model.destroy();
           return;
         }
 
-        // 세로가 긴 모델을 캔버스 높이에 맞춰 담고 가운데 정렬.
-        const baseScale = (app.renderer.height / model.height) * 0.92;
+        // 모델 전신을 캔버스 양축에 맞춰 담고(여백 0.8) 가운데 정렬.
+        const baseScale =
+          Math.min(app.renderer.width / model.width, app.renderer.height / model.height) * 0.8;
         model.scale.set(baseScale);
         model.anchor.set(0.5, 0.5);
         model.position.set(app.renderer.width / 2, app.renderer.height / 2);
         app.stage.addChild(model);
         modelRef.current = model;
+
+        // 모델 캔버스에 상단 여백이 있어 판다가 아래로 쏠려 다리가 잘리는 걸 보정한다.
+        // 실제 렌더 바운드(getBounds)의 중심을 캔버스 중앙에 맞춘다. 바운드가 유효할 때만.
+        const gb = model.getBounds();
+        if (isFinite(gb.width) && gb.width > 1 && isFinite(gb.height) && gb.height > 1) {
+          model.position.set(
+            model.x + (app.renderer.width / 2 - (gb.x + gb.width / 2)),
+            model.y + (app.renderer.height / 2 - (gb.y + gb.height / 2)),
+          );
+        }
 
         applyTint(model, colorThemeRef.current, tintedRef.current);
 
@@ -245,15 +269,19 @@ export function Live2DCharacter({
   );
 }
 
-// 전체 틴트(임시). body 역할 색으로 균일하게 곱해 애니는 유지한 채 색만 시프트.
-// tinted=false면 항등 행렬(r=g=b=1)로 원본 텍스처 색을 그대로 보여준다(무색).
-// 기존 필터를 재사용해 재틴트마다 새 필터를 할당하지 않는다(GPU 리소스 누적 방지).
-// TODO(B): 부위별 per-part Multiply로 교체 — body/secondary/accent 3역할을 그룹 드로어블에 적용.
+// 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 털(FUR_DRAWABLES)은 테마색,
+// 나머지는 흰색(1,1,1). overwrite 플래그를 켜 매 프레임 유지시킨다.
+//
+// ⚠️ 나머지를 흰색으로 "명시" 덮어써야 하는 이유: 이 플러그인은 0.4.0과 달리 드로어블별 baked
+// Multiply를 실제로 렌더한다. 재리깅 모델의 일부 드로어블(눈 등)에 흰색 아닌 baked 값이 남아
+// 있으면 그대로 어둡게/안 보이게 뜬다. 흰색으로 덮어써 원본 텍스처 색을 복원한다.
 function applyTint(model: Live2DModel, colorTheme: ColorTheme, tinted: boolean) {
-  const { r, g, b } = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
-  const current = model.filters?.[0];
-  const filter =
-    current instanceof filters.ColorMatrixFilter ? current : new filters.ColorMatrixFilter();
-  filter.matrix = [r, 0, 0, 0, 0, 0, g, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 1, 0];
-  if (model.filters?.[0] !== filter) model.filters = [filter];
+  const core = model.internalModel.coreModel as unknown as CubismCoreModel;
+  const fur = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
+  const ids = core.getDrawableIds();
+  for (let i = 0; i < ids.length; i++) {
+    const { r, g, b } = FUR_DRAWABLES.has(ids[i]) ? fur : { r: 1, g: 1, b: 1 };
+    core.setMultiplyColorByRGBA(i, r, g, b, 1);
+    core.setOverwriteFlagForDrawableMultiplyColors(i, true);
+  }
 }
