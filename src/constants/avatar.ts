@@ -22,10 +22,11 @@ export const CHARACTER_TYPES = [
 export const CHARACTER_COST = 1000;
 export const THEME_COST = 100;
 
-// 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용. 기본 지급분만 보유.
+// 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용.
 // TODO: 보유 테이블/컬럼 연동 시 서버 조회값으로 교체.
 export const OWNED_CHARACTERS: readonly CharacterType[] = [DEFAULT_CHARACTER_TYPE];
-export const OWNED_THEMES: readonly ColorTheme[] = [DEFAULT_COLOR_THEME];
+// 테마는 선택 전환/효과음 확인을 위해 일부를 보유 상태로 개방(나머지는 잠금 유지).
+export const OWNED_THEMES: readonly ColorTheme[] = [DEFAULT_COLOR_THEME, '라벤더', '민트'];
 
 // 헤더 코인 잔액 placeholder. TODO: users.coin 실조회로 교체(auth 연동 후).
 export const PLACEHOLDER_COIN = 1000;

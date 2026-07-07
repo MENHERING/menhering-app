@@ -1,3 +1,4 @@
 // 아바타 인터랙션 효과음 경로(public/sounds/). 라이선스: Mixkit Free License.
-export const AVATAR_TAP_SOUND = '/sounds/avatar-pop.wav';
-export const AVATAR_SELECT_SOUND = '/sounds/avatar-pop-2.wav';
+// 아바타 쓰다듬기(탭)=pop-2, 테마/캐릭터 카드 선택(터치)=pop.
+export const AVATAR_TAP_SOUND = '/sounds/avatar-pop-2.wav';
+export const AVATAR_SELECT_SOUND = '/sounds/avatar-pop.wav';

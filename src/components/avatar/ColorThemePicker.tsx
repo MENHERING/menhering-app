@@ -29,9 +29,10 @@ export function ColorThemePicker() {
             key={theme.value}
             type="button"
             onClick={() => {
+              // 터치 즉시 선택 효과음(보유/미보유 무관).
+              playSelect();
               if (owned) {
                 setColorTheme(theme.value);
-                playSelect();
               } else {
                 requestBuy({ kind: 'theme', value: theme.value, cost: THEME_COST });
               }

@@ -9,6 +9,8 @@ import { Button } from '@/components/common/Button';
 interface ConfirmModalProps {
   isOpen: boolean;
   title: string;
+  /** 제목 위 중앙 아이콘(선택, 예: 준비중 안내 아이콘) */
+  icon?: ReactNode;
   /** 본문 설명(선택) */
   description?: string;
   /** 제목 아래 강조 영역(선택, 예: 코인 총액 뱃지) */
@@ -17,6 +19,8 @@ interface ConfirmModalProps {
   cancelLabel?: string;
   /** 확인 버튼 비활성 (예: 코인 부족) */
   confirmDisabled?: boolean;
+  /** 취소 버튼 숨김 → 단일 버튼 안내 모달로 사용 (예: "준비중입니다") */
+  hideCancel?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -28,11 +32,13 @@ interface ConfirmModalProps {
 export function ConfirmModal({
   isOpen,
   title,
+  icon,
   description,
   highlight,
   confirmLabel = '확인',
   cancelLabel = '취소',
   confirmDisabled = false,
+  hideCancel = false,
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -87,6 +93,8 @@ export function ConfirmModal({
             exit={{ scale: 0.96, y: 8 }}
             transition={{ duration: 0.15 }}
           >
+            {icon && <div className="mb-3 flex justify-center">{icon}</div>}
+
             <h2 className="text-ink text-center text-base font-bold">{title}</h2>
 
             {highlight && <div className="mt-3 flex justify-center">{highlight}</div>}
@@ -96,9 +104,11 @@ export function ConfirmModal({
             )}
 
             <div className="mt-5 flex gap-2">
-              <Button variant="secondary" size="md" isFullWidth onClick={onCancel}>
-                {cancelLabel}
-              </Button>
+              {!hideCancel && (
+                <Button variant="secondary" size="md" isFullWidth onClick={onCancel}>
+                  {cancelLabel}
+                </Button>
+              )}
               <Button
                 variant="primary"
                 size="md"
