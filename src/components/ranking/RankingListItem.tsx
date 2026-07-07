@@ -1,6 +1,6 @@
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { cn } from '@/lib/cn';
-import type { RankingEntry } from '@/types/ranking';
+import type { RankingEntry } from '@/types/ranking/model';
 
 interface RankingListItemProps {
   entry: RankingEntry;

@@ -1,4 +1,4 @@
-import type { RankingEntry } from '@/types/ranking';
+import type { RankingEntry } from '@/types/ranking/model';
 
 export const MOCK_RANKING: RankingEntry[] = [
   {

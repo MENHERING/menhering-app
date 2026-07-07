@@ -1,5 +1,5 @@
 import { cn } from '@/lib/cn';
-import type { RankingPeriod } from '@/types/ranking';
+import type { RankingPeriod } from '@/types/ranking/model';
 
 const PERIODS: { value: RankingPeriod; label: string }[] = [
   { value: 'week', label: '주간' },
