@@ -19,7 +19,7 @@ export const CHARACTER_TYPES = [
 ] as const satisfies readonly CharacterType[];
 
 // 코인 경제(모델: 한 번 구매하면 보유, 재선택 무료). 미보유 선택분만 결제한다.
-export const CHARACTER_COST = 1000;
+export const CHARACTER_COST = 3000;
 export const THEME_COST = 100;
 
 // 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용.
