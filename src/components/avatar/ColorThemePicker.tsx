@@ -5,6 +5,8 @@ import { Check, Lock } from 'lucide-react';
 import { PickerSection } from '@/components/avatar/PickerSection';
 import { selectableCardClass } from '@/components/avatar/selectable-card';
 import { COLOR_THEMES, THEME_COST } from '@/constants/avatar';
+import { AVATAR_SELECT_SOUND } from '@/constants/sounds';
+import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
 import { useAvatarEconomyStore } from '@/stores/avatar-economy-store';
 import { useAvatarStore } from '@/stores/avatar-store';
@@ -14,6 +16,7 @@ export function ColorThemePicker() {
   const setColorTheme = useAvatarStore((s) => s.setColorTheme);
   const ownedThemes = useAvatarEconomyStore((s) => s.ownedThemes);
   const requestBuy = useAvatarEconomyStore((s) => s.requestBuy);
+  const playSelect = useSound(AVATAR_SELECT_SOUND);
 
   return (
     <PickerSection title="색상 테마" headingId="color-theme-heading" cost={THEME_COST}>
@@ -26,8 +29,12 @@ export function ColorThemePicker() {
             key={theme.value}
             type="button"
             onClick={() => {
-              if (owned) setColorTheme(theme.value);
-              else requestBuy({ kind: 'theme', value: theme.value, cost: THEME_COST });
+              if (owned) {
+                setColorTheme(theme.value);
+                playSelect();
+              } else {
+                requestBuy({ kind: 'theme', value: theme.value, cost: THEME_COST });
+              }
             }}
             aria-pressed={owned ? selected : undefined}
             aria-label={owned ? undefined : `${theme.value} 구매`}

@@ -4,6 +4,8 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { PickerSection } from '@/components/avatar/PickerSection';
 import { selectableCardClass } from '@/components/avatar/selectable-card';
 import { CHARACTER_COST, CHARACTER_TYPES } from '@/constants/avatar';
+import { AVATAR_SELECT_SOUND } from '@/constants/sounds';
+import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
 import { useAvatarEconomyStore } from '@/stores/avatar-economy-store';
 import { useAvatarStore } from '@/stores/avatar-store';
@@ -14,6 +16,7 @@ export function CharacterPicker() {
   const setCharacterType = useAvatarStore((s) => s.setCharacterType);
   const ownedCharacters = useAvatarEconomyStore((s) => s.ownedCharacters);
   const requestBuy = useAvatarEconomyStore((s) => s.requestBuy);
+  const playSelect = useSound(AVATAR_SELECT_SOUND);
 
   return (
     <PickerSection title="캐릭터 선택" headingId="character-heading" cost={CHARACTER_COST}>
@@ -33,8 +36,12 @@ export function CharacterPicker() {
             key={type}
             type="button"
             onClick={() => {
-              if (owned) setCharacterType(type);
-              else requestBuy({ kind: 'character', value: type, cost: CHARACTER_COST });
+              if (owned) {
+                setCharacterType(type);
+                playSelect();
+              } else {
+                requestBuy({ kind: 'character', value: type, cost: CHARACTER_COST });
+              }
             }}
             aria-pressed={owned ? selected : undefined}
             aria-label={owned ? undefined : `${type} 구매`}
