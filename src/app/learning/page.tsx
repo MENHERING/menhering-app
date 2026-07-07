@@ -2,13 +2,18 @@
 
 import { useState } from 'react';
 
+import { useRouter } from 'next/navigation';
+
 import { Footer } from '@/components/common/Footer';
 import { CurriculumBar } from '@/components/learning/CurriculumBar';
 import { LessonRoadmap } from '@/components/learning/LessonRoadmap';
 import { UserStatusBar } from '@/components/learning/UserStatusBar';
+import { ROUTES } from '@/constants/routes';
 import { MOCK_CURRICULUM, MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
 
 export default function LearningPage() {
+  const router = useRouter();
+
   // 이슈 스펙대로 진입 시에는 카드가 닫혀 있고, 현재 스테이지 노드를 탭해야 열린다.
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
 
@@ -29,6 +34,7 @@ export default function LearningPage() {
           title={MOCK_CURRICULUM.title}
           clearedCount={MOCK_CURRICULUM.clearedCount}
           totalCount={MOCK_CURRICULUM.totalCount}
+          onStatsPress={() => router.push(ROUTES.RANKING)}
         />
         <LessonRoadmap
           lessons={MOCK_LESSONS}
