@@ -24,9 +24,7 @@ export function StatCard({ value, label, variant, className }: StatCardProps) {
 
   return (
     <Section shadow="sm" className="overflow-hidden p-0">
-      <article
-        className={cn('shadow-card flex flex-col items-center gap-0.5 rounded-2xl p-3', className)}
-      >
+      <article className={cn('flex flex-col items-center gap-0.5 rounded-2xl p-3', className)}>
         <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-full', bg)}>
           <Icon size={18} className="text-brown-ink" aria-hidden />
         </span>
