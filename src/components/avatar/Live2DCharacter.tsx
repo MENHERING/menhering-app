@@ -62,6 +62,8 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 interface Live2DCharacterProps {
   modelUrl: string;
   colorTheme: ColorTheme;
+  /** false면 틴트 없이 원본 텍스처 색 그대로(무색). 기본 true. */
+  tinted?: boolean;
   /** 캔버스 한 변 픽셀(정사각). 기본 128. */
   size?: number;
   /** 포인터를 따라 살짝 기울일지. 히어로처럼 인터랙티브한 곳만 true. */
@@ -76,6 +78,7 @@ interface Live2DCharacterProps {
 export function Live2DCharacter({
   modelUrl,
   colorTheme,
+  tinted = true,
   size = 128,
   interactive = false,
   className,
@@ -93,12 +96,14 @@ export function Live2DCharacter({
     onErrorRef.current = onError;
   }, [onError]);
 
-  // 테마 변경은 모델 재생성 없이 재틴트만. init 이후 도착하는 첫 테마도 여기서 반영.
+  // 테마/틴트 변경은 모델 재생성 없이 재틴트만. init 이후 도착하는 첫 값도 여기서 반영.
   const colorThemeRef = useRef(colorTheme);
+  const tintedRef = useRef(tinted);
   useEffect(() => {
     colorThemeRef.current = colorTheme;
-    if (modelRef.current) applyTint(modelRef.current, colorTheme);
-  }, [colorTheme]);
+    tintedRef.current = tinted;
+    if (modelRef.current) applyTint(modelRef.current, colorTheme, tinted);
+  }, [colorTheme, tinted]);
 
   useEffect(() => {
     let disposed = false;
@@ -152,7 +157,7 @@ export function Live2DCharacter({
         app.stage.addChild(model);
         modelRef.current = model;
 
-        applyTint(model, colorThemeRef.current);
+        applyTint(model, colorThemeRef.current, tintedRef.current);
 
         if (reduceMotion) return; // 정적 렌더(움직임 없음)
 
@@ -241,11 +246,11 @@ export function Live2DCharacter({
 }
 
 // 전체 틴트(임시). body 역할 색으로 균일하게 곱해 애니는 유지한 채 색만 시프트.
+// tinted=false면 항등 행렬(r=g=b=1)로 원본 텍스처 색을 그대로 보여준다(무색).
 // 기존 필터를 재사용해 재틴트마다 새 필터를 할당하지 않는다(GPU 리소스 누적 방지).
 // TODO(B): 부위별 per-part Multiply로 교체 — body/secondary/accent 3역할을 그룹 드로어블에 적용.
-function applyTint(model: Live2DModel, colorTheme: ColorTheme) {
-  const { body } = getThemeRoles(colorTheme);
-  const { r, g, b } = hexToRgb(body);
+function applyTint(model: Live2DModel, colorTheme: ColorTheme, tinted: boolean) {
+  const { r, g, b } = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
   const current = model.filters?.[0];
   const filter =
     current instanceof filters.ColorMatrixFilter ? current : new filters.ColorMatrixFilter();

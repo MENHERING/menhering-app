@@ -20,6 +20,8 @@ const MODEL_URL = '/live2d/redpanda/menhering.model3.json';
 // 우리 모델이 렌더·모션·틴트되는지 확인한다. 색은 아직 전체 틴트(B에서 부위별로 교체).
 export function Live2dPoc() {
   const [theme, setTheme] = useState<ColorTheme>('클래식');
+  // false = 무색(틴트 없이 원본 텍스처 그대로).
+  const [tinted, setTinted] = useState(true);
 
   return (
     <div className="flex flex-col items-center gap-4 py-8">
@@ -27,6 +29,7 @@ export function Live2dPoc() {
         <Live2DCharacter
           modelUrl={MODEL_URL}
           colorTheme={theme}
+          tinted={tinted}
           size={320}
           interactive
           title="레서판다 Live2D"
@@ -34,14 +37,31 @@ export function Live2dPoc() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
+        <button
+          type="button"
+          onClick={() => setTinted(false)}
+          className={cn(
+            'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition',
+            !tinted ? 'border-coral bg-coral-soft/40' : 'border-cream',
+          )}
+        >
+          {/* 무색 = 틴트 없이 원본 텍스처. 스와치는 흰 바탕에 대각 슬래시로 "색 없음" 표시 */}
+          <span className="relative size-4 overflow-hidden rounded-full border border-black/10 bg-white">
+            <span className="absolute top-1/2 left-1/2 h-px w-6 -translate-x-1/2 -translate-y-1/2 -rotate-45 bg-red-400" />
+          </span>
+          무색
+        </button>
         {COLOR_THEMES.map(({ value }) => (
           <button
             key={value}
             type="button"
-            onClick={() => setTheme(value)}
+            onClick={() => {
+              setTheme(value);
+              setTinted(true);
+            }}
             className={cn(
               'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition',
-              theme === value ? 'border-coral bg-coral-soft/40' : 'border-cream',
+              tinted && theme === value ? 'border-coral bg-coral-soft/40' : 'border-cream',
             )}
           >
             <span
