@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 
 import type { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism4';
-import { Application, settings, Ticker, UPDATE_PRIORITY } from 'pixi.js';
+import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
 import type { ColorTheme } from '@/types/avatar';
@@ -12,10 +12,12 @@ import type { ColorTheme } from '@/types/avatar';
 // (자동 깜빡임·귀/꼬리/하트 흔들림·호흡·포인터 반응)을 구동한다. 리깅 파라미터는
 // "모양"만 제공하고 실제 움직임 값은 여기서 흔들어 만든다.
 //
+// ⚠️ 사용법·제약(싱글톤=동시 1개만)·재마운트 버그 원인/해결은 docs/live2d/frontend-integration.md 참고.
+//
 // 색은 드로어블별 Multiply(per-part)로 칠한다 — 털(body_fur/tail/arm)만 테마색을 곱하고
 // 크림 무늬·눈·하트(body_base/eye/heart)는 원본 텍스처 색을 유지한다. applyTint 참고.
 
-// 자체 호스팅한 Cubism Core 런타임(프로퍼티어리라 npm 미배포). registerTicker 전에 로드돼야 한다.
+// 자체 호스팅한 Cubism Core 런타임(프로퍼티어리라 npm 미배포). cubism4 모듈 import 전에 로드돼야 한다.
 const CUBISM_CORE_SRC = '/live2d/core/live2dcubismcore.min.js';
 
 // 번들러(Turbopack) 조합에서 settings 사이드이펙트가 누락되면 batch 렌더러가
@@ -38,8 +40,11 @@ interface CubismCoreModel {
 // 원본 텍스처 색을 그대로 유지한다.
 const FUR_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
 
-// 플러그인 자동 업데이트가 PIXI.Ticker를 쓰도록 1회만 등록.
-let tickerRegistered = false;
+// pixi Application/WebGL 컨텍스트를 페이지 세션 내내 하나만 두고 재사용한다.
+// 컨텍스트를 파괴·재생성하면 플러그인(Cubism)의 셰이더·마스크가 첫 컨텍스트에 묶인 채 orphan돼,
+// SPA 재마운트(탭 이동 후 복귀) 시 렌더가 에러 없이 빈 화면이 된다. 컨텍스트를 살려두면 방지된다.
+// (Live2D 히어로/POC는 한 번에 하나만 마운트되므로 싱글톤이 안전하다.)
+let sharedApp: Application | null = null;
 
 function loadCubismCore(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -137,26 +142,33 @@ export function Live2DCharacter({
         await loadCubismCore();
         if (disposed || !containerRef.current) return;
         const { Live2DModel } = await import('pixi-live2d-display-lipsyncpatch/cubism4');
-        if (!tickerRegistered) {
-          Live2DModel.registerTicker(Ticker);
-          tickerRegistered = true;
-        }
         if (disposed || !containerRef.current) return;
 
-        // view를 넘기지 않아 Pixi가 자체 캔버스를 만든다 → 매 마운트 새 캔버스+컨텍스트.
-        app = new Application({
-          width: size,
-          height: size,
-          backgroundAlpha: 0,
-          antialias: true,
-          autoDensity: true,
-          resolution: window.devicePixelRatio || 1,
-        });
+        // 싱글톤 앱/컨텍스트 재사용(위 sharedApp 주석 참고). 처음만 생성하고, 이후엔 크기만 맞춰
+        // 재사용하며 캔버스를 현재 컨테이너에 붙인다.
+        if (!sharedApp) {
+          sharedApp = new Application({
+            width: size,
+            height: size,
+            backgroundAlpha: 0,
+            antialias: true,
+            autoDensity: true,
+            resolution: window.devicePixelRatio || 1,
+          });
+        }
+        app = sharedApp;
+        app.renderer.resize(size, size);
+        app.start();
         containerRef.current.appendChild(app.view as HTMLCanvasElement);
 
-        // 포인터 반응은 코드로 직접 처리하므로 플러그인 내장 히트테스트·포커스는 끈다.
+        // 모든 자동화를 끈다. 업데이트·렌더는 전역 Ticker.shared가 아니라 이 컴포넌트의 app.ticker로
+        // 직접 구동한다(아래) — SPA 재마운트 시 전역 ticker 상태에 안 묶여 견고하다. 포인터도 코드로 처리.
         // (v0.5.0에서 autoInteract → autoHitTest/autoFocus로 분리됨)
-        const model = await Live2DModel.from(modelUrl, { autoHitTest: false, autoFocus: false });
+        const model = await Live2DModel.from(modelUrl, {
+          autoUpdate: false,
+          autoHitTest: false,
+          autoFocus: false,
+        });
         if (disposed || !app) {
           model.destroy();
           return;
@@ -185,15 +197,19 @@ export function Live2DCharacter({
 
         applyTint(model, colorThemeRef.current, tintedRef.current);
 
-        if (reduceMotion) return; // 정적 렌더(움직임 없음)
+        if (reduceMotion) {
+          model.update(16); // 정적 렌더: 드로어블을 1회 배치만 하고 움직임 없음
+          return;
+        }
 
         const core = model.internalModel.coreModel as unknown as CubismCoreModel;
         const setP = (id: string, v: number) => core.setParameterValueById(id, v);
+        const ticker = app.ticker;
 
-        // 모델 자동 업데이트(NORMAL) 이후에 파라미터를 얹도록 LOW 우선순위로 구동.
+        // 전역 Ticker.shared 대신 app.ticker로 구동(HIGH: app 렌더 전에 update가 반영되도록).
         tickerFn = () => {
           if (disposed) return;
-          const dt = Ticker.shared.deltaMS / 1000;
+          const dt = ticker.deltaMS / 1000;
           t += dt;
 
           // 자동 눈 깜빡임
@@ -229,8 +245,11 @@ export function Live2DCharacter({
 
           // 호흡(세로 스케일 미세 진동)
           model.scale.set(baseScale, baseScale * (1 + 0.012 * Math.sin(t * 1.3)));
+
+          // 얹은 파라미터를 모델에 직접 반영(autoUpdate 대신) → 이 프레임 렌더에 바로 나온다.
+          model.update(ticker.deltaMS);
         };
-        Ticker.shared.add(tickerFn, undefined, UPDATE_PRIORITY.LOW);
+        ticker.add(tickerFn, undefined, UPDATE_PRIORITY.HIGH);
       } catch (err) {
         console.error('[Live2DCharacter]', err);
         if (!disposed) onErrorRef.current?.();
@@ -241,19 +260,23 @@ export function Live2DCharacter({
 
     return () => {
       disposed = true;
-      if (tickerFn) Ticker.shared.remove(tickerFn);
+      // 공유 앱은 파괴하지 않는다(GL 컨텍스트 유지). 이 마운트가 얹은 것만 정리한다.
+      if (tickerFn && app) app.ticker.remove(tickerFn);
       const m = modelRef.current;
       modelRef.current = null;
-      // 모델을 먼저 명시적으로 파괴한다. app.destroy({children:true})가 모델을 cascade 파괴하면
-      // 포크의 Cubism 내부 teardown(_moc/_model release)이 pixi7 조합에서 undefined를 만져 던진다.
-      // 정리 실패가 cleanup 전체를 깨지 않도록 방어한다(부분 초기화·재마운트 레이스).
-      try {
-        m?.destroy();
-      } catch {
-        // Cubism teardown 예외는 무시 — 어차피 app.destroy로 컨텍스트째 정리된다.
+      if (m) {
+        app?.stage.removeChild(m);
+        // 포크의 Cubism teardown이 pixi7에서 간헐적으로 undefined를 만져 던지므로 방어한다.
+        try {
+          m.destroy();
+        } catch {
+          // 정리 실패 무시 — 컨텍스트는 재사용되고 모델 참조는 곧 GC된다.
+        }
       }
-      // removeView=true: Pixi가 소유한 캔버스까지 파괴 → 컨텍스트 정리, 재마운트 시 새 캔버스.
-      if (app) app.destroy(true);
+      // 렌더 루프를 멈추고 캔버스를 컨테이너에서 뗀다(app·컨텍스트는 다음 마운트에서 재사용).
+      app?.stop();
+      const view = app?.view as HTMLCanvasElement | undefined;
+      view?.parentNode?.removeChild(view);
     };
     // colorTheme은 재틴트 전용 effect에서 처리 → 여기 넣으면 테마 변경 시 모델이 통째로 재생성됨.
   }, [modelUrl, size, interactive]);
