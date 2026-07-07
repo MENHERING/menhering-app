@@ -3,7 +3,7 @@
 	"FileReferences": {
 		"Moc": "menhering.moc3",
 		"Textures": [
-			"menhering.2048/texture_00.png"
+			"menhering.4096/texture_00.png"
 		],
 		"DisplayInfo": "menhering.cdi3.json"
 	},

@@ -153,5 +153,10 @@
 		}
 	],
 	"ParameterGroups": [],
-	"Parts": []
+	"Parts": [
+		{
+			"Id": "Part",
+			"Name": "menhering.psd(레이어를 찾을 수 없음)"
+		}
+	]
 }
