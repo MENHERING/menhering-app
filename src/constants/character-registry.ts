@@ -15,14 +15,13 @@ export interface CharacterRenderSpec {
   live2d?: { modelUrl: string };
 }
 
-// 지금은 전 종류 SVG. 색 리워크(B) 완료 후 레서판다에 live2d를 달아 히어로만 Live2D로 전환(C)한다.
-// 모델 자체는 이미 public/live2d/redpanda/에 있으나, 부위별 색(Multiply)이 준비되기 전엔 켜지 않는다.
+// 레서판다는 부위별 색이 준비돼 히어로(메인 프리뷰)를 Live2D로 렌더한다.
+// 나머지 종류는 Live2D 모델이 없어 SVG로 렌더하며, Live2D 로드 실패 시에도 SVG로 폴백한다.
 export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
   레서판다: {
     Svg: RedPandaSvg,
-    // 메인 탭은 색 리워크(B) 전까지 SVG 유지 — 전체틴트 임시 색을 탭에 박지 않기로.
-    // 우리 Live2D 모델은 /live2d-poc 페이지에서 따로 확인. C에서 아래 활성화.
-    // live2d: { modelUrl: '/live2d/redpanda/menhering.model3.json' },
+    // 히어로만 Live2D로 렌더. 픽커 썸네일·폴백은 위 Svg를 그대로 쓴다.
+    live2d: { modelUrl: '/live2d/redpanda/menhering.model3.json' },
   },
   토끼: { Svg: RabbitSvg },
   강아지: { Svg: DogSvg },

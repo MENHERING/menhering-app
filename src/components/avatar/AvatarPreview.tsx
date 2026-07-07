@@ -74,7 +74,7 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
       )}
 
       {/* 콘텐츠: 캐릭터 + 이름표 */}
-      <div className="relative z-10 flex flex-col items-center gap-5 px-4 pt-8 pb-5">
+      <div className="relative z-10 flex flex-col items-center gap-0 px-4 pt-2 pb-4">
         {/* 캐릭터 탭 → 효과음(+ 살짝 눌리는 press 피드백). 반응 모션은 #35 모션 작업에서 확장.
             접근성 이름은 버튼의 aria-label이 담당하므로 내부 AvatarHero는 장식(title 생략)으로 둔다. */}
         <button
@@ -86,14 +86,14 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
           <AvatarHero
             characterType={characterType}
             colorTheme={colorTheme}
-            className="size-32"
-            size={128}
+            className="size-72"
+            size={288}
           />
         </button>
 
         {/* 이름표 카드 — 숲 위에 뜬 흰 카드(테마색 coral 테두리). 폭은 내용에 맞춰 좁게·가운데.
             TODO: 앱 다크모드 도입 시 `dark:border-coral dark:bg-neutral-900`(일괄 적용 시) */}
-        <div className="border-coral mx-auto w-fit max-w-full rounded-2xl border bg-white px-5 py-3 shadow-md">
+        <div className="border-coral mx-auto -mt-3 w-fit max-w-full rounded-2xl border bg-white px-5 py-3 shadow-md">
           <div className="flex flex-col items-center gap-1">
             {/* 닉네임 (편집 가능) */}
             {isEditing ? (

@@ -162,22 +162,24 @@ export function Live2DCharacter({
           return;
         }
 
-        // 모델 전신을 캔버스 양축에 맞춰 담고(여백 0.8) 가운데 정렬.
-        const baseScale =
-          Math.min(app.renderer.width / model.width, app.renderer.height / model.height) * 0.8;
+        // 모델 전신을 캔버스 양축에 맞춰 담고(여백 0.92) 가운데 정렬.
+        // ⚠️ app.screen(논리 픽셀)로 계산한다 — app.renderer는 device 픽셀(=논리×dpr)이라
+        // dpr>1이면 모델이 dpr배 커져 캔버스를 넘쳐 잘린다.
+        const canvasW = app.screen.width;
+        const canvasH = app.screen.height;
+        const baseScale = Math.min(canvasW / model.width, canvasH / model.height) * 0.92;
         model.scale.set(baseScale);
         model.anchor.set(0.5, 0.5);
-        model.position.set(app.renderer.width / 2, app.renderer.height / 2);
+        model.position.set(canvasW / 2, canvasH / 2);
         app.stage.addChild(model);
         modelRef.current = model;
 
-        // 모델 캔버스에 상단 여백이 있어 판다가 아래로 쏠려 다리가 잘리는 걸 보정한다.
-        // 실제 렌더 바운드(getBounds)의 중심을 캔버스 중앙에 맞춘다. 바운드가 유효할 때만.
+        // 모델 캔버스 여백으로 판다가 쏠려 잘리는 걸 실제 렌더 바운드(getBounds) 중심으로 보정.
         const gb = model.getBounds();
         if (isFinite(gb.width) && gb.width > 1 && isFinite(gb.height) && gb.height > 1) {
           model.position.set(
-            model.x + (app.renderer.width / 2 - (gb.x + gb.width / 2)),
-            model.y + (app.renderer.height / 2 - (gb.y + gb.height / 2)),
+            model.x + (canvasW / 2 - (gb.x + gb.width / 2)),
+            model.y + (canvasH / 2 - (gb.y + gb.height / 2)),
           );
         }
 
@@ -240,9 +242,18 @@ export function Live2DCharacter({
     return () => {
       disposed = true;
       if (tickerFn) Ticker.shared.remove(tickerFn);
+      const m = modelRef.current;
       modelRef.current = null;
+      // 모델을 먼저 명시적으로 파괴한다. app.destroy({children:true})가 모델을 cascade 파괴하면
+      // 포크의 Cubism 내부 teardown(_moc/_model release)이 pixi7 조합에서 undefined를 만져 던진다.
+      // 정리 실패가 cleanup 전체를 깨지 않도록 방어한다(부분 초기화·재마운트 레이스).
+      try {
+        m?.destroy();
+      } catch {
+        // Cubism teardown 예외는 무시 — 어차피 app.destroy로 컨텍스트째 정리된다.
+      }
       // removeView=true: Pixi가 소유한 캔버스까지 파괴 → 컨텍스트 정리, 재마운트 시 새 캔버스.
-      if (app) app.destroy(true, { children: true });
+      if (app) app.destroy(true);
     };
     // colorTheme은 재틴트 전용 effect에서 처리 → 여기 넣으면 테마 변경 시 모델이 통째로 재생성됨.
   }, [modelUrl, size, interactive]);
