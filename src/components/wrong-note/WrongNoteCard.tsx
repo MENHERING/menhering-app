@@ -1,45 +1,27 @@
+'use client';
+
 import { Check } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Section } from '@/components/common/Section';
 import { WrongNoteOptionRow } from '@/components/wrong-note/WrongNoteOptionRow';
+import { WrongNoteSubjectTags } from '@/components/wrong-note/WrongNoteSubjectTags';
 import { cn } from '@/lib/cn';
-import type { WrongNoteItem, WrongNoteSubject } from '@/types/wrong-note';
-
-const SUBJECT_STYLE: Partial<Record<WrongNoteSubject, { bg: string; text: string }>> = {
-  HTML: { bg: 'bg-subject-html-surface', text: 'text-subject-html' },
-  CSS: { bg: 'bg-subject-css-surface', text: 'text-subject-css' },
-  JS: { bg: 'bg-subject-js-surface', text: 'text-subject-js' },
-  React: { bg: 'bg-subject-react-surface', text: 'text-subject-react' },
-};
-
-const DEFAULT_SUBJECT_STYLE = { bg: 'bg-note-gray-soft', text: 'text-answer-neutral' };
+import type { WrongNoteItem } from '@/types/wrong-note';
 
 interface WrongNoteCardProps {
   item: WrongNoteItem;
 }
 
 export function WrongNoteCard({ item }: WrongNoteCardProps) {
-  const { bg: subjectBg, text: subjectText } = SUBJECT_STYLE[item.subject] ?? DEFAULT_SUBJECT_STYLE;
+  const router = useRouter();
   const isReviewed = item.reviewStatus === 'reviewed';
 
   return (
     <Section className="shadow-card p-4">
       <div className="flex items-center justify-between">
-        <div className="flex gap-1.5">
-          <span
-            className={cn(
-              'rounded-full px-2 py-0.5 text-[10px] leading-[15px] font-bold',
-              subjectBg,
-              subjectText,
-            )}
-          >
-            {item.subject}
-          </span>
-          <span className="bg-note-gray-soft text-answer-neutral rounded-full px-2 py-0.5 text-[10px] leading-[15px] font-bold">
-            {item.topic}
-          </span>
-        </div>
+        <WrongNoteSubjectTags subject={item.subject} topic={item.topic} />
         <span className="text-brown-muted text-[10px] leading-[15px]">{item.daysAgo}</span>
       </div>
 
@@ -64,7 +46,11 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
           {isReviewed ? '복습 완료' : '미복습'}
         </span>
         {!isReviewed && (
-          <Button size="sm" className="bg-coral-accent shadow-none">
+          <Button
+            size="sm"
+            className="bg-coral-accent shadow-none"
+            onClick={() => router.push(`/mypage/wrong-note/${item.id}`)}
+          >
             다시 풀기
           </Button>
         )}
