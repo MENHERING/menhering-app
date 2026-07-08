@@ -10,7 +10,7 @@ import { selectableCardClass } from '@/components/avatar/selectable-card';
 import { ConfirmModal } from '@/components/common/ConfirmModal';
 import { CHARACTER_COST, CHARACTER_TYPES } from '@/constants/avatar';
 import { CHARACTER_REGISTRY } from '@/constants/character-registry';
-import { AVATAR_SELECT_SOUND } from '@/constants/sounds';
+import { AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME } from '@/constants/sounds';
 import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
 import { useAvatarEconomyStore } from '@/stores/avatar-economy-store';
@@ -21,7 +21,7 @@ export function CharacterPicker() {
   const colorTheme = useAvatarStore((s) => s.colorTheme);
   const setCharacterType = useAvatarStore((s) => s.setCharacterType);
   const ownedCharacters = useAvatarEconomyStore((s) => s.ownedCharacters);
-  const playSelect = useSound(AVATAR_SELECT_SOUND, 0.1);
+  const playSelect = useSound(AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME);
 
   // 미보유 캐릭터는 아직 미구현 → 구매 대신 "준비중" 안내 모달만 띄운다.
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
