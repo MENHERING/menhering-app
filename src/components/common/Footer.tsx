@@ -66,8 +66,9 @@ export function Footer({ className }: FooterProps) {
       return;
     }
 
-    // 나가기로 확정 → 플래그 해제(다음 화면에 경고가 새지 않게)
-    useUnsavedChangesStore.getState().setHasUnsavedChanges(false);
+    // 나가기로 확정 → 플래그는 여기서 선제 해제하지 않는다.
+    // AvatarClient 언마운트 cleanup이 해제하므로, 네비게이션이 중단돼 화면에 남는 경우에도
+    // 경고가 꺼진 채로 남지 않는다.
   };
 
   return (

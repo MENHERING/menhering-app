@@ -27,7 +27,7 @@
 레서판다: {
   Svg: RedPandaSvg,
   live2d: { modelUrl: '/live2d/redpanda/menhering.model3.json' },
-  thumbnail: '/images/avatar/menhering_img.webp', // 픽커 얼굴 크롭용(선택)
+  thumbnail: '/images/avatar/menhering_1_img.webp', // 픽커 얼굴 크롭용(선택)
 },
 ```
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Check, Pencil } from 'lucide-react';
 
@@ -22,6 +22,18 @@ interface NicknameFieldProps {
 export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(nickname);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  // 명시적 종료(Enter·Escape·저장 버튼)일 때만 트리거(연필) 버튼으로 포커스를 되돌린다.
+  // input/저장 버튼이 언마운트되며 포커스가 <body>로 유실돼 키보드·스크린리더 사용자가
+  // 처음부터 재탐색하는 것을 막는다. blur(탭 아웃) 취소는 사용자가 이미 다른 곳으로
+  // 이동 중이라 되돌리지 않는다(탭 순서 방해 방지).
+  const restoreFocusRef = useRef(false);
+  useEffect(() => {
+    if (!isEditing && restoreFocusRef.current) {
+      restoreFocusRef.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [isEditing]);
 
   const startEdit = () => {
     setDraft(nickname);
@@ -33,10 +45,16 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
     setIsEditing(false);
   };
 
+  const cancelEditWithFocus = () => {
+    restoreFocusRef.current = true;
+    cancelEdit();
+  };
+
   const commit = () => {
     const next = draft.trim();
     if (!next) return; // 빈 닉네임은 저장하지 않음(체크 버튼도 비활성).
     onSave(next);
+    restoreFocusRef.current = true;
     setIsEditing(false);
   };
 
@@ -58,7 +76,7 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
           onBlur={cancelEdit}
           onKeyDown={(e) => {
             if (e.key === 'Enter') commit();
-            if (e.key === 'Escape') cancelEdit();
+            if (e.key === 'Escape') cancelEditWithFocus();
           }}
           aria-label="닉네임"
           // TODO: 다크모드 도입 시 `dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`
@@ -82,6 +100,7 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
   return (
     // max-w-full + 이름 truncate: 카드가 고정폭(w-56)이라 긴 닉네임이 카드를 넘치지 않게 말줄임.
     <button
+      ref={triggerRef}
       type="button"
       onClick={startEdit}
       className="focus-visible:ring-coral flex h-10 max-w-full items-center justify-center gap-1.5 rounded-md px-1 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 
 import { AnimatePresence, motion } from 'motion/react';
 
@@ -43,6 +43,8 @@ export function ConfirmModal({
   onCancel,
 }: ConfirmModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  // 다이얼로그 이름표(제목)와 연결해 스크린리더가 모달 목적을 즉시 안내하게 한다.
+  const titleId = useId();
   // onCancel이 매 렌더 새 함수로 와도 Esc 리스너를 재등록하지 않도록 ref로 최신 참조만 유지.
   const onCancelRef = useRef(onCancel);
   useEffect(() => {
@@ -86,6 +88,7 @@ export function ConfirmModal({
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
+            aria-labelledby={titleId}
             tabIndex={-1}
             className="shadow-custom relative w-full max-w-[320px] rounded-2xl bg-white p-6 outline-none"
             initial={{ scale: 0.96, y: 8 }}
@@ -95,7 +98,9 @@ export function ConfirmModal({
           >
             {icon && <div className="mb-3 flex justify-center">{icon}</div>}
 
-            <h2 className="text-ink text-center text-base font-bold">{title}</h2>
+            <h2 id={titleId} className="text-ink text-center text-base font-bold">
+              {title}
+            </h2>
 
             {highlight && <div className="mt-3 flex justify-center">{highlight}</div>}
 
