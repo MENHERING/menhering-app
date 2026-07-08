@@ -1,10 +1,4 @@
-import type { WrongNoteItem, WrongNoteStats } from '@/types/wrong-note';
-
-export const MOCK_WRONG_NOTE_STATS: WrongNoteStats = {
-  total: 12,
-  unreviewed: 8,
-  reviewed: 4,
-};
+import type { WrongNoteItem } from '@/types/wrong-note';
 
 export const MOCK_WRONG_NOTE_ITEMS: WrongNoteItem[] = [
   {
