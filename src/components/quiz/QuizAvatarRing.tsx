@@ -4,6 +4,8 @@ import { useId } from 'react';
 
 import Image from 'next/image';
 
+import { MIN_HAPPINESS_FILL_PERCENT } from '@/components/quiz/gauge-constants';
+
 interface QuizAvatarRingProps {
   size?: number;
   // 0(멘헤라/우울)~100(행복) — 이 비율만큼 링 호(arc) 길이를 채운다.
@@ -11,16 +13,14 @@ interface QuizAvatarRingProps {
   badge?: React.ReactNode;
 }
 
-// 0%여도 색이 살짝은 보이도록 최소 호 길이를 보장한다.
-const MIN_ARC_RATIO = 0.12;
-
 export function QuizAvatarRing({ size = 160, happinessPercent = 100, badge }: QuizAvatarRingProps) {
   const gradientId = useId();
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const ratio = Math.min(Math.max(happinessPercent, 0), 100) / 100;
-  const arcRatio = MIN_ARC_RATIO + (1 - MIN_ARC_RATIO) * ratio;
+  const minRatio = MIN_HAPPINESS_FILL_PERCENT / 100;
+  const arcRatio = minRatio + (1 - minRatio) * ratio;
   const dashOffset = circumference * (1 - arcRatio);
 
   return (

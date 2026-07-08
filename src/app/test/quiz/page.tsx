@@ -12,6 +12,7 @@ import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
 import { QuizTimer } from '@/components/quiz/QuizTimer';
+import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
 import { MOCK_QUIZ_QUESTIONS, QUIZ_TIME_LIMIT_SECONDS } from '@/mocks/quiz';
 
 export default function TestQuizPage() {
@@ -69,10 +70,13 @@ export default function TestQuizPage() {
       </div>
 
       {/* case 06: HappinessGauge */}
-      <HappinessGauge gainPercent={32} />
+      <HappinessGauge happinessPercent={80} gainPercent={32} />
 
       {/* case 07: QuizResultStats */}
       <QuizResultStats correctCount={5} wrongCount={0} />
+
+      {/* case 09: QuizXpBadge */}
+      <QuizXpBadge xp={50} />
 
       {/* case 08: QuizTimeoutModal */}
       <button

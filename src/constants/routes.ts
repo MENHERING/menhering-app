@@ -5,4 +5,5 @@ export const ROUTES = {
   AVATAR: '/avatar',
   MYPAGE: '/mypage',
   RANKING: '/learning/ranking',
+  WRONG_NOTE: '/mypage/wrong-note',
 } as const;
