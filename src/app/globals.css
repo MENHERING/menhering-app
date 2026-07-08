@@ -69,6 +69,10 @@
 
   --locked: #d1d5db;
   --locked-icon: #6b7280;
+
+  /* 퀴즈 오답 노트 — 결과 화면 */
+  --mascot-glow-start: #a8e6cf;
+  --mascot-glow-end: #4db6ac;
 }
 
 @theme inline {
@@ -136,9 +140,16 @@
   --shadow-toast-correct: 0 10px 24px rgba(76, 175, 80, 0.4);
   --shadow-toast-wrong: 0 10px 24px rgba(232, 114, 90, 0.45);
 
+  /* 퀴즈 오답 노트 — 결과 화면 */
+  --drop-shadow-mascot: 0 10px 7.5px rgba(0, 0, 0, 0.1);
+
   --color-gold: var(--gold);
   --color-locked: var(--locked);
   --color-locked-icon: var(--locked-icon);
+
+  /* 퀴즈 오답 노트 — 결과 화면 */
+  --color-mascot-glow-start: var(--mascot-glow-start);
+  --color-mascot-glow-end: var(--mascot-glow-end);
 
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -148,6 +159,9 @@
 
   /* 오답 노트 결과 토스트 등장 모션 */
   --animate-rise-in: rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* 오답 노트 결과 화면 반짝임 모션 */
+  --animate-sparkle-shine: sparkle-shine 1.8s ease-in-out infinite;
 }
 
 @keyframes rise-in {
@@ -158,6 +172,20 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes sparkle-shine {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8) rotate(0deg);
+    filter: drop-shadow(0 0 0 var(--gold));
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(8deg);
+    filter: drop-shadow(0 0 6px var(--gold));
   }
 }
 
