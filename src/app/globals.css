@@ -1,5 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css');
 @import 'tailwindcss';
+@source '../**/*.{ts,tsx}';
 
 :root {
   --background: #ffffff;
@@ -7,6 +8,7 @@
 
   /* 배경 */
   --sand: #f7ede0;
+  --sand-line: #f0ede8;
   --cream: #f0d9cc;
 
   /* 브랜드 컬러  */
@@ -22,8 +24,43 @@
 
   --linen: #faf0e6;
   --ink: #3d3d3d;
+  --brown-ink: #3d2b1f;
+  --brown-muted: #9e8070;
+  --yellow-soft: #fff3d0;
+  --green-soft: #d8f3e5;
+  --blue-soft: #d2d4ee;
+  --purple-soft: #f5e8f9;
+  --red-soft: #f8d9d9;
+  --cream-toggle: #f5e6df;
+  --peach-surface: #fff6f2;
+  --coral-highlight: #d4573d;
+  --green-accent: #52c97a;
+  --coral-accent: #e8725a;
 
   --brown-soft: #c27a5a;
+
+  /* 퀴즈 오답 노트 — 보기 상태 */
+  --answer-wrong-soft: #ffebee;
+  --answer-wrong: #e57373;
+  --answer-correct-soft: #e8f5e9;
+  --answer-correct: #4caf50;
+  --answer-neutral-soft: #f7f4f0;
+  --answer-neutral: #555555;
+
+  /* 퀴즈 오답 노트 — 공통 UI */
+  --note-gray-soft: #f0f0f0;
+  --note-line: #e0d6cf;
+  --coral-tint: #fff0ed;
+
+  /* 과목 라벨 */
+  --subject-html-surface: #fff3e0;
+  --subject-html: #e65100;
+  --subject-css-surface: #e3f0ff;
+  --subject-css: #2979cc;
+  --subject-js-surface: #fff8e1;
+  --subject-js: #f59e0b;
+  --subject-react-surface: #e0f7f4;
+  --subject-react: #00897b;
 
   --gold: #fbbf24;
 
@@ -42,6 +79,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-sand: var(--sand);
+  --color-sand-line: var(--sand-line);
   --color-cream: var(--cream);
   --color-primary: var(--primary);
   --color-primary-soft: var(--primary-soft);
@@ -54,6 +92,45 @@
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
+
+  --color-brown-ink: var(--brown-ink);
+  --color-brown-muted: var(--brown-muted);
+  --color-yellow-soft: var(--yellow-soft);
+  --color-green-soft: var(--green-soft);
+  --color-blue-soft: var(--blue-soft);
+  --color-purple-soft: var(--purple-soft);
+  --color-red-soft: var(--red-soft);
+  --color-cream-toggle: var(--cream-toggle);
+  --color-peach-surface: var(--peach-surface);
+  --color-coral-highlight: var(--coral-highlight);
+  --color-green-accent: var(--green-accent);
+  --color-coral-accent: var(--coral-accent);
+
+  /* 퀴즈 오답 노트 — 보기 상태 */
+  --color-answer-wrong-soft: var(--answer-wrong-soft);
+  --color-answer-wrong: var(--answer-wrong);
+  --color-answer-correct-soft: var(--answer-correct-soft);
+  --color-answer-correct: var(--answer-correct);
+  --color-answer-neutral-soft: var(--answer-neutral-soft);
+  --color-answer-neutral: var(--answer-neutral);
+
+  /* 퀴즈 오답 노트 — 공통 UI */
+  --color-note-gray-soft: var(--note-gray-soft);
+  --color-note-line: var(--note-line);
+  --color-coral-tint: var(--coral-tint);
+
+  /* 과목 라벨 */
+  --color-subject-html-surface: var(--subject-html-surface);
+  --color-subject-html: var(--subject-html);
+  --color-subject-css-surface: var(--subject-css-surface);
+  --color-subject-css: var(--subject-css);
+  --color-subject-js-surface: var(--subject-js-surface);
+  --color-subject-js: var(--subject-js);
+  --color-subject-react-surface: var(--subject-react-surface);
+  --color-subject-react: var(--subject-react);
+
+  --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
   --color-gold: var(--gold);
   --color-locked: var(--locked);
   --color-locked-icon: var(--locked-icon);
