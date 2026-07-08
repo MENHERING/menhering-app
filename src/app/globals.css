@@ -131,6 +131,11 @@
 
   --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
+  /* 퀴즈 오답 노트 — 다시 풀기(상세) 화면 */
+  --shadow-explain-badge: 0 2px 3px rgba(76, 175, 80, 0.35);
+  --shadow-toast-correct: 0 10px 24px rgba(76, 175, 80, 0.4);
+  --shadow-toast-wrong: 0 10px 24px rgba(232, 114, 90, 0.45);
+
   --color-gold: var(--gold);
   --color-locked: var(--locked);
   --color-locked-icon: var(--locked-icon);

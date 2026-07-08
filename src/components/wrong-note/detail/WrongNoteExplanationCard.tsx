@@ -12,7 +12,7 @@ export function WrongNoteExplanationCard({ options, explanation }: WrongNoteExpl
   return (
     <div className="overflow-hidden rounded-[20px] bg-[linear-gradient(160deg,var(--explain-surface-start),var(--explain-surface-end))]">
       <div className="border-answer-correct/15 flex items-center gap-2.5 border-b px-[18px] pt-[18px] pb-[15px]">
-        <span className="bg-answer-correct flex size-[30px] shrink-0 items-center justify-center rounded-full text-[15px] font-bold text-white shadow-[0_2px_3px_rgba(76,175,80,0.35)]">
+        <span className="bg-answer-correct shadow-explain-badge flex size-[30px] shrink-0 items-center justify-center rounded-full text-[15px] font-bold text-white">
           !
         </span>
         <div>

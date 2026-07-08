@@ -33,31 +33,29 @@ export function WrongNoteDetailScreen({
 }: WrongNoteDetailScreenProps) {
   const router = useRouter();
   const markReviewed = useWrongNoteStore((state) => state.markReviewed);
-  // 정답을 맞힐 때까지 재선택할 수 있으며, 마지막에 고른 오답 하나만 기록한다.
-  const [wrongNumber, setWrongNumber] = useState<number | null>(null);
-  const [isSolved, setIsSolved] = useState(false);
+  const recordSolveResult = useWrongNoteStore((state) => state.recordSolveResult);
+  // 선택은 한 번만 가능하며, 정답/오답 여부와 무관하게 즉시 정답을 함께 공개한다.
+  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
 
   const correctNumber = useMemo(
     () => item.options.find((option) => option.state === 'correct')?.number,
     [item.options],
   );
-  const hasWrongAttempt = wrongNumber !== null;
+  const isAnswered = selectedNumber !== null;
+  const isCorrect = selectedNumber === correctNumber;
 
   const handleSelect = (number: number) => {
-    if (isSolved || number === wrongNumber) return;
-    if (number === correctNumber) {
-      setIsSolved(true);
-      markReviewed(item.id);
-    } else {
-      setWrongNumber(number);
-    }
+    if (isAnswered) return;
+    setSelectedNumber(number);
+    markReviewed(item.id);
+    recordSolveResult(item.id, number === correctNumber);
   };
 
-  // 정답을 맞히기 전에는 정답을 공개하지 않고, 마지막에 고른 오답만 표시한다.
+  // 선택 즉시 정답 위치와 내가 고른 오답을 함께 보여준다.
   const displayOptions = item.options.map((option) => {
     let state: OptionState = 'neutral';
-    if (isSolved && option.number === correctNumber) state = 'correct';
-    else if (!isSolved && option.number === wrongNumber) state = 'my_wrong';
+    if (isAnswered && option.number === correctNumber) state = 'correct';
+    else if (isAnswered && option.number === selectedNumber) state = 'my_wrong';
     return { ...option, state };
   });
 
@@ -81,25 +79,22 @@ export function WrongNoteDetailScreen({
             <WrongNoteDetailOptionRow
               key={option.number}
               option={option}
-              disabled={isSolved || option.state === 'my_wrong'}
+              disabled={isAnswered}
               onSelect={() => handleSelect(option.number)}
             />
           ))}
         </div>
 
-        {isSolved && (
+        {isAnswered && (
           <div className="mt-8">
             <WrongNoteExplanationCard options={item.options} explanation={item.explanation} />
           </div>
         )}
-        {(isSolved || hasWrongAttempt) && (
+        {isAnswered && (
           <WrongNoteResultToast
-            key={isSolved ? 'solved' : `wrong-${wrongNumber}`}
-            isCorrect={isSolved}
-            nextLabel={
-              isSolved ? (isLastInQueue ? '오답 노트로 돌아가기' : '다음 문제') : undefined
-            }
-            onNext={isSolved ? () => router.push(nextHref) : undefined}
+            isCorrect={isCorrect}
+            nextLabel={isLastInQueue ? '제출하기' : '다음 문제'}
+            onNext={() => router.push(nextHref)}
           />
         )}
       </main>

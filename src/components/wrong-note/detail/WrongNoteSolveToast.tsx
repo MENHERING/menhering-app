@@ -16,9 +16,7 @@ export function WrongNoteResultToast({ isCorrect, nextLabel, onNext }: WrongNote
     <div
       className={cn(
         'animate-rise-in sticky bottom-4 mt-6 flex flex-col gap-3.5 rounded-[20px] p-4 text-white',
-        isCorrect
-          ? 'bg-answer-correct shadow-[0_10px_24px_rgba(76,175,80,0.4)]'
-          : 'bg-coral-accent shadow-[0_10px_24px_rgba(232,114,90,0.45)]',
+        isCorrect ? 'bg-answer-correct shadow-toast-correct' : 'bg-coral-accent shadow-toast-wrong',
       )}
     >
       <div className="flex items-center gap-3">
@@ -30,7 +28,7 @@ export function WrongNoteResultToast({ isCorrect, nextLabel, onNext }: WrongNote
             {isCorrect ? '정답입니다!' : '틀렸어요'}
           </p>
           <p className="text-[11px] leading-4 text-white/75">
-            {isCorrect ? '해설을 확인해 보세요' : '다시 선택해 보세요'}
+            {isCorrect ? '해설을 확인해 보세요' : '정답과 해설을 확인해 보세요'}
           </p>
         </div>
       </div>
