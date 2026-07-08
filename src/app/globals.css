@@ -27,6 +27,7 @@
   --purple-soft: #f5e8f9;
   --red-soft: #f8d9d9;
   --cream-toggle: #f5e6df;
+  --peach-surface: #fff6f2;
   --coral-highlight: #d4573d;
   --green-accent: #52c97a;
   --coral-accent: #e8725a;
@@ -43,6 +44,7 @@
 
   /* 퀴즈 오답 노트 — 공통 UI */
   --note-gray-soft: #f0f0f0;
+  --note-line: #e0d6cf;
   --coral-tint: #fff0ed;
 
   /* 퀴즈 오답 노트 — 다시 풀기(상세) 화면 */
@@ -69,6 +71,10 @@
 
   --locked: #d1d5db;
   --locked-icon: #6b7280;
+
+  /* 퀴즈 정답/오답 표시 */
+  --correct: #22c55e;
+  --wrong: #ef4444;
 
   /* 퀴즈 오답 노트 — 결과 화면 */
   --mascot-glow-start: #a8e6cf;
@@ -97,6 +103,7 @@
   --color-purple-soft: var(--purple-soft);
   --color-red-soft: var(--red-soft);
   --color-cream-toggle: var(--cream-toggle);
+  --color-peach-surface: var(--peach-surface);
   --color-coral-highlight: var(--coral-highlight);
   --color-green-accent: var(--green-accent);
   --color-coral-accent: var(--coral-accent);
@@ -111,6 +118,7 @@
 
   /* 퀴즈 오답 노트 — 공통 UI */
   --color-note-gray-soft: var(--note-gray-soft);
+  --color-note-line: var(--note-line);
   --color-coral-tint: var(--coral-tint);
 
   /* 퀴즈 오답 노트 — 다시 풀기(상세) 화면 */
@@ -146,6 +154,8 @@
   --color-gold: var(--gold);
   --color-locked: var(--locked);
   --color-locked-icon: var(--locked-icon);
+  --color-correct: var(--correct);
+  --color-wrong: var(--wrong);
 
   /* 퀴즈 오답 노트 — 결과 화면 */
   --color-mascot-glow-start: var(--mascot-glow-start);

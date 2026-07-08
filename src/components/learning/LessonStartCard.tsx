@@ -1,3 +1,5 @@
+import { useRouter } from 'next/navigation';
+
 import { Button } from '@/components/common/Button';
 import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
 import { cn } from '@/lib/cn';
@@ -11,6 +13,8 @@ interface LessonStartCardProps {
 }
 
 export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCardProps) {
+  const router = useRouter();
+
   return (
     <div className="relative w-full">
       <span
@@ -47,9 +51,7 @@ export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCard
           variant="secondary"
           size="md"
           isFullWidth
-          onClick={() => {
-            // TODO: 학습 상세 화면 라우팅 연결
-          }}
+          onClick={() => router.push(`/learning/${lesson.id}/quiz`)}
         >
           시작하기 +{lesson.xpReward} XP
         </Button>
