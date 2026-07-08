@@ -16,7 +16,7 @@ export function ColorThemePicker() {
   const setColorTheme = useAvatarStore((s) => s.setColorTheme);
   const ownedThemes = useAvatarEconomyStore((s) => s.ownedThemes);
   const requestBuy = useAvatarEconomyStore((s) => s.requestBuy);
-  const playSelect = useSound(AVATAR_SELECT_SOUND);
+  const playSelect = useSound(AVATAR_SELECT_SOUND, 0.1);
 
   return (
     <PickerSection title="색상 테마" headingId="color-theme-heading" cost={THEME_COST}>
@@ -41,19 +41,17 @@ export function ColorThemePicker() {
             aria-label={owned ? undefined : `${theme.value} 구매`}
             className={cn(selectableCardClass(selected), 'flex items-center gap-2 px-3 py-3')}
           >
-            {/* 스와치 미리보기 (동적 색상은 SVG fill로 표현 → 인라인 style 회피) */}
-            <svg viewBox="0 0 46 22" className="h-[22px] w-[46px] shrink-0" aria-hidden>
-              {theme.swatches.map((color, i) => (
-                <circle
-                  key={`${color}-${i}`}
-                  cx={11 + i * 12}
-                  cy={11}
-                  r={10}
-                  fill={color}
-                  stroke="#ffffff"
-                  strokeWidth={2}
-                />
-              ))}
+            {/* 스와치 미리보기 — 실제 캐릭터에 입혀지는 body(털) 색 한 가지.
+                (동적 색상은 SVG fill로 표현 → 인라인 style 회피) */}
+            <svg viewBox="0 0 22 22" className="size-[22px] shrink-0" aria-hidden>
+              <circle
+                cx={11}
+                cy={11}
+                r={10}
+                fill={theme.roles.body}
+                stroke="rgba(0,0,0,0.1)"
+                strokeWidth={1}
+              />
             </svg>
 
             {/* TODO: 다크모드 도입 시 라벨 `dark:text-neutral-100` */}

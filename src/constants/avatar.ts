@@ -33,9 +33,7 @@ export const PLACEHOLDER_COIN = 1000;
 
 interface ColorThemeConfig {
   value: ColorTheme;
-  // 프리셋 스와치 미리보기(밝은 → 어두운). roles와 별개로 UI 표시용.
-  swatches: readonly [string, string, string];
-  // 캐릭터 SVG 색 슬롯 매핑
+  // 캐릭터 색 슬롯 매핑. body는 픽커 스와치·Live2D 틴트에 함께 쓰인다.
   roles: ThemeRoles;
 }
 
@@ -43,33 +41,27 @@ interface ColorThemeConfig {
 export const COLOR_THEMES: readonly ColorThemeConfig[] = [
   {
     value: '클래식',
-    swatches: ['#E8563A', '#F0D9CC', '#3D3D3D'],
     roles: { body: '#E8563A', secondary: '#F0D9CC', accent: '#3D3D3D' },
   },
   {
     value: '라벤더',
-    swatches: ['#C9B8F0', '#B191E8', '#7A3FB0'],
     roles: { body: '#B191E8', secondary: '#EFE7FB', accent: '#4A2A73' },
   },
   {
     value: '민트',
-    swatches: ['#A7E8C6', '#7BD3A6', '#1E5B3A'],
     roles: { body: '#7BD3A6', secondary: '#E4F7ED', accent: '#154A2E' },
   },
   {
     value: '피치',
-    swatches: ['#F9C6D3', '#F79EC0', '#C81E3A'],
     roles: { body: '#F79EC0', secondary: '#FDE7EE', accent: '#8E1327' },
   },
   {
     value: '스카이',
-    swatches: ['#BFE1F3', '#8CCDEC', '#12405F'],
     roles: { body: '#8CCDEC', secondary: '#E6F4FC', accent: '#123F5E' },
   },
   {
     value: '선샤인',
-    swatches: ['#E8C15C', '#F1DFA0', '#7A5A1E'],
-    roles: { body: '#E8C15C', secondary: '#FBF1CF', accent: '#6E5017' },
+    roles: { body: '#FFD400', secondary: '#FAF3E6', accent: '#6B4A22' },
   },
 ];
 

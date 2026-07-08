@@ -36,9 +36,11 @@ interface CubismCoreModel {
   setOverwriteFlagForDrawableMultiplyColors(index: number, value: boolean): void;
 }
 
-// 테마색을 곱할 "털" 드로어블(재리깅으로 크림과 분리됨). 나머지는 흰색(1,1,1)으로 덮어써
-// 원본 텍스처 색을 그대로 유지한다.
-const FUR_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
+// 테마 body색을 곱할 드로어블(재리깅으로 크림과 분리됨). 나머지는 흰색(1,1,1)으로 덮어써
+// 원본 텍스처 색을 유지한다. 눈은 통짜 드로어블(eye_L/eye_R)이라 여기 넣으면 눈동자·흰
+// 반짝이까지 다 물든다 → 제외(고정). 반사광만 테마색 하려면 눈을 base/reflection으로 분리
+// 재리깅한 뒤 reflection 드로어블 id를 여기 추가한다.
+const BODY_TINT_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
 
 // pixi Application/WebGL 컨텍스트를 페이지 세션 내내 하나만 두고 재사용한다.
 // 컨텍스트를 파괴·재생성하면 플러그인(Cubism)의 셰이더·마스크가 첫 컨텍스트에 묶인 채 orphan돼,
@@ -303,18 +305,18 @@ export function Live2DCharacter({
   );
 }
 
-// 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 털(FUR_DRAWABLES)은 테마색,
-// 나머지는 흰색(1,1,1). overwrite 플래그를 켜 매 프레임 유지시킨다.
+// 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 털(BODY_TINT_DRAWABLES)은
+// 테마색, 나머지(크림·눈·코·하트)는 흰색(1,1,1). overwrite 플래그를 켜 매 프레임 유지시킨다.
 //
 // ⚠️ 나머지를 흰색으로 "명시" 덮어써야 하는 이유: 이 플러그인은 0.4.0과 달리 드로어블별 baked
 // Multiply를 실제로 렌더한다. 재리깅 모델의 일부 드로어블(눈 등)에 흰색 아닌 baked 값이 남아
 // 있으면 그대로 어둡게/안 보이게 뜬다. 흰색으로 덮어써 원본 텍스처 색을 복원한다.
 function applyTint(model: Live2DModel, colorTheme: ColorTheme, tinted: boolean) {
   const core = model.internalModel.coreModel as unknown as CubismCoreModel;
-  const fur = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
+  const tint = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
   const ids = core.getDrawableIds();
   for (let i = 0; i < ids.length; i++) {
-    const { r, g, b } = FUR_DRAWABLES.has(ids[i]) ? fur : { r: 1, g: 1, b: 1 };
+    const { r, g, b } = BODY_TINT_DRAWABLES.has(ids[i]) ? tint : { r: 1, g: 1, b: 1 };
     core.setMultiplyColorByRGBA(i, r, g, b, 1);
     core.setOverwriteFlagForDrawableMultiplyColors(i, true);
   }
