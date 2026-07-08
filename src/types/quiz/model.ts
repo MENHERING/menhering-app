@@ -6,3 +6,8 @@ export interface QuizQuestion {
   correctIndex: number;
   explanation: string;
 }
+
+export interface QuizResult {
+  correctCount: number;
+  wrongCount: number;
+}
