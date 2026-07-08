@@ -1,0 +1,60 @@
+'use client';
+
+import { notFound } from 'next/navigation';
+
+import { QuizExplanation } from '@/components/quiz/QuizExplanation';
+import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
+import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
+import { QuizTimer } from '@/components/quiz/QuizTimer';
+import { MOCK_QUIZ_QUESTIONS, QUIZ_TIME_LIMIT_SECONDS } from '@/mocks/quiz';
+
+export default function TestQuizPage() {
+  if (process.env.NODE_ENV !== 'development') notFound();
+
+  const question = MOCK_QUIZ_QUESTIONS[0];
+
+  return (
+    <main className="flex min-h-screen flex-col gap-8 bg-gray-50 px-4 py-16">
+      {/* case 01: QuizTimer */}
+      <div className="rounded-2xl bg-white p-6">
+        <QuizTimer
+          secondsLeft={25}
+          totalSeconds={QUIZ_TIME_LIMIT_SECONDS}
+          currentIndex={0}
+          totalQuestions={MOCK_QUIZ_QUESTIONS.length}
+        />
+      </div>
+
+      {/* case 02: QuizQuestionCard */}
+      <QuizQuestionCard order={question.order} prompt={question.prompt} />
+
+      {/* case 03: QuizOptionButton - default / correct / wrong-selected */}
+      <div className="flex flex-col gap-3">
+        <QuizOptionButton
+          index={0}
+          label="기본 상태"
+          state="default"
+          disabled={false}
+          onSelect={() => {}}
+        />
+        <QuizOptionButton
+          index={1}
+          label="정답 상태"
+          state="correct"
+          disabled
+          onSelect={() => {}}
+        />
+        <QuizOptionButton
+          index={2}
+          label="내가 고른 오답 상태"
+          state="wrong-selected"
+          disabled
+          onSelect={() => {}}
+        />
+      </div>
+
+      {/* case 04: QuizExplanation */}
+      <QuizExplanation explanation={question.explanation} onNext={() => {}} />
+    </main>
+  );
+}
