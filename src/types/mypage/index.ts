@@ -9,3 +9,12 @@ export type {
   StatCardItem,
   StatCardVariant,
 } from '@/types/mypage/model';
+
+export type {
+  FontSizeOption,
+  FriendRequest,
+  SettingsIconId,
+  SettingsInfoItem,
+  SettingsSection,
+  SettingsToggleItem,
+} from '@/types/mypage/settings';
