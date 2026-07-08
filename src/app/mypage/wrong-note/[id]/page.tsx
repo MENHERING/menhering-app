@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 
-import { WrongNoteDetailScreen } from '@/components/wrong-note/WrongNoteDetailScreen';
+import { WrongNoteDetailScreen } from '@/components/wrong-note/detail/WrongNoteDetailScreen';
 import { MOCK_WRONG_NOTE_ITEMS } from '@/mocks/wrong-note.mock';
 
 interface WrongNoteDetailPageProps {

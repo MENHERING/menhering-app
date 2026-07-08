@@ -7,9 +7,9 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
-import { WrongNoteCard } from '@/components/wrong-note/WrongNoteCard';
-import { WrongNoteFilterBar } from '@/components/wrong-note/WrongNoteFilterBar';
-import { WrongNoteStatsRow } from '@/components/wrong-note/WrongNoteStatsRow';
+import { WrongNoteCard } from '@/components/wrong-note/list/WrongNoteCard';
+import { WrongNoteFilterBar } from '@/components/wrong-note/list/WrongNoteFilterBar';
+import { WrongNoteStatsRow } from '@/components/wrong-note/list/WrongNoteStatsRow';
 import { useWrongNoteStore } from '@/stores/wrong-note-store';
 import type { WrongNoteFilter, WrongNoteStats, WrongNoteSubject } from '@/types/wrong-note';
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Section } from '@/components/common/Section';
-import { WrongNoteOptionRow } from '@/components/wrong-note/WrongNoteOptionRow';
+import { WrongNoteOptionRow } from '@/components/wrong-note/list/WrongNoteOptionRow';
 import { WrongNoteSubjectTags } from '@/components/wrong-note/WrongNoteSubjectTags';
 import { cn } from '@/lib/cn';
 import type { WrongNoteItem } from '@/types/wrong-note';

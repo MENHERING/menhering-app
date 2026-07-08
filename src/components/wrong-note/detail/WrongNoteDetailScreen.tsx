@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 
 import { Header } from '@/components/common/Header';
 import { Section } from '@/components/common/Section';
-import { WrongNoteDetailOptionRow } from '@/components/wrong-note/WrongNoteDetailOptionRow';
-import { WrongNoteExplanationCard } from '@/components/wrong-note/WrongNoteExplanationCard';
-import { WrongNoteProgressBar } from '@/components/wrong-note/WrongNoteProgressBar';
-import { WrongNoteResultToast } from '@/components/wrong-note/WrongNoteResultToast';
+import { WrongNoteDetailOptionRow } from '@/components/wrong-note/detail/WrongNoteDetailOptionRow';
+import { WrongNoteExplanationCard } from '@/components/wrong-note/detail/WrongNoteExplanationCard';
+import { WrongNoteProgressBar } from '@/components/wrong-note/detail/WrongNoteProgressBar';
+import { WrongNoteResultToast } from '@/components/wrong-note/detail/WrongNoteSolveToast';
 import { WrongNoteSubjectTags } from '@/components/wrong-note/WrongNoteSubjectTags';
 import { useWrongNoteStore } from '@/stores/wrong-note-store';
 import type { OptionState, WrongNoteItem } from '@/types/wrong-note';
