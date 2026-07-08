@@ -7,6 +7,7 @@ import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
 import { cn } from '@/lib/cn';
+import { prefersReducedMotion } from '@/lib/prefers-reduced-motion';
 import type { ColorTheme } from '@/types/avatar';
 
 // Live2D 캐릭터 렌더러. 커스텀 모델을 WebGL로 띄우고, 물리 없이 코드로 모션
@@ -132,9 +133,7 @@ export function Live2DCharacter({
     let disposed = false;
     let app: Application | null = null;
     let tickerFn: (() => void) | null = null;
-    const reduceMotion =
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = prefersReducedMotion();
 
     // 모션 상태
     let t = 0;
@@ -314,12 +313,7 @@ export function Live2DCharacter({
   };
   // 탭하면 귀 쫑긋 + 하트 뿅. reduce-motion이면 반응 생략(효과음은 상위에서 유지).
   const handleTap = () => {
-    if (
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      return;
-    }
+    if (prefersReducedMotion()) return;
     reactionRef.current = { active: true, t: 0 };
     const base = heartIdRef.current;
     heartIdRef.current += 3;
