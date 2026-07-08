@@ -158,8 +158,9 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
         isOpen={feedback !== null}
         message={feedback?.message ?? ''}
         variant={feedback?.variant ?? 'success'}
-        duration={feedback?.variant === 'error' ? 0 : undefined}
-        // auth 필수 안내(에러)는 스스로 닫으면 안 되므로 성공 토스트에만 X 노출
+        // auth 안내(에러)는 X 없이 시간이 지나면 자동으로 닫힌다(2.5s). 성공은 기본(2s).
+        duration={feedback?.variant === 'error' ? 2500 : undefined}
+        // X 버튼은 성공 토스트에만 — auth 안내는 스스로 사라지게 둔다.
         dismissible={feedback?.variant === 'success'}
         onClose={() => setFeedback(null)}
         // 저장 바(하단 ~142px)를 가리지 않도록 그 위로 올린다.
