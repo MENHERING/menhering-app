@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism4';
 import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
+import { cn } from '@/lib/cn';
 import type { ColorTheme } from '@/types/avatar';
 
 // Live2D 캐릭터 렌더러. 커스텀 모델을 WebGL로 띄우고, 물리 없이 코드로 모션
@@ -108,6 +109,10 @@ export function Live2DCharacter({
   const containerRef = useRef<HTMLDivElement>(null);
   const modelRef = useRef<Live2DModel | null>(null);
   const pointerRef = useRef({ x: 0, active: false });
+  // 탭 반응(귀 쫑긋 + 하트 뿅). ticker가 reactionRef를 읽어 파라미터를 흔들고, hearts는 DOM 오버레이.
+  const reactionRef = useRef({ active: false, t: 0 });
+  const heartIdRef = useRef(0);
+  const [hearts, setHearts] = useState<number[]>([]);
   // 부모 리렌더로 콜백이 바뀌어도 init effect를 재실행하지 않도록 ref로 고정.
   const onErrorRef = useRef(onError);
   useEffect(() => {
@@ -240,10 +245,25 @@ export function Live2DCharacter({
           const px = interactive && pointerRef.current.active ? pointerRef.current.x : 0;
           model.rotation = px * 0.05;
 
-          // 귀·꼬리·하트 idle 흔들림(서로 다른 주기/위상 + 포인터 편향)
-          setP('ParamEarSway', 5 * Math.sin(t * 1.6) + px * 3);
+          // 탭 반응 버스트: 귀가 쫑긋 솟았다 잦아들고 하트 펜던트가 통 튄다(~0.55s 반원 곡선).
+          let earPerk = 0;
+          let heartPop = 0;
+          if (reactionRef.current.active) {
+            reactionRef.current.t += dt;
+            const p = reactionRef.current.t / 0.55;
+            if (p >= 1) {
+              reactionRef.current.active = false;
+            } else {
+              const swell = Math.sin(p * Math.PI);
+              earPerk = swell * 16;
+              heartPop = swell * 12;
+            }
+          }
+
+          // 귀·꼬리·하트 idle 흔들림(서로 다른 주기/위상 + 포인터 편향 + 탭 반응)
+          setP('ParamEarSway', 5 * Math.sin(t * 1.6) + px * 3 + earPerk);
           setP('ParamTailSway', 1.5 * Math.sin(t * 1.15 + 0.7) + px * 0.5);
-          setP('ParamHeartSway', 6 * Math.sin(t * 2.1 + 1.3));
+          setP('ParamHeartSway', 6 * Math.sin(t * 2.1 + 1.3) + heartPop);
 
           // 호흡(세로 스케일 미세 진동)
           model.scale.set(baseScale, baseScale * (1 + 0.012 * Math.sin(t * 1.3)));
@@ -292,16 +312,55 @@ export function Live2DCharacter({
   const handlePointerLeave = () => {
     pointerRef.current.active = false;
   };
+  // 탭하면 귀 쫑긋 + 하트 뿅. reduce-motion이면 반응 생략(효과음은 상위에서 유지).
+  const handleTap = () => {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return;
+    }
+    reactionRef.current = { active: true, t: 0 };
+    const base = heartIdRef.current;
+    heartIdRef.current += 3;
+    setHearts((prev) => [...prev, base, base + 1, base + 2]);
+  };
+  const removeHeart = (id: number) => setHearts((prev) => prev.filter((h) => h !== id));
 
   return (
-    <div
-      ref={containerRef}
-      className={className}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      // 이름이 있을 때만 img 역할 부여(빈 aria-label로 이름 없는 이미지가 되는 것 방지).
-      {...(title ? { role: 'img', 'aria-label': title } : {})}
-    />
+    // Pixi가 소유하는 캔버스 컨테이너 + 하트 오버레이를 형제로 감싼다. 오버레이를 컨테이너 자식으로
+    // 두면 Pixi가 append한 캔버스를 React가 건드려 충돌하므로 분리한다.
+    <div className={cn('relative', className)}>
+      {/* 크기 클래스를 두지 않는다 — 컨테이너는 Pixi가 append한 캔버스(size 픽셀) 콘텐츠 크기로
+          잡힌다. size-full로 부모(래퍼) %를 참조하면 className 미전달(POC)일 때 접힐 수 있다. */}
+      <div
+        ref={containerRef}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        onPointerDown={handleTap}
+        // 이름이 있을 때만 img 역할 부여(빈 aria-label로 이름 없는 이미지가 되는 것 방지).
+        {...(title ? { role: 'img', 'aria-label': title } : {})}
+      />
+      {hearts.length > 0 && (
+        // 클리핑 없음 → 하트가 머리 위 캔버스 밖(숲 하늘)까지 떠오른다. 카드 overflow가 최종 클립.
+        <div className="pointer-events-none absolute inset-0" aria-hidden>
+          {hearts.map((id) => (
+            <span
+              key={id}
+              onAnimationEnd={() => removeHeart(id)}
+              className={cn(
+                'animate-heart-float text-primary absolute top-[12%] text-xl',
+                id % 3 === 0 && 'left-[36%]',
+                id % 3 === 1 && 'left-1/2 text-2xl',
+                id % 3 === 2 && 'left-[58%]',
+              )}
+            >
+              ♥
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
