@@ -24,7 +24,7 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   const nickname = useAvatarStore((s) => s.nickname);
   const setNickname = useAvatarStore((s) => s.setNickname);
 
-  const playTap = useSound(AVATAR_TAP_SOUND);
+  const playTap = useSound(AVATAR_TAP_SOUND, 0.1);
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(nickname);

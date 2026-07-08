@@ -21,7 +21,7 @@ export function CharacterPicker() {
   const colorTheme = useAvatarStore((s) => s.colorTheme);
   const setCharacterType = useAvatarStore((s) => s.setCharacterType);
   const ownedCharacters = useAvatarEconomyStore((s) => s.ownedCharacters);
-  const playSelect = useSound(AVATAR_SELECT_SOUND);
+  const playSelect = useSound(AVATAR_SELECT_SOUND, 0.1);
 
   // 미보유 캐릭터는 아직 미구현 → 구매 대신 "준비중" 안내 모달만 띄운다.
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
