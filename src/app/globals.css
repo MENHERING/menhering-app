@@ -29,6 +29,10 @@
 
   --locked: #d1d5db;
   --locked-icon: #6b7280;
+
+  /* 퀴즈 정답/오답 표시 */
+  --correct: #22c55e;
+  --wrong: #ef4444;
 }
 
 @theme inline {
@@ -50,6 +54,8 @@
   --color-gold: var(--gold);
   --color-locked: var(--locked);
   --color-locked-icon: var(--locked-icon);
+  --color-correct: var(--correct);
+  --color-wrong: var(--wrong);
 
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
