@@ -33,6 +33,9 @@
   /* 퀴즈 정답/오답 표시 */
   --correct: #22c55e;
   --wrong: #ef4444;
+
+  /* 행복도 게이지 — 멘헤라(우울) 톤 */
+  --mood-sad: #7b86d9;
 }
 
 @theme inline {
@@ -56,6 +59,7 @@
   --color-locked-icon: var(--locked-icon);
   --color-correct: var(--correct);
   --color-wrong: var(--wrong);
+  --color-mood-sad: var(--mood-sad);
 
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;

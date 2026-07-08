@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import { Clock, X } from 'lucide-react';
 
 import { Button } from '@/components/common/Button';
 import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
@@ -32,16 +32,21 @@ export function QuizTimeoutModal({ onRetry, onLeave }: QuizTimeoutModalProps) {
 
         <QuizAvatarRing
           size={112}
+          happinessPercent={20}
           badge={
-            <span className="bg-coral flex size-8 items-center justify-center rounded-full text-base">
-              ⏰
+            <span className="bg-coral flex size-8 items-center justify-center rounded-full">
+              <Clock size={16} className="text-white" />
             </span>
           }
         />
 
         <div>
-          <p id="quiz-timeout-title" className="text-ink text-lg font-bold">
-            ⏰ 시간 초과
+          <p
+            id="quiz-timeout-title"
+            className="text-ink flex items-center justify-center gap-1.5 text-lg font-bold"
+          >
+            <Clock size={18} className="text-coral" />
+            시간 초과
           </p>
           <p className="text-brown-soft mt-1 text-sm leading-6">
             문제를 다시 풀어볼까요?

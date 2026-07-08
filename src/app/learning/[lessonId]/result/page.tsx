@@ -18,12 +18,15 @@ export default async function QuizResultPage({
   const correctCount = parseCount(correct);
   const wrongCount = parseCount(wrong);
   const totalCount = correctCount + wrongCount;
-  // 행복도 상승 폭은 임시 계산식(정답 비율 * 40%p). 실제 산정 로직은 후속 이슈.
-  const gainPercent = totalCount > 0 ? Math.round((correctCount / totalCount) * 40) : 0;
+  const correctRatio = totalCount > 0 ? correctCount / totalCount : 0;
+  // 행복도(링 색상)는 정답 비율(0~100), 상승 폭 텍스트는 임시 계산식(정답 비율 * 40%p).
+  // 실제 산정 로직은 후속 이슈.
+  const happinessPercent = Math.round(correctRatio * 100);
+  const gainPercent = Math.round(correctRatio * 40);
 
   return (
     <>
-      <QuizAvatarRing size={160} />
+      <QuizAvatarRing size={200} happinessPercent={happinessPercent} />
       <h1 className="text-ink text-center text-xl font-extrabold">오늘의 클리어</h1>
       <HappinessGauge gainPercent={gainPercent} />
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />

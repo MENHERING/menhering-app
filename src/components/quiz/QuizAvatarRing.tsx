@@ -6,24 +6,31 @@ import Image from 'next/image';
 
 interface QuizAvatarRingProps {
   size?: number;
+  // 0(멘헤라/우울)~100(행복) — 이 비율만큼 링 호(arc) 길이를 채운다.
+  happinessPercent?: number;
   badge?: React.ReactNode;
 }
 
-export function QuizAvatarRing({ size = 160, badge }: QuizAvatarRingProps) {
+// 0%여도 색이 살짝은 보이도록 최소 호 길이를 보장한다.
+const MIN_ARC_RATIO = 0.12;
+
+export function QuizAvatarRing({ size = 160, happinessPercent = 100, badge }: QuizAvatarRingProps) {
   const gradientId = useId();
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  // 장식용 링이라 데이터 비율이 아닌 고정 비율(85%)만 채워 도넛 형태로 표현한다.
-  const dashOffset = circumference * 0.15;
+  const ratio = Math.min(Math.max(happinessPercent, 0), 100) / 100;
+  const arcRatio = MIN_ARC_RATIO + (1 - MIN_ARC_RATIO) * ratio;
+  const dashOffset = circumference * (1 - arcRatio);
 
   return (
     <div className="relative mx-auto" style={{ width: size, height: size }}>
       <svg width={size} height={size} aria-hidden className="-rotate-90">
         <defs>
+          {/* 멘헤라(파랑)에서 행복(코랄)까지 항상 뚜렷하게 보이는 고정 그라데이션. */}
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="var(--coral)" />
-            <stop offset="100%" stopColor="var(--primary-soft)" />
+            <stop offset="100%" stopColor="var(--mood-sad)" />
           </linearGradient>
         </defs>
         <circle
