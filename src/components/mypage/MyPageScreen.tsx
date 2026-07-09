@@ -72,7 +72,7 @@ export function MyPageScreen() {
             icon={MOCK_MYPAGE_WRONG_NOTE.icon}
             title={MOCK_MYPAGE_WRONG_NOTE.title}
             description={MOCK_MYPAGE_WRONG_NOTE.description}
-            onClick={() => router.push(ROUTES.MYPAGE_WRONG_NOTE)}
+            onClick={() => router.push(ROUTES.WRONG_NOTE)}
           />
         </div>
 
