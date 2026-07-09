@@ -1,16 +1,24 @@
 'use client';
 
+import { useState } from 'react';
+
 import { notFound } from 'next/navigation';
 
+import { HappinessGauge } from '@/components/quiz/HappinessGauge';
+import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizExplanation } from '@/components/quiz/QuizExplanation';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
+import { QuizResultStats } from '@/components/quiz/QuizResultStats';
+import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
 import { QuizTimer } from '@/components/quiz/QuizTimer';
+import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
 import { MOCK_QUIZ_QUESTIONS, QUIZ_TIME_LIMIT_SECONDS } from '@/mocks/quiz';
 
 export default function TestQuizPage() {
   if (process.env.NODE_ENV !== 'development') notFound();
 
+  const [showTimeoutModal, setShowTimeoutModal] = useState(false);
   const question = MOCK_QUIZ_QUESTIONS[0];
 
   return (
@@ -55,6 +63,35 @@ export default function TestQuizPage() {
 
       {/* case 04: QuizExplanation */}
       <QuizExplanation explanation={question.explanation} onNext={() => {}} />
+
+      {/* case 05: QuizAvatarRing */}
+      <div className="flex justify-center rounded-2xl bg-white p-6">
+        <QuizAvatarRing />
+      </div>
+
+      {/* case 06: HappinessGauge */}
+      <HappinessGauge happinessPercent={80} gainPercent={32} />
+
+      {/* case 07: QuizResultStats */}
+      <QuizResultStats correctCount={5} wrongCount={0} />
+
+      {/* case 09: QuizXpBadge */}
+      <QuizXpBadge xp={50} />
+
+      {/* case 08: QuizTimeoutModal */}
+      <button
+        type="button"
+        onClick={() => setShowTimeoutModal(true)}
+        className="rounded-2xl bg-white p-4 text-sm font-semibold"
+      >
+        타임아웃 모달 열기
+      </button>
+      {showTimeoutModal && (
+        <QuizTimeoutModal
+          onRetry={() => setShowTimeoutModal(false)}
+          onLeave={() => setShowTimeoutModal(false)}
+        />
+      )}
     </main>
   );
 }
