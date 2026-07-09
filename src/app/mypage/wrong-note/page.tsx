@@ -1,4 +1,4 @@
-import { WrongNoteScreen } from '@/components/wrong-note/WrongNoteScreen';
+import { WrongNoteScreen } from '@/components/wrong-note/list/WrongNoteScreen';
 
 export default function WrongNotePage() {
   return (

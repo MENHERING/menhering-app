@@ -32,6 +32,7 @@ export interface WrongNoteItem {
   options: WrongNoteOption[];
   reviewStatus: ReviewStatus;
   daysAgo: string;
+  explanation: string;
 }
 
 export interface WrongNoteStats {
