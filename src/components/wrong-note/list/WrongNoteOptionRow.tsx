@@ -1,9 +1,7 @@
-import { Check, X } from 'lucide-react';
-
+import { WrongNoteAnswerMark } from '@/components/wrong-note/WrongNoteAnswerMark';
+import { OPTION_SYMBOLS } from '@/constants/wrong-note';
 import { cn } from '@/lib/cn';
 import type { OptionState, WrongNoteOption } from '@/types/wrong-note';
-
-const OPTION_SYMBOLS = ['①', '②', '③', '④'];
 
 const OPTION_ROW_BG: Record<OptionState, string> = {
   my_wrong: 'bg-answer-wrong-soft',
@@ -34,16 +32,7 @@ export function WrongNoteOptionRow({ option }: WrongNoteOptionRowProps) {
       >
         {option.text}
       </span>
-      {option.state === 'my_wrong' && (
-        <span className="text-answer-wrong flex shrink-0 items-center gap-1 text-[10px] leading-none font-bold">
-          <X className="size-3" strokeWidth={3} aria-hidden /> 내 답
-        </span>
-      )}
-      {option.state === 'correct' && (
-        <span className="text-answer-correct flex shrink-0 items-center gap-1 text-[10px] leading-none font-bold">
-          <Check className="size-3" strokeWidth={3} aria-hidden /> 정답
-        </span>
-      )}
+      <WrongNoteAnswerMark state={option.state} />
     </div>
   );
 }
