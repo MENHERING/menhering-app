@@ -76,6 +76,9 @@
   --correct: #22c55e;
   --wrong: #ef4444;
 
+  /* 행복도 게이지 — 멘헤라(우울) 톤 */
+  --mood-sad: #7b86d9;
+
   /* 퀴즈 오답 노트 — 결과 화면 */
   --mascot-glow-start: #a8e6cf;
   --mascot-glow-end: #4db6ac;
@@ -156,6 +159,7 @@
   --color-locked-icon: var(--locked-icon);
   --color-correct: var(--correct);
   --color-wrong: var(--wrong);
+  --color-mood-sad: var(--mood-sad);
 
   /* 퀴즈 오답 노트 — 결과 화면 */
   --color-mascot-glow-start: var(--mascot-glow-start);
