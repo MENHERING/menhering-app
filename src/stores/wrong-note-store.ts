@@ -8,6 +8,7 @@ interface WrongNoteState {
   firstTryCorrectMap: Record<string, boolean>;
   markReviewed: (id: string) => void;
   recordSolveResult: (id: string, isFirstTryCorrect: boolean) => void;
+  resetSolveResults: () => void;
 }
 
 export const useWrongNoteStore = create<WrongNoteState>((set) => ({
@@ -26,4 +27,7 @@ export const useWrongNoteStore = create<WrongNoteState>((set) => ({
     set((state) => ({
       firstTryCorrectMap: { ...state.firstTryCorrectMap, [id]: isFirstTryCorrect },
     })),
+
+  // 새 배치 시작 시 이전 풀이 기록이 이번 결과 집계에 섞이지 않도록 초기화
+  resetSolveResults: () => set({ firstTryCorrectMap: {} }),
 }));

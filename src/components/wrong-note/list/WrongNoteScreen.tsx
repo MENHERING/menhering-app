@@ -16,6 +16,7 @@ import type { WrongNoteFilter, WrongNoteStats, WrongNoteSubject } from '@/types/
 export function WrongNoteScreen() {
   const router = useRouter();
   const items = useWrongNoteStore((state) => state.items);
+  const resetSolveResults = useWrongNoteStore((state) => state.resetSolveResults);
   const [activeFilter, setActiveFilter] = useState<WrongNoteFilter>('all');
 
   const subjects = useMemo<WrongNoteSubject[]>(
@@ -47,6 +48,7 @@ export function WrongNoteScreen() {
   const handleSolveUnreviewed = () => {
     const [firstId] = unreviewedIds;
     if (!firstId) return;
+    resetSolveResults();
     router.push(
       `/mypage/wrong-note/${firstId}?mode=batch&queue=${unreviewedIds.join(',')}&index=0`,
     );
