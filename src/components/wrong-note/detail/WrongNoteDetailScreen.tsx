@@ -47,8 +47,12 @@ export function WrongNoteDetailScreen({
   const handleSelect = (number: number) => {
     if (isAnswered) return;
     setSelectedNumber(number);
-    markReviewed(item.id);
-    recordSolveResult(item.id, number === correctNumber);
+    const isFirstTryCorrect = number === correctNumber;
+    // 정답을 맞혔을 때만 복습 완료로 처리하고, 틀리면 미복습 상태를 유지해 다시 풀 수 있게 한다.
+    if (isFirstTryCorrect) {
+      markReviewed(item.id);
+    }
+    recordSolveResult(item.id, isFirstTryCorrect);
   };
 
   // 선택 즉시 정답 위치와 내가 고른 오답을 함께 보여준다.
@@ -70,7 +74,7 @@ export function WrongNoteDetailScreen({
       {isBatchMode && <WrongNoteProgressBar current={current} total={total} />}
       <main className="flex-1 p-4 pb-8">
         <Section className="shadow-card flex flex-col gap-4 p-4">
-          <WrongNoteSubjectTags subject={item.subject} topic={item.topic} />
+          <WrongNoteSubjectTags subject={item.subject} />
           <p className="text-brown-ink text-[15px] leading-[22px] font-bold">{item.question}</p>
         </Section>
 

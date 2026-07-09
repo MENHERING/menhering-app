@@ -21,7 +21,7 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
   return (
     <Section className="shadow-card p-4">
       <div className="flex items-center justify-between">
-        <WrongNoteSubjectTags subject={item.subject} topic={item.topic} />
+        <WrongNoteSubjectTags subject={item.subject} />
         <span className="text-brown-muted text-[10px] leading-[15px]">{item.daysAgo}</span>
       </div>
 
