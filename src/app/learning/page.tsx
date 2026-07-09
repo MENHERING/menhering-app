@@ -56,23 +56,36 @@ export default function LearningPage() {
           xp={MOCK_USER_PROGRESS.xp}
           avatarSrc={MOCK_USER_PROGRESS.avatarSrc}
         />
-        <CurriculumBar
-          level={selectedCurriculum.level}
-          title={selectedCurriculum.title}
-          clearedCount={selectedCurriculum.clearedCount}
-          totalCount={selectedCurriculum.totalCount}
-          isDropdownOpen={isDropdownOpen}
-          onTogglePress={() => setIsDropdownOpen((prev) => !prev)}
-          onStatsPress={() => router.push(ROUTES.RANKING)}
-        />
-        {isDropdownOpen && (
-          <CurriculumDropdown
-            curricula={MOCK_CURRICULA}
-            myStep={myStep}
-            selectedId={selectedCurriculumId}
-            onSelect={handleSelectCurriculum}
+        <div className="relative">
+          <CurriculumBar
+            level={selectedCurriculum.level}
+            title={selectedCurriculum.title}
+            clearedCount={selectedCurriculum.clearedCount}
+            totalCount={selectedCurriculum.totalCount}
+            isDropdownOpen={isDropdownOpen}
+            onTogglePress={() => setIsDropdownOpen((prev) => !prev)}
+            onStatsPress={() => router.push(ROUTES.RANKING)}
           />
-        )}
+          {isDropdownOpen && (
+            <>
+              {/* 바깥 영역 탭하면 닫히는 투명 오버레이 */}
+              <button
+                type="button"
+                aria-label="난이도 목록 닫기"
+                onClick={() => setIsDropdownOpen(false)}
+                className="fixed inset-0 z-10"
+              />
+              <div className="absolute inset-x-0 top-full z-20">
+                <CurriculumDropdown
+                  curricula={MOCK_CURRICULA}
+                  myStep={myStep}
+                  selectedId={selectedCurriculumId}
+                  onSelect={handleSelectCurriculum}
+                />
+              </div>
+            </>
+          )}
+        </div>
         <LessonRoadmap
           lessons={lessons}
           level={selectedCurriculum.level}
