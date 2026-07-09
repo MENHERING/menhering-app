@@ -82,6 +82,17 @@
   /* 퀴즈 오답 노트 — 결과 화면 */
   --mascot-glow-start: #a8e6cf;
   --mascot-glow-end: #4db6ac;
+
+  /* 마이페이지 — 설정·로그아웃 */
+  --settings-row-border: #f9fafb;
+  --settings-icon-sound: #424242;
+  --settings-icon-music: #f5f5f5;
+  --settings-icon-dark: #1a237e;
+  --logout-overlay: rgba(139, 115, 85, 0.6);
+  --logout-danger: #c0392b;
+  --logout-cancel-text: #4a5565;
+  --sheet-handle: #d1d5dc;
+  --sheet-cancel-border: #e5e7eb;
 }
 
 @theme inline {
@@ -164,6 +175,17 @@
   /* 퀴즈 오답 노트 — 결과 화면 */
   --color-mascot-glow-start: var(--mascot-glow-start);
   --color-mascot-glow-end: var(--mascot-glow-end);
+
+  /* 마이페이지 — 설정·로그아웃 */
+  --color-settings-row-border: var(--settings-row-border);
+  --color-settings-icon-sound: var(--settings-icon-sound);
+  --color-settings-icon-music: var(--settings-icon-music);
+  --color-settings-icon-dark: var(--settings-icon-dark);
+  --color-logout-overlay: var(--logout-overlay);
+  --color-logout-danger: var(--logout-danger);
+  --color-logout-cancel-text: var(--logout-cancel-text);
+  --color-sheet-handle: var(--sheet-handle);
+  --color-sheet-cancel-border: var(--sheet-cancel-border);
 
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;

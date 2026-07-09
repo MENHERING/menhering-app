@@ -10,6 +10,7 @@ import { Header } from '@/components/common/Header';
 import { WrongNoteCard } from '@/components/wrong-note/list/WrongNoteCard';
 import { WrongNoteFilterBar } from '@/components/wrong-note/list/WrongNoteFilterBar';
 import { WrongNoteStatsRow } from '@/components/wrong-note/list/WrongNoteStatsRow';
+import { ROUTES } from '@/constants/routes';
 import { useWrongNoteStore } from '@/stores/wrong-note-store';
 import type { WrongNoteFilter, WrongNoteStats, WrongNoteSubject } from '@/types/wrong-note';
 
@@ -56,7 +57,7 @@ export function WrongNoteScreen() {
 
   return (
     <>
-      <Header title="오답 노트" leftType="back" onLeftPress={() => router.back()} />
+      <Header title="오답 노트" leftType="back" onLeftPress={() => router.push(ROUTES.MYPAGE)} />
       <main className="flex-1 pb-6">
         <WrongNoteStatsRow stats={stats} />
         <WrongNoteFilterBar
