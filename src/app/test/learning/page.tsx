@@ -5,12 +5,17 @@ import { notFound } from 'next/navigation';
 import { LessonNode } from '@/components/learning/LessonNode';
 import { LessonStartCard } from '@/components/learning/LessonStartCard';
 import { UserStatusBar } from '@/components/learning/UserStatusBar';
-import { MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
+import { MOCK_CURRICULA, MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
 
 export default function TestLearningPage() {
   if (process.env.NODE_ENV !== 'development') notFound();
 
-  const currentLesson = MOCK_LESSONS.find((lesson) => lesson.status === 'current')!;
+  const currentCurriculum = MOCK_CURRICULA[1];
+  const currentLesson = MOCK_LESSONS.find(
+    (lesson) =>
+      lesson.curriculumId === currentCurriculum.id &&
+      lesson.order === currentCurriculum.clearedCount + 1,
+  )!;
 
   return (
     <main className="flex min-h-screen flex-col gap-8 bg-gray-50 px-4 py-16">

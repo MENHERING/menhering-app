@@ -2,10 +2,10 @@ import { LessonNode } from '@/components/learning/LessonNode';
 import { LessonStartCard } from '@/components/learning/LessonStartCard';
 import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
 import { RoadPath } from '@/components/learning/RoadPath';
-import type { Lesson } from '@/types/lesson';
+import type { LessonWithStatus } from '@/types/lesson';
 
 interface LessonRoadmapProps {
-  lessons: Lesson[];
+  lessons: LessonWithStatus[];
   level: string;
   selectedLessonId: string | null;
   onSelectLesson: (lessonId: string) => void;
