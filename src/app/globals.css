@@ -3,9 +3,6 @@
 @source '../**/*.{ts,tsx}';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-
   /* 배경 */
   --sand: #f7ede0;
   --sand-line: #f0ede8;
@@ -15,8 +12,6 @@
   --primary: #d4537e;
   --primary-soft: #f4c0d1;
   --plum: #4b1528;
-  --accent-green: #97c459;
-  --accent-magenta: #993556;
 
   --coral: #e8563a;
   --coral-dark: #d24a30;
@@ -52,6 +47,16 @@
   --note-line: #e0d6cf;
   --coral-tint: #fff0ed;
 
+  /* 퀴즈 오답 노트 — 다시 풀기(상세) 화면 */
+  --answer-wrong-badge: #ffd0ca;
+  --answer-correct-badge: #c8e6c9;
+  --answer-neutral-border: #e0e0e0;
+  --explain-surface-start: #f0faf1;
+  --explain-surface-end: #e4f5e6;
+  --explain-title: #2e7d32;
+  --explain-subtitle: #66bb6a;
+  --explain-body: #3a4f3b;
+
   /* 과목 라벨 */
   --subject-html-surface: #fff3e0;
   --subject-html: #e65100;
@@ -70,19 +75,19 @@
   /* 퀴즈 정답/오답 표시 */
   --correct: #22c55e;
   --wrong: #ef4444;
+
+  /* 퀴즈 오답 노트 — 결과 화면 */
+  --mascot-glow-start: #a8e6cf;
+  --mascot-glow-end: #4db6ac;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --color-sand: var(--sand);
   --color-sand-line: var(--sand-line);
   --color-cream: var(--cream);
   --color-primary: var(--primary);
   --color-primary-soft: var(--primary-soft);
   --color-plum: var(--plum);
-  --color-accent-green: var(--accent-green);
-  --color-accent-magenta: var(--accent-magenta);
   --color-coral: var(--coral);
   --color-coral-dark: var(--coral-dark);
   --color-coral-soft: var(--coral-soft);
@@ -116,6 +121,16 @@
   --color-note-line: var(--note-line);
   --color-coral-tint: var(--coral-tint);
 
+  /* 퀴즈 오답 노트 — 다시 풀기(상세) 화면 */
+  --color-answer-wrong-badge: var(--answer-wrong-badge);
+  --color-answer-correct-badge: var(--answer-correct-badge);
+  --color-answer-neutral-border: var(--answer-neutral-border);
+  --color-explain-surface-start: var(--explain-surface-start);
+  --color-explain-surface-end: var(--explain-surface-end);
+  --color-explain-title: var(--explain-title);
+  --color-explain-subtitle: var(--explain-subtitle);
+  --color-explain-body: var(--explain-body);
+
   /* 과목 라벨 */
   --color-subject-html-surface: var(--subject-html-surface);
   --color-subject-html: var(--subject-html);
@@ -128,17 +143,60 @@
 
   --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
+  /* 퀴즈 오답 노트 — 다시 풀기(상세) 화면 */
+  --shadow-explain-badge: 0 2px 3px rgba(76, 175, 80, 0.35);
+  --shadow-toast-correct: 0 10px 24px rgba(76, 175, 80, 0.4);
+  --shadow-toast-wrong: 0 10px 24px rgba(232, 114, 90, 0.45);
+
+  /* 퀴즈 오답 노트 — 결과 화면 */
+  --drop-shadow-mascot: 0 10px 7.5px rgba(0, 0, 0, 0.1);
+
   --color-gold: var(--gold);
   --color-locked: var(--locked);
   --color-locked-icon: var(--locked-icon);
   --color-correct: var(--correct);
   --color-wrong: var(--wrong);
 
+  /* 퀴즈 오답 노트 — 결과 화면 */
+  --color-mascot-glow-start: var(--mascot-glow-start);
+  --color-mascot-glow-end: var(--mascot-glow-end);
+
   --font-sans:
     'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono);
 
   --shadow-custom: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+
+  /* 오답 노트 결과 토스트 등장 모션 */
+  --animate-rise-in: rise-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  /* 오답 노트 결과 화면 반짝임 모션 */
+  --animate-sparkle-shine: sparkle-shine 1.8s ease-in-out infinite;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sparkle-shine {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.8) rotate(0deg);
+    filter: drop-shadow(0 0 0 var(--gold));
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15) rotate(8deg);
+    filter: drop-shadow(0 0 6px var(--gold));
+  }
 }
 
 /* 라이트 고정 (#16). TODO: 다크모드 도입 시 :root 다크 오버라이드 복원 (참고 #20) */

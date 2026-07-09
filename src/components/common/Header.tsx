@@ -27,9 +27,9 @@ export function Header({
             type="button"
             onClick={onLeftPress}
             aria-label="뒤로가기"
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white"
           >
-            <ChevronLeft size={24} className="text-ink" />
+            <ChevronLeft size={22} className="text-ink" />
           </button>
         )}
       </div>
@@ -42,8 +42,13 @@ export function Header({
       <div className="flex items-center gap-2">
         {rightElement}
         {rightType === 'close' && (
-          <button type="button" onClick={onRightPress} aria-label="닫기">
-            <X size={24} className="text-ink" />
+          <button
+            type="button"
+            onClick={onRightPress}
+            aria-label="닫기"
+            className="rounded-full bg-white p-1.25"
+          >
+            <X size={22} className="text-ink" />
           </button>
         )}
       </div>
