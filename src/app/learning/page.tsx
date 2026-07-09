@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
@@ -18,11 +18,19 @@ export default function LearningPage() {
   const router = useRouter();
   const myStep = useUserLevelStore((state) => state.step);
 
-  // 기본 선택 커리큘럼은 내 레벨과 같은 난이도
-  const [selectedCurriculumId, setSelectedCurriculumId] = useState(
-    () =>
-      MOCK_CURRICULA.find((curriculum) => curriculum.step === myStep)?.id ?? MOCK_CURRICULA[0].id,
-  );
+  const defaultCurriculumId =
+    MOCK_CURRICULA.find((curriculum) => curriculum.step === myStep)?.id ?? MOCK_CURRICULA[0].id;
+
+  // 기본 선택 커리큘럼은 내 레벨과 같은 난이도. 온보딩을 다시 거쳐 내 레벨(myStep)이
+  // 바뀌면 렌더 중에 override를 리셋해 새 레벨의 커리큘럼을 다시 기본값으로 보여준다.
+  const [lastSyncedStep, setLastSyncedStep] = useState(myStep);
+  const [curriculumOverrideId, setCurriculumOverrideId] = useState<string | null>(null);
+  if (myStep !== lastSyncedStep) {
+    setLastSyncedStep(myStep);
+    setCurriculumOverrideId(null);
+  }
+  const selectedCurriculumId = curriculumOverrideId ?? defaultCurriculumId;
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // 이슈 스펙대로 진입 시에는 카드가 닫혀 있고, 현재 스테이지 노드를 탭해야 열린다.
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
@@ -38,12 +46,24 @@ export default function LearningPage() {
     }),
   );
 
+  // 드롭다운이 열려 있을 때 Esc로도 닫을 수 있게 한다.
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsDropdownOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isDropdownOpen]);
+
   const handleSelectLesson = (lessonId: string) => {
     setSelectedLessonId((prev) => (prev === lessonId ? null : lessonId));
   };
 
   const handleSelectCurriculum = (curriculumId: string) => {
-    setSelectedCurriculumId(curriculumId);
+    setCurriculumOverrideId(curriculumId);
     setSelectedLessonId(null);
     setIsDropdownOpen(false);
   };

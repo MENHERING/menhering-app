@@ -28,13 +28,15 @@ export function LessonRoadmap({
 }: LessonRoadmapProps) {
   const selectedIndex = lessons.findIndex((lesson) => lesson.id === selectedLessonId);
   const selectedLesson = selectedIndex === -1 ? null : lessons[selectedIndex];
-  const currentNodeRef = useRef<HTMLDivElement>(null);
-  const currentLessonId = lessons.find((lesson) => lesson.status === 'current')?.id;
+  const scrollTargetRef = useRef<HTMLDivElement>(null);
+  // 커리큘럼을 다 클리어해 "현재" 스테이지가 없는 경우엔 마지막 스테이지로 스크롤한다.
+  const scrollTargetId =
+    lessons.find((lesson) => lesson.status === 'current')?.id ?? lessons.at(-1)?.id;
 
   // 스테이지 수가 늘어나도 진입 시 항상 "지금 내 위치"부터 보이게 스크롤한다.
   useEffect(() => {
-    currentNodeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [currentLessonId]);
+    scrollTargetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [scrollTargetId]);
 
   return (
     <div className="relative flex flex-col items-center gap-20 py-8">
@@ -46,7 +48,7 @@ export function LessonRoadmap({
         return (
           <div
             key={lesson.id}
-            ref={isCurrent ? currentNodeRef : undefined}
+            ref={lesson.id === scrollTargetId ? scrollTargetRef : undefined}
             className="relative"
             style={{ transform: `translateX(${offset}px)` }}
           >

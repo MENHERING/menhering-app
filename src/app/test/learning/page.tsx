@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import { LessonNode } from '@/components/learning/LessonNode';
 import { LessonStartCard } from '@/components/learning/LessonStartCard';
 import { UserStatusBar } from '@/components/learning/UserStatusBar';
+import { getLessonStatus } from '@/lib/curriculum-lock';
 import { MOCK_CURRICULA, MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
 
 export default function TestLearningPage() {
@@ -16,6 +17,10 @@ export default function TestLearningPage() {
       lesson.curriculumId === currentCurriculum.id &&
       lesson.order === currentCurriculum.clearedCount + 1,
   )!;
+  const currentLessonWithStatus = {
+    ...currentLesson,
+    status: getLessonStatus(currentLesson.order, currentCurriculum.clearedCount),
+  };
 
   return (
     <main className="flex min-h-screen flex-col gap-8 bg-gray-50 px-4 py-16">
@@ -34,7 +39,7 @@ export default function TestLearningPage() {
       </div>
 
       {/* case 03: LessonStartCard */}
-      <LessonStartCard level="초급" lesson={currentLesson} pointerAlign="right" />
+      <LessonStartCard level="초급" lesson={currentLessonWithStatus} pointerAlign="right" />
     </main>
   );
 }
