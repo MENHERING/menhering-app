@@ -5,6 +5,7 @@ import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';
 
 // 아바타 탭의 편집(draft) 상태. 실제 저장은 Server Action이 담당하고,
 // 이 스토어는 "저장하기" 전까지의 UI 임시 상태만 관리한다.
+// 감정(mood)은 편집값이 아니라 서버 파생값이라 avatar-status-store에 따로 둔다.
 interface AvatarState {
   characterType: CharacterType;
   colorTheme: ColorTheme;
