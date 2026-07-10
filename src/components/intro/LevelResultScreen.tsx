@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
-import { LEVELS } from '@/components/intro/LevelSelectScreen';
+import { LEVELS } from '@/constants/levels';
 import { cn } from '@/lib/cn';
 
 interface LevelResultScreenProps {
