@@ -25,9 +25,11 @@ import sharp from 'sharp';
 const CORE_SRC = 'public/live2d/core/live2dcubismcore.min.js';
 const MOC = 'public/live2d/redpanda/menhering.moc3';
 const TEXTURE = 'public/live2d/redpanda/menhering.4096/texture_00.png';
+const TINT_DRAWABLES_JSON = 'src/constants/live2d-tint-drawables.json';
 
-// Live2DCharacter의 BODY_TINT_DRAWABLES와 반드시 같아야 한다.
-const FUR_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
+// 런타임(Live2DCharacter의 BODY_TINT_DRAWABLES)과 **같은 파일**을 읽는다.
+// 손으로 복사해두면 재리깅 때 한쪽만 고쳐져, 틴트는 되는데 회색화가 안 된 부위가 갈색으로 뜬다.
+const FUR_DRAWABLES = new Set(JSON.parse(readFileSync(TINT_DRAWABLES_JSON, 'utf8')));
 
 // Photopea "Desaturate"와 같은 HSL 명도 (max+min)/2 를 쓴 뒤, Levels 흰점을 여기로 올린다.
 // 표준 휘도(0.2126R+0.7152G+0.0722B)를 쓰면 진빨강이 거의 검정이 돼 곱하기 결과가 새까매진다.

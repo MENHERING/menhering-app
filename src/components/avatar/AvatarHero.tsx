@@ -23,6 +23,8 @@ interface AvatarHeroProps {
   colorTheme: ColorTheme;
   /** 감정 상태 → Live2D 표정 + 만화적 심볼·기운 배경. SVG 폴백에는 기운 배경만 반영된다. */
   mood?: Mood;
+  /** false면 Live2D 털에 테마색을 곱하지 않고 원본 텍스처 색으로 렌더(검증용). 기본 true. */
+  tinted?: boolean;
   /** SVG 렌더 시 크기(Tailwind). 예: "size-32" */
   className?: string;
   /** Live2D 캔버스 한 변 픽셀. 기본 128. */
@@ -39,6 +41,7 @@ export function AvatarHero({
   characterType,
   colorTheme,
   mood,
+  tinted,
   className,
   size = 128,
   title,
@@ -70,6 +73,7 @@ export function AvatarHero({
           modelUrl={spec.live2d.modelUrl}
           colorTheme={colorTheme}
           mood={mood}
+          tinted={tinted}
           size={size}
           interactive
           className={className}

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
+import bodyTintDrawableIds from '@/constants/live2d-tint-drawables.json';
 import {
   EXPRESSION_KEYS,
   getMoodExpression,
@@ -44,8 +45,11 @@ interface CubismCoreModel {
 // 테마 body색을 곱할 드로어블(재리깅으로 크림과 분리됨). 나머지는 흰색(1,1,1)으로 덮어써
 // 원본 텍스처 색을 유지한다. 눈은 통짜 드로어블(eye_L/eye_R)이라 여기 넣으면 눈동자·흰
 // 반짝이까지 다 물든다 → 제외(고정). 반사광만 테마색 하려면 눈을 base/reflection으로 분리
-// 재리깅한 뒤 reflection 드로어블 id를 여기 추가한다.
-const BODY_TINT_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
+// 재리깅한 뒤 reflection 드로어블 id를 여기(=JSON)에 추가한다.
+//
+// 목록을 JSON에 둔 이유: scripts/desaturate-fur.mjs가 **같은 목록**으로 텍스처를 회색화해야 한다.
+// 둘이 어긋나면 틴트는 되지만 회색화가 안 된 부위가 생겨 탁한 갈색으로 렌더된다.
+const BODY_TINT_DRAWABLES = new Set<string>(bodyTintDrawableIds);
 
 // pixi Application/WebGL 컨텍스트를 페이지 세션 내내 하나만 두고 재사용한다.
 // 컨텍스트를 파괴·재생성하면 플러그인(Cubism)의 셰이더·마스크가 첫 컨텍스트에 묶인 채 orphan돼,
