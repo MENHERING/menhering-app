@@ -14,6 +14,7 @@ Next.js (App Router) · TypeScript · Tailwind CSS · Zustand · Supabase · ESL
 - @.agents/code-style-convention/SKILLS.md — 네이밍·컴포넌트·TypeScript·스타일·import·주석
 - @.agents/structure-convention/SKILLS.md — `src/` 디렉토리 구조·역할
 - @.agents/supabase-convention/SKILLS.md — Supabase 환경변수·클라이언트·RLS
+- @.agents/api-convention/SKILLS.md — TanStack Query·API client(public/private)·query key·Zod 스키마
 
 ## 핵심 규칙 요약
 
