@@ -68,7 +68,8 @@ const eslintConfig = defineConfig([
   },
 
   // Override default ignores of eslint-config-next.
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  // public/**: 정적 에셋·vendored 런타임(예: live2dcubismcore.min.js)은 린트 대상 아님(.prettierignore와 동일 정책).
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'public/**']),
 ]);
 
 export default eslintConfig;

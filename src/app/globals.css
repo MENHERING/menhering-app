@@ -232,3 +232,22 @@ body {
   color: var(--plum);
   font-family: var(--font-sans);
 }
+
+/* 아바타 탭 반응 — 하트가 살짝 솟았다 커지며 사라진다(Live2DCharacter 오버레이). */
+@keyframes heart-float {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.4);
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-56px) scale(1);
+  }
+}
+
+.animate-heart-float {
+  animation: heart-float 1s ease-out forwards;
+}

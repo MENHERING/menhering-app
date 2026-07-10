@@ -1,11 +1,15 @@
 'use client';
 
-import { BookOpen, Home, Shirt, UserRound, type LucideIcon } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState, type MouseEvent } from 'react';
 
+import { BookOpen, Home, Shirt, TriangleAlert, UserRound, type LucideIcon } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+
+import { ConfirmModal } from '@/components/common/ConfirmModal';
 import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
+import { useUnsavedChangesStore } from '@/stores/unsaved-changes-store';
 
 interface NavItem {
   label: string;
@@ -48,45 +52,94 @@ interface FooterProps {
  */
 export function Footer({ className }: FooterProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // 이탈 확인 모달로 이동할 목적지(대기 중인 href). null이면 모달 닫힘.
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  // 미저장 변경이 있는 화면(예: 아바타 탭)에서 다른 탭으로 이동 시 이탈 경고.
+  // 현재 탭(활성) 재클릭은 이탈이 아니므로 통과한다.
+  const handleNavClick = (
+    event: MouseEvent<HTMLAnchorElement>,
+    isActive: boolean,
+    href: string,
+  ) => {
+    if (isActive) return;
+    if (!useUnsavedChangesStore.getState().hasUnsavedChanges) return;
+
+    // 미저장 변경이 있으면 기본 이동을 막고(Link는 defaultPrevented면 내비게이션을 건너뜀),
+    // 네이티브 confirm 대신 공용 모달로 물어본다. 확정 시 프로그래매틱 이동한다.
+    event.preventDefault();
+    setPendingHref(href);
+  };
+
+  const handleConfirmLeave = () => {
+    const href = pendingHref;
+    setPendingHref(null);
+
+    // 나가기로 확정 → 플래그는 여기서 선제 해제하지 않는다.
+    // AvatarClient 언마운트 cleanup이 해제하므로, 이동이 완료되면 자연히 꺼진다.
+    if (href) router.push(href);
+  };
+
+  const handleCancelLeave = () => setPendingHref(null);
 
   return (
-    <nav
-      aria-label="하단 탭 내비게이션"
-      className={cn(
-        // TODO: 다크모드 도입 시 `dark:border-neutral-800 dark:bg-neutral-900` 추가
-        'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[env(safe-area-inset-bottom)]',
-        className,
-      )}
-    >
-      {NAV_ITEMS.map(({ label, href, Icon }) => {
-        const active = isActiveTab(pathname, href);
+    <>
+      <nav
+        aria-label="하단 탭 내비게이션"
+        className={cn(
+          // TODO: 다크모드 도입 시 `dark:border-neutral-800 dark:bg-neutral-900` 추가
+          'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[env(safe-area-inset-bottom)]',
+          className,
+        )}
+      >
+        {NAV_ITEMS.map(({ label, href, Icon }) => {
+          const active = isActiveTab(pathname, href);
 
-        return (
-          <Link
-            key={href}
-            href={href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'flex flex-col items-center gap-1 py-1.5 text-xs font-bold transition-colors',
-              // 탭 누르는 순간 피드백(모바일 탭 하이라이트)
-              'active:opacity-70',
-              // TODO: 다크모드 도입 시 비활성 탭 `dark:text-neutral-400`
-              active ? 'text-coral' : 'text-brown-soft',
-            )}
-          >
-            <span
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={(event) => handleNavClick(event, active, href)}
+              aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex size-8 items-center justify-center rounded-full transition-colors',
-                // TODO: 다크모드 도입 시 활성 탭 원형 배경 `dark:bg-coral/20`
-                active && 'bg-coral-soft',
+                'flex flex-col items-center gap-1 py-1.5 text-xs font-bold transition-colors',
+                // 탭 누르는 순간 피드백(모바일 탭 하이라이트)
+                'active:opacity-70',
+                // TODO: 다크모드 도입 시 비활성 탭 `dark:text-neutral-400`
+                active ? 'text-coral' : 'text-brown-soft',
               )}
             >
-              <Icon className="h-5 w-5" aria-hidden />
-            </span>
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
+              <span
+                className={cn(
+                  'flex size-8 items-center justify-center rounded-full transition-colors',
+                  // TODO: 다크모드 도입 시 활성 탭 원형 배경 `dark:bg-coral/20`
+                  active && 'bg-coral-soft',
+                )}
+              >
+                <Icon className="h-5 w-5" aria-hidden />
+              </span>
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <ConfirmModal
+        isOpen={pendingHref !== null}
+        icon={
+          <span className="bg-coral-soft/40 flex size-14 items-center justify-center rounded-full">
+            <TriangleAlert className="text-coral size-7" aria-hidden />
+          </span>
+        }
+        title="저장하지 않은 변경이 있어요"
+        description="지금 나가면 변경사항이 사라져요."
+        confirmLabel="나가기"
+        cancelLabel="계속 편집"
+        onConfirm={handleConfirmLeave}
+        onCancel={handleCancelLeave}
+      />
+    </>
   );
 }
