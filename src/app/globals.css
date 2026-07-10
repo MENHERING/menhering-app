@@ -34,6 +34,25 @@
 
   --brown-soft: #c27a5a;
 
+  /* 아바타 감정 심볼(MoodSymbol) 채움색.
+     `--*-soft` 토큰은 어두운 글자 뒤에 까는 연한 배경색이라 채도가 낮다 → 심볼 채움에 쓰면
+     색이 안 읽힌다(blue-soft #d2d4ee는 파랑이 아니라 페리윙클이라 보라로 보였음). 별도로 둔다. */
+  --tear: #6cc0ec;
+  /* 캐릭터 뒤에 깔리는 감정 기운(MoodBackdrop). 우울=가라앉은 청색, 지침=탈진한 무채색,
+     화남=달아오른 붉은기, 행복=화사한 분홍. 보통만 기운이 없다(대비의 기준선). */
+  --aura-blue: #4f74ad;
+  --aura-ink: #33333d;
+  --aura-red: #a8362a;
+  --aura-pink: #e8709e;
+
+  /* 화남 심볼의 만화적 핏줄(💢). 빨간 털 위에 얹히므로 plum 밑선과 함께 써야 읽힌다. */
+  --vein: #e0392b;
+
+  /* 행복 심볼의 하트. 위→아래 그라데이션이라 단색보다 입체적이다.
+     브랜드 분홍(--primary #d4537e)은 탁한 로즈라 하트로 쓰면 칙칙하다 → 붉은 계열로 따로 둔다. */
+  --heart-light: #ff7a8a;
+  --heart-deep: #d81e4a;
+
   /* 퀴즈 오답 노트 — 보기 상태 */
   --answer-wrong-soft: #ffebee;
   --answer-wrong: #e57373;
@@ -108,6 +127,14 @@
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
+  --color-tear: var(--tear);
+  --color-aura-blue: var(--aura-blue);
+  --color-aura-ink: var(--aura-ink);
+  --color-aura-red: var(--aura-red);
+  --color-aura-pink: var(--aura-pink);
+  --color-vein: var(--vein);
+  --color-heart-light: var(--heart-light);
+  --color-heart-deep: var(--heart-deep);
 
   --color-brown-ink: var(--brown-ink);
   --color-brown-muted: var(--brown-muted);
@@ -250,4 +277,87 @@ body {
 
 .animate-heart-float {
   animation: heart-float 1s ease-out forwards;
+}
+
+/* 아바타 감정 심볼(우울) — 눈물이 눈가에 맺혔다 볼을 타고 흘러내린다(MoodSymbol 오버레이). */
+@keyframes tear-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.35);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(85%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(130%) scale(0.85);
+  }
+}
+
+.animate-tear-drop {
+  animation: tear-drop 2.6s ease-in infinite;
+}
+
+/* 아바타 감정 심볼(지침) — 이마 위 세로 음영선이 느리게 짙어졌다 옅어진다(축 처진 느낌). */
+@keyframes weary-lines {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.animate-weary-lines {
+  animation: weary-lines 2.8s ease-in-out infinite;
+}
+
+/* 아바타 감정 심볼(화남) — 핏줄이 관자놀이처럼 욱신거린다. */
+@keyframes vein-pulse {
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+}
+
+.animate-vein-pulse {
+  animation: vein-pulse 1.1s ease-in-out infinite;
+}
+
+/* 아바타 감정 심볼(행복) — 얼굴 양옆 하트가 살짝 떠올랐다 내려온다.
+   탭 반응 하트(animate-heart-float)는 솟아올라 사라지는 1회성이라 별개다. */
+@keyframes heart-bob {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-12%) scale(1.09);
+  }
+}
+
+.animate-heart-bob {
+  animation: heart-bob 1.9s ease-in-out infinite;
+}
+
+/* 감정 심볼은 장식이 아니라 정보(mood)를 전달하므로, 동작 줄이기에서도 숨기지 않는다.
+   애니메이션만 끄고 심볼 자체는 정지 상태로 남긴다(해칭은 요소의 opacity-80이 그대로 적용됨). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-tear-drop,
+  .animate-weary-lines,
+  .animate-vein-pulse,
+  .animate-heart-bob {
+    animation: none;
+  }
 }

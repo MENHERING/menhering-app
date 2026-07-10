@@ -4,7 +4,11 @@ import { useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
+import { MoodBackdrop } from '@/components/avatar/MoodBackdrop';
+import { MoodSymbol } from '@/components/avatar/MoodSymbol';
 import { COLOR_THEMES, getThemeRoles } from '@/constants/avatar';
+import { CHARACTER_REGISTRY } from '@/constants/character-registry';
+import { MOOD_EXPRESSION } from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
 import type { ColorTheme } from '@/types/avatar';
 import type { Mood } from '@/types/mypage/model';
@@ -15,9 +19,11 @@ const Live2DCharacter = dynamic(
   { ssr: false },
 );
 
-const MODEL_URL = '/live2d/redpanda/menhering.model3.json';
+// 모델 경로·심볼 앵커는 아바타 탭과 같은 출처(레지스트리)를 써야 POC가 실물과 어긋나지 않는다.
+const REDPANDA = CHARACTER_REGISTRY['레서판다'].live2d!;
 
-const MOODS: readonly Mood[] = ['행복', '보통', '우울', '지침', '화남'];
+// Mood 유니온을 손으로 다시 나열하면 감정이 추가돼도 타입 검사에 안 걸린다 → 상수 테이블에서 파생.
+const MOODS = Object.keys(MOOD_EXPRESSION) as Mood[];
 
 // A단계 검증 하네스: npm 번들(pixi + pixi-live2d-display) + 자체 호스팅 Cubism Core로
 // 우리 모델이 렌더·모션·틴트되는지 확인한다. 색은 아직 전체 틴트(B에서 부위별로 교체).
@@ -30,15 +36,21 @@ export function Live2dPoc() {
   return (
     <div className="flex flex-col items-center gap-4 py-8">
       <div className="bg-coral-soft/40 flex size-[360px] items-center justify-center rounded-3xl">
-        <Live2DCharacter
-          modelUrl={MODEL_URL}
-          colorTheme={theme}
-          mood={mood}
-          tinted={tinted}
-          size={320}
-          interactive
-          title="레서판다 Live2D"
-        />
+        {/* 심볼 오버레이가 캔버스 좌표를 기준으로 얹히도록 정사각 래퍼로 감싼다.
+            MoodBackdrop은 캐릭터보다 먼저(=뒤에), MoodSymbol은 나중에(=앞에) 그려진다. */}
+        <div className="relative">
+          <MoodBackdrop mood={mood} />
+          <Live2DCharacter
+            modelUrl={REDPANDA.modelUrl}
+            colorTheme={theme}
+            mood={mood}
+            tinted={tinted}
+            size={320}
+            interactive
+            title="레서판다 Live2D"
+          />
+          <MoodSymbol mood={mood} anchors={REDPANDA.moodAnchors} />
+        </div>
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
