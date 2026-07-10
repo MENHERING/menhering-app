@@ -2,6 +2,7 @@
 
 import { useId } from 'react';
 
+import { HeartShape } from '@/components/avatar/HeartShape';
 import type { MoodSymbolAnchors } from '@/constants/character-registry';
 import { cn } from '@/lib/cn';
 import type { Mood } from '@/types/mypage/model';
@@ -38,104 +39,88 @@ interface MoodSymbolProps {
   anchors: MoodSymbolAnchors;
 }
 
-interface HeartShapeProps {
-  /** SVG 그라데이션 id. 문서 전역이라 인스턴스마다 달라야 한다(useId로 생성). */
-  gradientId: string;
-}
-
-// 행복 하트. 좌우 두 개가 같은 모양이라 한 곳에 둔다.
-// 위(밝은 산호빛)→아래(진한 장미빛) 그라데이션이라 단색보다 입체적이다.
-function HeartShape({ gradientId }: HeartShapeProps) {
-  return (
-    <svg viewBox="0 0 24 24" className="size-full" aria-hidden focusable="false">
-      <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" className="[stop-color:var(--heart-light)]" />
-          <stop offset="1" className="[stop-color:var(--heart-deep)]" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M12 20.7 3.6 12.3a5 5 0 0 1 7.1-7L12 6.6l1.3-1.3a5 5 0 1 1 7.1 7L12 20.7Z"
-        fill={`url(#${gradientId})`}
-        className="stroke-plum"
-        strokeWidth={2.2}
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export function MoodSymbol({ mood, anchors }: MoodSymbolProps) {
   // 한 페이지에 아바타가 둘 이상 뜨면 고정 id가 중복돼, 두 하트가 모두 첫 인스턴스의
   // 그라데이션으로 칠해진다(문서 순서상 첫 정의가 이긴다). 인스턴스별 접두사로 막는다.
   // useId 결과에 콜론이 섞일 수 있어 지운다(url(#...) 참조 안전).
   const symbolId = useId().replace(/:/g, '');
 
-  if (mood === '행복') {
-    return (
-      <>
-        {/* 얼굴 양옆 배경에 뜬 하트. 좌우 위상을 엇갈리게 하면 늘 다른 높이에 떠서
-            짝이 안 맞아 보인다 → 같이 뛴다. */}
-        <span className={cn('animate-heart-bob', OVERLAY_BASE, anchors.heartLeft)}>
-          <HeartShape gradientId={`${symbolId}-heart-left`} />
+  if (!mood) return null;
+
+  // switch + never 가드: Mood에 감정이 추가되면 여기서 컴파일 에러가 난다.
+  // if 체인으로 두면 새 감정이 조용히 "심볼 없음"으로 렌더된다.
+  switch (mood) {
+    case '행복':
+      return (
+        <>
+          {/* 얼굴 양옆 배경에 뜬 하트. 좌우 위상을 엇갈리게 하면 늘 다른 높이에 떠서
+              짝이 안 맞아 보인다 → 같이 뛴다. */}
+          <span className={cn('animate-heart-bob', OVERLAY_BASE, anchors.heartLeft)}>
+            <HeartShape gradientId={`${symbolId}-heart-left`} />
+          </span>
+          <span className={cn('animate-heart-bob', OVERLAY_BASE, anchors.heartRight)}>
+            <HeartShape gradientId={`${symbolId}-heart-right`} />
+          </span>
+        </>
+      );
+
+    case '우울':
+      return (
+        // 눈가에서 맺혀 볼을 타고 흘러내린다. pointer-events-none으로 캐릭터 탭을 막지 않는다.
+        <span className={cn('animate-tear-drop', OVERLAY_BASE, anchors.tear)}>
+          <svg viewBox="0 0 24 32" className="size-full" aria-hidden focusable="false">
+            <path
+              d="M12 1.5C12 1.5 3.5 15 3.5 20.5a8.5 8.5 0 0 0 17 0C20.5 15 12 1.5 12 1.5Z"
+              className="fill-tear stroke-plum"
+              strokeWidth={2.4}
+              strokeLinejoin="round"
+            />
+            {/* 물방울 하이라이트 — 유리질 느낌을 줘 평평한 도형으로 안 보이게 한다. */}
+            <ellipse cx="8.8" cy="20.5" rx="1.9" ry="3.1" className="fill-white/80" />
+          </svg>
         </span>
-        <span className={cn('animate-heart-bob', OVERLAY_BASE, anchors.heartRight)}>
-          <HeartShape gradientId={`${symbolId}-heart-right`} />
+      );
+
+    case '화남':
+      return (
+        <span className={cn('animate-vein-pulse', OVERLAY_BASE, anchors.vein)}>
+          <svg viewBox="0 0 24 24" className="size-full" aria-hidden focusable="false">
+            {/* 빨간 털 위에 빨간 핏줄이라 그냥 두면 묻힌다 → plum 밑선을 먼저 굵게 깔아
+                외곽선을 만든다(눈물의 stroke-plum과 같은 규약). 테마색이 바뀌어도 읽힌다. */}
+            <g
+              className="stroke-plum"
+              strokeWidth={5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            >
+              {VEIN_MARKS.map((d) => (
+                <path key={d} d={d} />
+              ))}
+            </g>
+            <g
+              className="stroke-vein"
+              strokeWidth={2.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            >
+              {VEIN_MARKS.map((d) => (
+                <path key={d} d={d} />
+              ))}
+            </g>
+          </svg>
         </span>
-      </>
-    );
-  }
+      );
 
-  if (mood === '우울') {
-    return (
-      // 눈가에서 맺혀 볼을 타고 흘러내린다. pointer-events-none으로 캐릭터 탭을 막지 않는다.
-      <span className={cn('animate-tear-drop', OVERLAY_BASE, anchors.tear)}>
-        <svg viewBox="0 0 24 32" className="size-full" aria-hidden focusable="false">
-          <path
-            d="M12 1.5C12 1.5 3.5 15 3.5 20.5a8.5 8.5 0 0 0 17 0C20.5 15 12 1.5 12 1.5Z"
-            className="fill-tear stroke-plum"
-            strokeWidth={2.4}
-            strokeLinejoin="round"
-          />
-          {/* 물방울 하이라이트 — 유리질 느낌을 줘 평평한 도형으로 안 보이게 한다. */}
-          <ellipse cx="8.8" cy="20.5" rx="1.9" ry="3.1" className="fill-white/80" />
-        </svg>
-      </span>
-    );
-  }
+    // 보통은 심볼 없음(대비의 기준선), 지침은 배경 세로 해칭(MoodBackdrop)이 담당한다.
+    case '보통':
+    case '지침':
+      return null;
 
-  if (mood === '화남') {
-    return (
-      <span className={cn('animate-vein-pulse', OVERLAY_BASE, anchors.vein)}>
-        <svg viewBox="0 0 24 24" className="size-full" aria-hidden focusable="false">
-          {/* 빨간 털 위에 빨간 핏줄이라 그냥 두면 묻힌다 → plum 밑선을 먼저 굵게 깔아
-              외곽선을 만든다(눈물의 stroke-plum과 같은 규약). 테마색이 바뀌어도 읽힌다. */}
-          <g
-            className="stroke-plum"
-            strokeWidth={5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          >
-            {VEIN_MARKS.map((d) => (
-              <path key={d} d={d} />
-            ))}
-          </g>
-          <g
-            className="stroke-vein"
-            strokeWidth={2.6}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="none"
-          >
-            {VEIN_MARKS.map((d) => (
-              <path key={d} d={d} />
-            ))}
-          </g>
-        </svg>
-      </span>
-    );
+    default: {
+      const unhandled: never = mood;
+      return unhandled;
+    }
   }
-
-  return null;
 }

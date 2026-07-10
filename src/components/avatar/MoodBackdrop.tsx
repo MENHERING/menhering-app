@@ -9,12 +9,14 @@ import type { Mood } from '@/types/mypage/model';
 // 컨텍스트를 안 만들어서 조상(카드)의 배경보다 아래로 내려가 아예 안 보인다.
 
 // 감정별 기운 색·농도. 얼굴 표정만으로는 우울/지침이 거의 같아 보이므로 색으로 갈라 준다.
-// 보통만 비워 둔다 — 기준선이 깨끗해야 나머지 감정이 대비로 읽힌다.
+// 보통만 비워 둔다(null) — 기준선이 깨끗해야 나머지 감정이 대비로 읽힌다.
+// Partial이 아니라 완전한 Record라, 감정이 추가되면 여기서 컴파일 에러가 나 결정을 강제한다.
 //
 // 농도는 실제 아바타 탭(숲 배경) 기준으로 잡았다. POC의 평평한 코랄 카드보다 배경이 복잡해
 // 같은 값이라도 훨씬 옅게 읽힌다. 무채색(지침)은 같은 알파에서 제일 무거워 한 단계 낮춘다.
-const MOOD_AURA: Partial<Record<Mood, string>> = {
+const MOOD_AURA: Record<Mood, string | null> = {
   행복: 'bg-aura-pink/55',
+  보통: null,
   우울: 'bg-aura-blue/70',
   지침: 'bg-aura-ink/55',
   화남: 'bg-aura-red/60',
@@ -42,7 +44,7 @@ interface MoodBackdropProps {
 }
 
 export function MoodBackdrop({ mood }: MoodBackdropProps) {
-  const auraClassName = mood ? MOOD_AURA[mood] : undefined;
+  const auraClassName = mood ? MOOD_AURA[mood] : null;
   if (!auraClassName) return null;
 
   return (

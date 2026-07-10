@@ -36,17 +36,25 @@ function loadCubismCore(): Promise<void> {
       resolve();
       return;
     }
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${CUBISM_CORE_SRC}"]`);
-    if (existing) {
-      existing.addEventListener('load', () => resolve());
-      existing.addEventListener('error', () => reject(new Error('Cubism Core 로드 실패')));
+    // 아직 로드 중인 스크립트가 있으면 거기에 얹는다. (실패한 스크립트는 아래에서 제거하므로
+    // 여기서 잡히는 건 항상 "아직 pending"인 것이다.)
+    const pending = document.querySelector<HTMLScriptElement>(`script[src="${CUBISM_CORE_SRC}"]`);
+    if (pending) {
+      pending.addEventListener('load', () => resolve());
+      pending.addEventListener('error', () => reject(new Error('Cubism Core 로드 실패')));
       return;
     }
     const el = document.createElement('script');
     el.src = CUBISM_CORE_SRC;
     el.async = false;
     el.onload = () => resolve();
-    el.onerror = () => reject(new Error('Cubism Core 로드 실패'));
+    el.onerror = () => {
+      // ⚠️ 실패한 <script>를 DOM에 남기면 다음 시도가 그 엘리먼트를 주워 리스너를 붙이는데,
+      // load/error는 다시 발생하지 않으므로 promise가 영원히 pending이 된다.
+      // 그러면 init의 catch도, onError도, SVG 폴백도 돌지 않고 빈 화면에 고정된다.
+      el.remove();
+      reject(new Error('Cubism Core 로드 실패'));
+    };
     document.head.appendChild(el);
   });
 }
