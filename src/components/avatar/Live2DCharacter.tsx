@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import type { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism4';
 import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
@@ -12,6 +11,7 @@ import {
   type MoodExpression,
 } from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
+import { loadCubism4, type Live2DModel } from '@/lib/live2d/load-cubism4';
 import { prefersReducedMotion } from '@/lib/prefers-reduced-motion';
 import type { ColorTheme } from '@/types/avatar';
 import type { Mood } from '@/types/mypage/model';
@@ -24,9 +24,6 @@ import type { Mood } from '@/types/mypage/model';
 //
 // 색은 드로어블별 Multiply(per-part)로 칠한다 — 털(body_fur/tail/arm)만 테마색을 곱하고
 // 크림 무늬·눈·하트(body_base/eye/heart)는 원본 텍스처 색을 유지한다. applyTint 참고.
-
-// 자체 호스팅한 Cubism Core 런타임(프로퍼티어리라 npm 미배포). cubism4 모듈 import 전에 로드돼야 한다.
-const CUBISM_CORE_SRC = '/live2d/core/live2dcubismcore.min.js';
 
 // 번들러(Turbopack) 조합에서 settings 사이드이펙트가 누락되면 batch 렌더러가
 // maxTextures=0으로 초기화되며 셰이더 검증에서 죽는다. 모듈 로드 시 1회 방어(전역 설정이라
@@ -55,27 +52,6 @@ const BODY_TINT_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
 // SPA 재마운트(탭 이동 후 복귀) 시 렌더가 에러 없이 빈 화면이 된다. 컨텍스트를 살려두면 방지된다.
 // (Live2D 히어로/POC는 한 번에 하나만 마운트되므로 싱글톤이 안전하다.)
 let sharedApp: Application | null = null;
-
-function loadCubismCore(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window !== 'undefined' && 'Live2DCubismCore' in window) {
-      resolve();
-      return;
-    }
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${CUBISM_CORE_SRC}"]`);
-    if (existing) {
-      existing.addEventListener('load', () => resolve());
-      existing.addEventListener('error', () => reject(new Error('Cubism Core 로드 실패')));
-      return;
-    }
-    const el = document.createElement('script');
-    el.src = CUBISM_CORE_SRC;
-    el.async = false;
-    el.onload = () => resolve();
-    el.onerror = () => reject(new Error('Cubism Core 로드 실패'));
-    document.head.appendChild(el);
-  });
-}
 
 // #RRGGBB → 0~1 RGB. 잘못된 값이면 흰색(무틴트).
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -162,11 +138,8 @@ export function Live2DCharacter({
 
     async function init() {
       try {
-        // 플러그인 cubism4 모듈은 import 시점에 Cubism Core를 요구한다 →
-        // Core를 먼저 로드한 뒤 동적 import 해야 한다.
-        await loadCubismCore();
-        if (disposed || !containerRef.current) return;
-        const { Live2DModel } = await import('pixi-live2d-display-lipsyncpatch/cubism4');
+        // Core 스크립트 로드 → 플러그인 import → resolveURL 패치를 loadCubism4가 1회만 수행한다.
+        const { Live2DModel } = await loadCubism4();
         if (disposed || !containerRef.current) return;
 
         // 싱글톤 앱/컨텍스트 재사용(위 sharedApp 주석 참고). 처음만 생성하고, 이후엔 크기만 맞춰
