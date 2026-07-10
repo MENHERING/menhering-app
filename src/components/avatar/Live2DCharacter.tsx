@@ -6,9 +6,15 @@ import type { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism4';
 import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
+import {
+  EXPRESSION_KEYS,
+  getMoodExpression,
+  type MoodExpression,
+} from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
 import { prefersReducedMotion } from '@/lib/prefers-reduced-motion';
 import type { ColorTheme } from '@/types/avatar';
+import type { Mood } from '@/types/mypage/model';
 
 // Live2D 캐릭터 렌더러. 커스텀 모델을 WebGL로 띄우고, 물리 없이 코드로 모션
 // (자동 깜빡임·귀/꼬리/하트 흔들림·호흡·포인터 반응)을 구동한다. 리깅 파라미터는
@@ -82,6 +88,8 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 interface Live2DCharacterProps {
   modelUrl: string;
   colorTheme: ColorTheme;
+  /** 감정 상태 → 표정(입/눈/눈썹/볼). 생략 시 무표정(보통). */
+  mood?: Mood;
   /** false면 틴트 없이 원본 텍스처 색 그대로(무색). 기본 true. */
   tinted?: boolean;
   /** 캔버스 한 변 픽셀(정사각). 기본 128. */
@@ -98,6 +106,7 @@ interface Live2DCharacterProps {
 export function Live2DCharacter({
   modelUrl,
   colorTheme,
+  mood,
   tinted = true,
   size = 128,
   interactive = false,
@@ -128,6 +137,16 @@ export function Live2DCharacter({
     tintedRef.current = tinted;
     if (modelRef.current) applyTint(modelRef.current, colorTheme, tinted);
   }, [colorTheme, tinted]);
+
+  // mood 변경도 모델 재생성 없이 반영한다. 티커가 도는 평소엔 매 프레임 moodRef를 읽어 보간하므로
+  // ref 갱신만으로 충분하다. reduce-motion일 땐 티커 자체가 없어 아무도 ref를 안 읽으므로,
+  // colorTheme의 재틴트 effect와 같은 식으로 여기서 정적 표정을 직접 다시 얹어야 한다.
+  const moodRef = useRef(mood);
+  useEffect(() => {
+    moodRef.current = mood;
+    const model = modelRef.current;
+    if (model && prefersReducedMotion()) applyStaticExpression(model, mood);
+  }, [mood]);
 
   useEffect(() => {
     let disposed = false;
@@ -204,7 +223,8 @@ export function Live2DCharacter({
         applyTint(model, colorThemeRef.current, tintedRef.current);
 
         if (reduceMotion) {
-          model.update(16); // 정적 렌더: 드로어블을 1회 배치만 하고 움직임 없음
+          // 정적 렌더: 움직임 없이 현재 감정 표정만 1회 얹고 배치. 이후 mood 변경은 위 effect가 얹는다.
+          applyStaticExpression(model, moodRef.current);
           return;
         }
 
@@ -212,22 +232,36 @@ export function Live2DCharacter({
         const setP = (id: string, v: number) => core.setParameterValueById(id, v);
         const ticker = app.ticker;
 
+        // 표정 보간 상태. 목표(mood)로 매 프레임 부드럽게 다가간다.
+        const cur: MoodExpression = { ...getMoodExpression(moodRef.current) };
+
         // 전역 Ticker.shared 대신 app.ticker로 구동(HIGH: app 렌더 전에 update가 반영되도록).
         tickerFn = () => {
           if (disposed) return;
           const dt = ticker.deltaMS / 1000;
           t += dt;
 
-          // 자동 눈 깜빡임
-          let eyeOpen = 1;
+          // 감정 표정을 목표값으로 보간(입/눈웃음/눈썹/볼). 눈뜸 베이스는 아래 깜빡임과 곱한다.
+          // 감쇠율은 dt에 지수적으로 물려 프레임레이트와 무관하게 같은 시정수(~0.17s)를 갖는다.
+          // 선형 dt*6이면 탭 백그라운드 복귀처럼 dt가 튀는 프레임에서 목표로 확 점프해 팝인 된다.
+          const target = getMoodExpression(moodRef.current);
+          const k = 1 - Math.exp(-dt * 6);
+          for (const key of EXPRESSION_KEYS) {
+            cur[key] += (target[key] - cur[key]) * k;
+          }
+
+          // 자동 눈 깜빡임(0~1). applyExpression에서 감정 베이스 눈뜸과 곱해진다 —
+          // 반개 키폼이 붙어 eyeOpen<1을 쓰게 되면 졸린 상태의 깜빡임도 자연스럽게 겹친다.
+          let blinkFactor = 1;
           if (blinking) {
             blinkT += dt;
             const dur = 0.14;
-            eyeOpen = blinkT < dur / 2 ? 1 - blinkT / (dur / 2) : (blinkT - dur / 2) / (dur / 2);
-            eyeOpen = Math.max(0, Math.min(1, eyeOpen));
+            blinkFactor =
+              blinkT < dur / 2 ? 1 - blinkT / (dur / 2) : (blinkT - dur / 2) / (dur / 2);
+            blinkFactor = Math.max(0, Math.min(1, blinkFactor));
             if (blinkT >= dur) {
               blinking = false;
-              eyeOpen = 1;
+              blinkFactor = 1;
               nextBlink = 2 + Math.random() * 3;
             }
           } else {
@@ -237,8 +271,7 @@ export function Live2DCharacter({
               blinkT = 0;
             }
           }
-          setP('ParamEyeLOpen', eyeOpen);
-          setP('ParamEyeROpen', eyeOpen);
+          applyExpression(setP, cur, blinkFactor);
 
           // 포인터 반응(비활성/미사용이면 0으로 감쇠)
           const px = interactive && pointerRef.current.active ? pointerRef.current.x : 0;
@@ -356,6 +389,36 @@ export function Live2DCharacter({
       )}
     </div>
   );
+}
+
+// 감정 표정 파라미터를 모델에 얹는다. 최종 눈뜸 = 감정 베이스(expr.eyeOpen) × 깜빡임(blinkFactor)
+// 이라 눈뜸의 출처를 여기 하나로 둔다 — 호출부는 깜빡임 진행도만 넘긴다.
+// 눈썹은 좌우 대칭으로 같은 값을 넣는다(비대칭 표정은 아직 미사용). 모델 키폼 범위를 벗어나는
+// 값은 Cubism이 파라미터별 min/max로 자동 클램프하므로 오버슈트는 안전하다.
+function applyExpression(
+  setP: (id: string, v: number) => void,
+  expr: MoodExpression,
+  blinkFactor = 1,
+) {
+  const eyeOpen = expr.eyeOpen * blinkFactor;
+  setP('ParamEyeLOpen', eyeOpen);
+  setP('ParamEyeROpen', eyeOpen);
+  setP('ParamEyeLSmile', expr.eyeSmile);
+  setP('ParamEyeRSmile', expr.eyeSmile);
+  setP('ParamMouthForm', expr.mouthForm);
+  setP('ParamMouthOpenY', expr.mouthOpen);
+  setP('ParamBrowLY', expr.browY);
+  setP('ParamBrowRY', expr.browY);
+  setP('ParamBrowLForm', expr.browForm);
+  setP('ParamBrowRForm', expr.browForm);
+  setP('ParamCheek', expr.cheek);
+}
+
+// reduce-motion 정적 렌더용. 티커가 없으므로 보간·깜빡임 없이 목표 표정을 즉시 얹고 1회 배치한다.
+function applyStaticExpression(model: Live2DModel, mood: Mood | undefined) {
+  const core = model.internalModel.coreModel as unknown as CubismCoreModel;
+  applyExpression((id, v) => core.setParameterValueById(id, v), getMoodExpression(mood));
+  model.update(16);
 }
 
 // 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 털(BODY_TINT_DRAWABLES)은

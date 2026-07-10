@@ -8,6 +8,7 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { DEFAULT_CHARACTER_TYPE } from '@/constants/avatar';
 import { CHARACTER_REGISTRY } from '@/constants/character-registry';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
+import type { Mood } from '@/types/mypage/model';
 
 // Live2D 런타임(pixi + WebGL)은 무겁고 클라이언트 전용 → 필요할 때만 지연 로드.
 const Live2DCharacter = dynamic(
@@ -18,6 +19,8 @@ const Live2DCharacter = dynamic(
 interface AvatarHeroProps {
   characterType: CharacterType;
   colorTheme: ColorTheme;
+  /** 감정 상태 → Live2D 표정. SVG 폴백에는 반영되지 않는다. */
+  mood?: Mood;
   /** SVG 렌더 시 크기(Tailwind). 예: "size-32" */
   className?: string;
   /** Live2D 캔버스 한 변 픽셀. 기본 128. */
@@ -33,6 +36,7 @@ interface AvatarHeroProps {
 export function AvatarHero({
   characterType,
   colorTheme,
+  mood,
   className,
   size = 128,
   title,
@@ -54,6 +58,7 @@ export function AvatarHero({
       <Live2DCharacter
         modelUrl={spec.live2d.modelUrl}
         colorTheme={colorTheme}
+        mood={mood}
         size={size}
         interactive
         className={className}

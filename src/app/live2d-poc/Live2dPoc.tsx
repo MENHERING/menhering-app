@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 import { COLOR_THEMES, getThemeRoles } from '@/constants/avatar';
 import { cn } from '@/lib/cn';
 import type { ColorTheme } from '@/types/avatar';
+import type { Mood } from '@/types/mypage/model';
 
 // 실제 아바타 탭과 동일한 로딩 경로(dynamic ssr:false)로 npm 런타임을 검증한다.
 const Live2DCharacter = dynamic(
@@ -16,12 +17,15 @@ const Live2DCharacter = dynamic(
 
 const MODEL_URL = '/live2d/redpanda/menhering.model3.json';
 
+const MOODS: readonly Mood[] = ['행복', '보통', '우울', '지침', '화남'];
+
 // A단계 검증 하네스: npm 번들(pixi + pixi-live2d-display) + 자체 호스팅 Cubism Core로
 // 우리 모델이 렌더·모션·틴트되는지 확인한다. 색은 아직 전체 틴트(B에서 부위별로 교체).
 export function Live2dPoc() {
   const [theme, setTheme] = useState<ColorTheme>('클래식');
   // false = 무색(틴트 없이 원본 텍스처 그대로).
   const [tinted, setTinted] = useState(true);
+  const [mood, setMood] = useState<Mood>('보통');
 
   return (
     <div className="flex flex-col items-center gap-4 py-8">
@@ -29,11 +33,28 @@ export function Live2dPoc() {
         <Live2DCharacter
           modelUrl={MODEL_URL}
           colorTheme={theme}
+          mood={mood}
           tinted={tinted}
           size={320}
           interactive
           title="레서판다 Live2D"
         />
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        {MOODS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setMood(value)}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-sm transition',
+              mood === value ? 'border-coral bg-coral-soft/40' : 'border-cream',
+            )}
+          >
+            {value}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
