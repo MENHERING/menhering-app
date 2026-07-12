@@ -30,6 +30,11 @@ function patchResolveURL(settingsClass: ModelSettingsClass) {
   };
 }
 
+// load/error가 둘 다 안 오는 경우(네트워크 정체·무응답 프록시)엔 promise가 영원히 pending으로 남아
+// loadCubism4가 그 실패를 캐시하고, init의 catch도 onError(SVG 폴백)도 못 돌아 빈 화면에 고정된다.
+// 타임아웃으로 반드시 reject되게 해 Live2DCharacter의 에러 경로가 살아 있게 한다.
+const CUBISM_CORE_TIMEOUT_MS = 15_000;
+
 function loadCubismCore(): Promise<void> {
   return new Promise((resolve, reject) => {
     if ('Live2DCubismCore' in window) {
@@ -40,19 +45,37 @@ function loadCubismCore(): Promise<void> {
     // 여기서 잡히는 건 항상 "아직 pending"인 것이다.)
     const pending = document.querySelector<HTMLScriptElement>(`script[src="${CUBISM_CORE_SRC}"]`);
     if (pending) {
-      pending.addEventListener('load', () => resolve());
-      pending.addEventListener('error', () => reject(new Error('Cubism Core 로드 실패')));
+      const timer = setTimeout(
+        () => reject(new Error('Cubism Core 로드 타임아웃')),
+        CUBISM_CORE_TIMEOUT_MS,
+      );
+      pending.addEventListener('load', () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      pending.addEventListener('error', () => {
+        clearTimeout(timer);
+        reject(new Error('Cubism Core 로드 실패'));
+      });
       return;
     }
     const el = document.createElement('script');
     el.src = CUBISM_CORE_SRC;
     el.async = false;
-    el.onload = () => resolve();
+    const timer = setTimeout(() => {
+      el.remove();
+      reject(new Error('Cubism Core 로드 타임아웃'));
+    }, CUBISM_CORE_TIMEOUT_MS);
+    el.onload = () => {
+      clearTimeout(timer);
+      resolve();
+    };
     el.onerror = () => {
       // ⚠️ 실패한 <script>를 DOM에 남기면 다음 시도가 그 엘리먼트를 주워 리스너를 붙이는데,
       // load/error는 다시 발생하지 않으므로 promise가 영원히 pending이 된다.
       // 그러면 init의 catch도, onError도, SVG 폴백도 돌지 않고 빈 화면에 고정된다.
       el.remove();
+      clearTimeout(timer);
       reject(new Error('Cubism Core 로드 실패'));
     };
     document.head.appendChild(el);
