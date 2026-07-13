@@ -15,6 +15,14 @@ export const DEFAULT_NICKNAME = '멘헤링이';
 // 감정 상태를 아직 못 읽었을 때(로딩 중·비로그인) 쓸 기본값. 심볼·기운 배경이 없는 중립 상태.
 export const DEFAULT_MOOD: Mood = '보통';
 
+// 감정 수치(mood_value 0~100) 기본값. avatar_status 행이 없거나(신규 유저) 조회 실패 시 폴백.
+// DB avatar_status.mood_value의 기본값과 동일하게 60으로 맞춘다(60~79 보통 구간이라 moodFromValue(60)===DEFAULT_MOOD '보통').
+export const DEFAULT_MOOD_VALUE = 60;
+
+// Mood 5종의 런타임 목록(단일 출처). 타입 Mood는 유니온이라 런타임 값이 없어서,
+// Zod z.enum 등 런타임 검증에 쓸 튜플을 여기서 파생시킨다.
+export const MOODS = ['행복', '보통', '우울', '지침', '화남'] as const satisfies readonly Mood[];
+
 export const CHARACTER_TYPES = [
   '레서판다',
   '토끼',

@@ -6,9 +6,10 @@ import { AvatarBackdrop } from '@/components/avatar/AvatarBackdrop';
 import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { NicknameField } from '@/components/avatar/NicknameField';
 import { Section } from '@/components/common/Section';
+import { DEFAULT_MOOD } from '@/constants/avatar';
 import { AVATAR_SFX_VOLUME, AVATAR_TAP_SOUND } from '@/constants/sounds';
+import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
 import { useSound } from '@/hooks/use-sound';
-import { useAvatarStatusStore } from '@/stores/avatar-status-store';
 import { useAvatarStore } from '@/stores/avatar-store';
 
 interface AvatarPreviewProps {
@@ -21,8 +22,9 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   const colorTheme = useAvatarStore((s) => s.colorTheme);
   const nickname = useAvatarStore((s) => s.nickname);
   const setNickname = useAvatarStore((s) => s.setNickname);
-  // 감정은 편집값이 아니라 서버 파생값이라 별도 스토어(avatar-status-store)에서 읽는다.
-  const mood = useAvatarStatusStore((s) => s.mood);
+  // 감정은 편집값이 아니라 서버 파생값이라 avatar_status 조회 훅에서 읽는다(로딩·비로그인 시 기본값).
+  const { data: status } = useAvatarStatus();
+  const mood = status?.mood ?? DEFAULT_MOOD;
   // 감정 안내를 버튼 이름에서 분리해 담는 live 영역 id (버튼 포커스 중 감정이 바뀌어도 이름은 그대로).
   const moodStatusId = useId();
 
