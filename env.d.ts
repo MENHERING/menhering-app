@@ -6,5 +6,9 @@ namespace NodeJS {
 
     // 서버 전용 (클라이언트 노출 금지)
     SUPABASE_SERVICE_ROLE_KEY: string;
+
+    // 카카오 OIDC 로그인 (서버 전용)
+    KAKAO_REST_API_KEY: string;
+    KAKAO_CLIENT_SECRET: string;
   }
 }
