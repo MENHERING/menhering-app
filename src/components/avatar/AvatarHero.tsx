@@ -64,12 +64,15 @@ export function AvatarHero({
   // MoodSymbol의 심볼 좌표는 렌더러마다 실루엣 비율이 달라 앵커를 나눠 쓴다:
   // Live2D 경로는 캔버스 실측값(live2d.moodAnchors), SVG 폴백은 viewBox 기준값(svgMoodAnchors).
   // MoodBackdrop은 캔버스 중앙의 흐릿한 타원이라 렌더러와 무관하게 안전하다.
-  if (spec.live2d && !failed) {
-    return (
-      <div className="relative">
-        <MoodBackdrop mood={mood} />
+  // 로드 실패(failed) 시 Live2D 스펙이 있어도 SVG로 폴백한다. 래퍼·배경·심볼 층 구성은 두 경로가 같다.
+  const live2d = failed ? undefined : spec.live2d;
+
+  return (
+    <div className="relative">
+      <MoodBackdrop mood={mood} />
+      {live2d ? (
         <Live2DCharacter
-          modelUrl={spec.live2d.modelUrl}
+          modelUrl={live2d.modelUrl}
           colorTheme={colorTheme}
           mood={mood}
           tinted={tinted}
@@ -79,21 +82,15 @@ export function AvatarHero({
           title={title}
           onError={() => setFailed(true)}
         />
-        <MoodSymbol mood={mood} anchors={spec.live2d.moodAnchors} />
-      </div>
-    );
-  }
-
-  return (
-    <div className="relative">
-      <MoodBackdrop mood={mood} />
-      <CharacterRenderer
-        characterType={characterType}
-        colorTheme={colorTheme}
-        className={className}
-        title={title}
-      />
-      <MoodSymbol mood={mood} anchors={spec.svgMoodAnchors} />
+      ) : (
+        <CharacterRenderer
+          characterType={characterType}
+          colorTheme={colorTheme}
+          className={className}
+          title={title}
+        />
+      )}
+      <MoodSymbol mood={mood} anchors={live2d ? live2d.moodAnchors : spec.svgMoodAnchors} />
     </div>
   );
 }

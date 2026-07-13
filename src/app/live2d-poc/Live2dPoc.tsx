@@ -3,8 +3,7 @@
 import { useState } from 'react';
 
 import { AvatarHero } from '@/components/avatar/AvatarHero';
-import { COLOR_THEMES, getThemeRoles } from '@/constants/avatar';
-import { CHARACTER_REGISTRY } from '@/constants/character-registry';
+import { CHARACTER_TYPES, COLOR_THEMES, getThemeRoles } from '@/constants/avatar';
 import { MOOD_EXPRESSION } from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
@@ -12,8 +11,6 @@ import type { Mood } from '@/types/mypage/model';
 
 // Mood 유니온을 손으로 다시 나열하면 감정이 추가돼도 타입 검사에 안 걸린다 → 상수 테이블에서 파생.
 const MOODS = Object.keys(MOOD_EXPRESSION) as Mood[];
-// 캐릭터도 레지스트리에서 파생. 레서판다=Live2D, 나머지=SVG 폴백이라 두 경로의 감정 심볼을 함께 검증한다.
-const CHARACTERS = Object.keys(CHARACTER_REGISTRY) as CharacterType[];
 
 // 감정·테마 검증 하네스. 실제 아바타 탭과 **같은 AvatarHero**를 쓴다 —
 // 오버레이 층 순서·심볼 앵커·모델 경로를 여기서 따로 조립하면 POC가 실물과 조용히 어긋난다.
@@ -41,7 +38,7 @@ export function Live2dPoc() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
-        {CHARACTERS.map((value) => (
+        {CHARACTER_TYPES.map((value) => (
           <button
             key={value}
             type="button"
