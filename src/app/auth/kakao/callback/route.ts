@@ -14,8 +14,21 @@ import { getBaseUrl, sanitizeNextPath } from '@/lib/auth/redirect';
 import { createClient } from '@/lib/supabase/server';
 
 interface KakaoTokenResponse {
-  id_token?: string;
+  id_token: string;
   access_token?: string;
+}
+
+// 외부 응답이라 컴파일 타임 타입만으로는 형태를 보장할 수 없다.
+// 200과 함께 null·primitive가 오면 구조 분해에서 TypeError가 나므로 런타임에 확인한다.
+// TODO: #47의 api-convention(Zod) 머지 후 schemas/로 옮겨 스키마 검증으로 대체.
+function isKakaoTokenResponse(payload: unknown): payload is KakaoTokenResponse {
+  if (typeof payload !== 'object' || payload === null) return false;
+
+  const { id_token: idToken, access_token: accessToken } = payload as Record<string, unknown>;
+
+  return (
+    typeof idToken === 'string' && (accessToken === undefined || typeof accessToken === 'string')
+  );
 }
 
 // 카카오 OIDC 콜백. state 대조 → 인가 코드를 id_token으로 교환 → Supabase 세션 확립.
@@ -70,7 +83,14 @@ export async function GET(request: Request) {
       return NextResponse.redirect(failureUrl);
     }
 
-    tokens = await tokenResponse.json();
+    const payload: unknown = await tokenResponse.json();
+
+    if (!isKakaoTokenResponse(payload)) {
+      console.error('카카오 토큰 응답 형식이 올바르지 않음 (OpenID Connect 활성화 여부 확인)');
+      return NextResponse.redirect(failureUrl);
+    }
+
+    tokens = payload;
   } catch (error) {
     // 네트워크 장애·타임아웃·JSON 파싱 실패 → 로그인 화면으로 되돌린다.
     console.error('카카오 토큰 요청 오류:', error);
@@ -78,11 +98,6 @@ export async function GET(request: Request) {
   }
 
   const { id_token: idToken, access_token: accessToken } = tokens;
-
-  if (!idToken) {
-    console.error('카카오 응답에 id_token 없음 (OpenID Connect 활성화 여부 확인)');
-    return NextResponse.redirect(failureUrl);
-  }
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithIdToken({
