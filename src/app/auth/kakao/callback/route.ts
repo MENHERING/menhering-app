@@ -7,6 +7,7 @@ import {
   KAKAO_STATE_COOKIE,
   KAKAO_TOKEN_TIMEOUT_MS,
   KAKAO_TOKEN_URL,
+  getKakaoCredentials,
   getKakaoRedirectUri,
 } from '@/lib/auth/kakao';
 import { getBaseUrl, sanitizeNextPath } from '@/lib/auth/redirect';
@@ -40,6 +41,13 @@ export async function GET(request: Request) {
     return NextResponse.redirect(failureUrl);
   }
 
+  const credentials = getKakaoCredentials();
+
+  if (!credentials) {
+    console.error('카카오 환경변수(KAKAO_REST_API_KEY, KAKAO_CLIENT_SECRET) 미설정');
+    return NextResponse.redirect(failureUrl);
+  }
+
   let tokens: KakaoTokenResponse;
 
   try {
@@ -48,8 +56,8 @@ export async function GET(request: Request) {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         grant_type: 'authorization_code',
-        client_id: process.env.KAKAO_REST_API_KEY,
-        client_secret: process.env.KAKAO_CLIENT_SECRET,
+        client_id: credentials.restApiKey,
+        client_secret: credentials.clientSecret,
         redirect_uri: getKakaoRedirectUri(request),
         code,
       }),

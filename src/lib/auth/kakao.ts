@@ -36,6 +36,17 @@ export function getKakaoRedirectUri(request: Request): string {
   return `${getBaseUrl(request)}/auth/kakao/callback`;
 }
 
+// env.d.ts가 string으로 선언해 타입 검사로는 미설정을 잡지 못한다.
+// 값이 없으면 "undefined" 문자열이 카카오로 전달돼 원인 파악이 어려우므로 런타임에 확인한다.
+export function getKakaoCredentials(): { restApiKey: string; clientSecret: string } | null {
+  const restApiKey = process.env.KAKAO_REST_API_KEY;
+  const clientSecret = process.env.KAKAO_CLIENT_SECRET;
+
+  if (!restApiKey || !clientSecret) return null;
+
+  return { restApiKey, clientSecret };
+}
+
 // Supabase(GoTrue)는 signInWithIdToken에 넘긴 nonce를 SHA-256으로 해시해서 id_token의 nonce 클레임과 비교한다.
 // 따라서 인가 요청에는 해시값을, signInWithIdToken에는 원본을 넘겨야 한다. (Nonces mismatch 방지)
 export async function hashNonce(nonce: string): Promise<string> {
