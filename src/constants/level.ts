@@ -1,12 +1,7 @@
-export interface Level {
-  step: number;
-  title: string;
-  desc: string;
-  resultDesc: string;
-}
+import type { DifficultyLevel } from '@/types/level';
 
-// 실력 단계 — 레벨 선택/테스트 결과 화면 공유
-export const LEVELS: Level[] = [
+// 실력 단계 — 온보딩 레벨 선택과 학습 화면 난이도 드롭다운이 함께 쓰는 단일 출처.
+export const LEVELS: DifficultyLevel[] = [
   {
     step: 1,
     title: '입문',

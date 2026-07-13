@@ -3,11 +3,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
 import { cn } from '@/lib/cn';
-import type { Lesson } from '@/types/lesson';
+import type { LessonWithStatus } from '@/types/lesson';
 
 interface LessonStartCardProps {
   level: string;
-  lesson: Lesson;
+  lesson: LessonWithStatus;
   // 카드 섹션에 따라 말풍선 꼬리 지정
   pointerAlign: 'left' | 'right';
 }
