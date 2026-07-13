@@ -159,6 +159,8 @@ redpanda/
 
 ### 프로토타입 결과 (2026-07-06, `spike/#23/live2d-poc`) ✅
 
+> ℹ️ 아래는 2026-07-06 프로토타입 시점의 **historical 기록**이다. §3의 "전체 톤 vs 부위별" 결정은 상단 배너대로 **부위별 per-part Multiply로 확정·구현**됐다([frontend-integration.md](frontend-integration.md), `Live2DCharacter`의 `tinted` 참고).
+
 - **런타임 색교체 자체는 앱에서 검증됨.** 샘플 모델에 테마 색 적용·전환·복원 동작, 그동안 애니메이션(호흡·깜빡)도 유지.
 - 단, 검증에 쓴 건 **Pixi ColorMatrixFilter = 전체 균일 틴트**(모든 부위 동시 곱셈). `pixi-live2d-display@0.4.0`은 네이티브 per-part multiply(`setDrawableMultiplyColor`)를 **노출 안 함**(undefined). 로드된 Cubism Core는 4.2(드로어블 134개 감지)라 **코어 차원 지원은 존재**.
 - **판정:**
@@ -166,7 +168,7 @@ redpanda/
   - "털만 테마색, 눈·크림·코는 유지"(부위별) → **네이티브 per-part Multiply 필요** = Cubism Web Framework 직접 사용 or per-part API 노출하는 최신 plugin fork로 배선. 코어가 지원하므로 실현 가능(연동 추가 작업).
   - 원본 아트는 **채도 약간 낮게** 그려야 곱셈 틴트가 예쁘게 먹음.
 
-> 결정 필요: 테마를 **전체 톤 틴트**로 갈지 **부위별(털만)**로 갈지 → 전자는 즉시, 후자는 per-part 배선 추가.
+> ~~결정 필요: 테마를 **전체 톤 틴트**로 갈지 **부위별(털만)**로 갈지 → 전자는 즉시, 후자는 per-part 배선 추가.~~ → **결정됨: 부위별 per-part Multiply로 배선 완료**(상단 배너 참고).
 
 ---
 
