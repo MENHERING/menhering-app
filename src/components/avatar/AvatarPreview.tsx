@@ -6,6 +6,7 @@ import { NicknameField } from '@/components/avatar/NicknameField';
 import { Section } from '@/components/common/Section';
 import { AVATAR_SFX_VOLUME, AVATAR_TAP_SOUND } from '@/constants/sounds';
 import { useSound } from '@/hooks/use-sound';
+import { useAvatarStatusStore } from '@/stores/avatar-status-store';
 import { useAvatarStore } from '@/stores/avatar-store';
 
 interface AvatarPreviewProps {
@@ -18,6 +19,8 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   const colorTheme = useAvatarStore((s) => s.colorTheme);
   const nickname = useAvatarStore((s) => s.nickname);
   const setNickname = useAvatarStore((s) => s.setNickname);
+  // 감정은 편집값이 아니라 서버 파생값이라 별도 스토어(avatar-status-store)에서 읽는다.
+  const mood = useAvatarStatusStore((s) => s.mood);
 
   const playTap = useSound(AVATAR_TAP_SOUND, AVATAR_SFX_VOLUME);
 
@@ -43,16 +46,18 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
       {/* 콘텐츠: 캐릭터 + 이름표 */}
       <div className="relative z-10 flex flex-col items-center gap-0 px-4 pt-2 pb-4">
         {/* 캐릭터 탭 → 효과음(+ 살짝 눌리는 press 피드백). 반응 모션(귀·하트)은 Live2DCharacter 내부.
-            접근성 이름은 버튼의 aria-label이 담당하므로 내부 AvatarHero는 장식(title 생략)으로 둔다. */}
+            접근성 이름은 버튼의 aria-label이 담당하므로 내부 AvatarHero는 장식(title 생략)으로 둔다.
+            감정 심볼·기운 배경은 aria-hidden(시각 정보)이라, 감정은 이 라벨로만 전달된다. */}
         <button
           type="button"
           onClick={playTap}
-          aria-label="아바타 쓰다듬기"
+          aria-label={`아바타 쓰다듬기, 지금 기분: ${mood}`}
           className="focus-visible:ring-coral rounded-full transition-transform outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95"
         >
           <AvatarHero
             characterType={characterType}
             colorTheme={colorTheme}
+            mood={mood}
             className="size-72"
             size={288}
           />

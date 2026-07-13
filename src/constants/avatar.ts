@@ -1,4 +1,5 @@
 import type { CharacterType, ColorTheme, ThemeRoles } from '@/types/avatar';
+import type { Mood } from '@/types/mypage/model';
 
 // 저장값은 한글(DB avatars.color_theme/character_type 정합). 영문 slug 사용 금지.
 
@@ -10,6 +11,9 @@ export const NICKNAME_MAX_LENGTH = 20;
 
 // 세션/닉네임이 없을 때 표시할 폴백 닉네임(로그인 전 미리보기용).
 export const DEFAULT_NICKNAME = '멘헤링이';
+
+// 감정 상태를 아직 못 읽었을 때(로딩 중·비로그인) 쓸 기본값. 심볼·기운 배경이 없는 중립 상태.
+export const DEFAULT_MOOD: Mood = '보통';
 
 export const CHARACTER_TYPES = [
   '레서판다',

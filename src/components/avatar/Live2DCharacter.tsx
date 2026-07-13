@@ -2,13 +2,20 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import type { Live2DModel } from 'pixi-live2d-display-lipsyncpatch/cubism4';
 import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { getThemeRoles } from '@/constants/avatar';
+import bodyTintDrawableIds from '@/constants/live2d-tint-drawables.json';
+import {
+  EXPRESSION_KEYS,
+  getMoodExpression,
+  type MoodExpression,
+} from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
+import { loadCubism4, type Live2DModel } from '@/lib/live2d/load-cubism4';
 import { prefersReducedMotion } from '@/lib/prefers-reduced-motion';
 import type { ColorTheme } from '@/types/avatar';
+import type { Mood } from '@/types/mypage/model';
 
 // Live2D 캐릭터 렌더러. 커스텀 모델을 WebGL로 띄우고, 물리 없이 코드로 모션
 // (자동 깜빡임·귀/꼬리/하트 흔들림·호흡·포인터 반응)을 구동한다. 리깅 파라미터는
@@ -18,9 +25,6 @@ import type { ColorTheme } from '@/types/avatar';
 //
 // 색은 드로어블별 Multiply(per-part)로 칠한다 — 털(body_fur/tail/arm)만 테마색을 곱하고
 // 크림 무늬·눈·하트(body_base/eye/heart)는 원본 텍스처 색을 유지한다. applyTint 참고.
-
-// 자체 호스팅한 Cubism Core 런타임(프로퍼티어리라 npm 미배포). cubism4 모듈 import 전에 로드돼야 한다.
-const CUBISM_CORE_SRC = '/live2d/core/live2dcubismcore.min.js';
 
 // 번들러(Turbopack) 조합에서 settings 사이드이펙트가 누락되면 batch 렌더러가
 // maxTextures=0으로 초기화되며 셰이더 검증에서 죽는다. 모듈 로드 시 1회 방어(전역 설정이라
@@ -41,35 +45,17 @@ interface CubismCoreModel {
 // 테마 body색을 곱할 드로어블(재리깅으로 크림과 분리됨). 나머지는 흰색(1,1,1)으로 덮어써
 // 원본 텍스처 색을 유지한다. 눈은 통짜 드로어블(eye_L/eye_R)이라 여기 넣으면 눈동자·흰
 // 반짝이까지 다 물든다 → 제외(고정). 반사광만 테마색 하려면 눈을 base/reflection으로 분리
-// 재리깅한 뒤 reflection 드로어블 id를 여기 추가한다.
-const BODY_TINT_DRAWABLES = new Set(['body_fur', 'tail', 'arm_L', 'arm_R']);
+// 재리깅한 뒤 reflection 드로어블 id를 여기(=JSON)에 추가한다.
+//
+// 목록을 JSON에 둔 이유: scripts/desaturate-fur.mjs가 **같은 목록**으로 텍스처를 회색화해야 한다.
+// 둘이 어긋나면 틴트는 되지만 회색화가 안 된 부위가 생겨 탁한 갈색으로 렌더된다.
+const BODY_TINT_DRAWABLES = new Set<string>(bodyTintDrawableIds);
 
 // pixi Application/WebGL 컨텍스트를 페이지 세션 내내 하나만 두고 재사용한다.
 // 컨텍스트를 파괴·재생성하면 플러그인(Cubism)의 셰이더·마스크가 첫 컨텍스트에 묶인 채 orphan돼,
 // SPA 재마운트(탭 이동 후 복귀) 시 렌더가 에러 없이 빈 화면이 된다. 컨텍스트를 살려두면 방지된다.
 // (Live2D 히어로/POC는 한 번에 하나만 마운트되므로 싱글톤이 안전하다.)
 let sharedApp: Application | null = null;
-
-function loadCubismCore(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window !== 'undefined' && 'Live2DCubismCore' in window) {
-      resolve();
-      return;
-    }
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${CUBISM_CORE_SRC}"]`);
-    if (existing) {
-      existing.addEventListener('load', () => resolve());
-      existing.addEventListener('error', () => reject(new Error('Cubism Core 로드 실패')));
-      return;
-    }
-    const el = document.createElement('script');
-    el.src = CUBISM_CORE_SRC;
-    el.async = false;
-    el.onload = () => resolve();
-    el.onerror = () => reject(new Error('Cubism Core 로드 실패'));
-    document.head.appendChild(el);
-  });
-}
 
 // #RRGGBB → 0~1 RGB. 잘못된 값이면 흰색(무틴트).
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -82,6 +68,8 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 interface Live2DCharacterProps {
   modelUrl: string;
   colorTheme: ColorTheme;
+  /** 감정 상태 → 표정(입/눈/눈썹/볼). 생략 시 무표정(보통). */
+  mood?: Mood;
   /** false면 틴트 없이 원본 텍스처 색 그대로(무색). 기본 true. */
   tinted?: boolean;
   /** 캔버스 한 변 픽셀(정사각). 기본 128. */
@@ -98,6 +86,7 @@ interface Live2DCharacterProps {
 export function Live2DCharacter({
   modelUrl,
   colorTheme,
+  mood,
   tinted = true,
   size = 128,
   interactive = false,
@@ -129,6 +118,16 @@ export function Live2DCharacter({
     if (modelRef.current) applyTint(modelRef.current, colorTheme, tinted);
   }, [colorTheme, tinted]);
 
+  // mood 변경도 모델 재생성 없이 반영한다. 티커가 도는 평소엔 매 프레임 moodRef를 읽어 보간하므로
+  // ref 갱신만으로 충분하다. reduce-motion일 땐 티커 자체가 없어 아무도 ref를 안 읽으므로,
+  // colorTheme의 재틴트 effect와 같은 식으로 여기서 정적 표정을 직접 다시 얹어야 한다.
+  const moodRef = useRef(mood);
+  useEffect(() => {
+    moodRef.current = mood;
+    const model = modelRef.current;
+    if (model && prefersReducedMotion()) applyStaticExpression(model, mood);
+  }, [mood]);
+
   useEffect(() => {
     let disposed = false;
     let app: Application | null = null;
@@ -143,11 +142,8 @@ export function Live2DCharacter({
 
     async function init() {
       try {
-        // 플러그인 cubism4 모듈은 import 시점에 Cubism Core를 요구한다 →
-        // Core를 먼저 로드한 뒤 동적 import 해야 한다.
-        await loadCubismCore();
-        if (disposed || !containerRef.current) return;
-        const { Live2DModel } = await import('pixi-live2d-display-lipsyncpatch/cubism4');
+        // Core 스크립트 로드 → 플러그인 import → resolveURL 패치를 loadCubism4가 1회만 수행한다.
+        const { Live2DModel } = await loadCubism4();
         if (disposed || !containerRef.current) return;
 
         // 싱글톤 앱/컨텍스트 재사용(위 sharedApp 주석 참고). 처음만 생성하고, 이후엔 크기만 맞춰
@@ -204,7 +200,8 @@ export function Live2DCharacter({
         applyTint(model, colorThemeRef.current, tintedRef.current);
 
         if (reduceMotion) {
-          model.update(16); // 정적 렌더: 드로어블을 1회 배치만 하고 움직임 없음
+          // 정적 렌더: 움직임 없이 현재 감정 표정만 1회 얹고 배치. 이후 mood 변경은 위 effect가 얹는다.
+          applyStaticExpression(model, moodRef.current);
           return;
         }
 
@@ -212,22 +209,36 @@ export function Live2DCharacter({
         const setP = (id: string, v: number) => core.setParameterValueById(id, v);
         const ticker = app.ticker;
 
+        // 표정 보간 상태. 목표(mood)로 매 프레임 부드럽게 다가간다.
+        const cur: MoodExpression = { ...getMoodExpression(moodRef.current) };
+
         // 전역 Ticker.shared 대신 app.ticker로 구동(HIGH: app 렌더 전에 update가 반영되도록).
         tickerFn = () => {
           if (disposed) return;
           const dt = ticker.deltaMS / 1000;
           t += dt;
 
-          // 자동 눈 깜빡임
-          let eyeOpen = 1;
+          // 감정 표정을 목표값으로 보간(입/눈웃음/눈썹/볼). 눈뜸 베이스는 아래 깜빡임과 곱한다.
+          // 감쇠율은 dt에 지수적으로 물려 프레임레이트와 무관하게 같은 시정수(~0.17s)를 갖는다.
+          // 선형 dt*6이면 탭 백그라운드 복귀처럼 dt가 튀는 프레임에서 목표로 확 점프해 팝인 된다.
+          const target = getMoodExpression(moodRef.current);
+          const k = 1 - Math.exp(-dt * 6);
+          for (const key of EXPRESSION_KEYS) {
+            cur[key] += (target[key] - cur[key]) * k;
+          }
+
+          // 자동 눈 깜빡임(0~1). applyExpression에서 감정 베이스 눈뜸과 곱해진다 —
+          // 반개 키폼이 붙어 eyeOpen<1을 쓰게 되면 졸린 상태의 깜빡임도 자연스럽게 겹친다.
+          let blinkFactor = 1;
           if (blinking) {
             blinkT += dt;
             const dur = 0.14;
-            eyeOpen = blinkT < dur / 2 ? 1 - blinkT / (dur / 2) : (blinkT - dur / 2) / (dur / 2);
-            eyeOpen = Math.max(0, Math.min(1, eyeOpen));
+            blinkFactor =
+              blinkT < dur / 2 ? 1 - blinkT / (dur / 2) : (blinkT - dur / 2) / (dur / 2);
+            blinkFactor = Math.max(0, Math.min(1, blinkFactor));
             if (blinkT >= dur) {
               blinking = false;
-              eyeOpen = 1;
+              blinkFactor = 1;
               nextBlink = 2 + Math.random() * 3;
             }
           } else {
@@ -237,8 +248,7 @@ export function Live2DCharacter({
               blinkT = 0;
             }
           }
-          setP('ParamEyeLOpen', eyeOpen);
-          setP('ParamEyeROpen', eyeOpen);
+          applyExpression(setP, cur, blinkFactor);
 
           // 포인터 반응(비활성/미사용이면 0으로 감쇠)
           const px = interactive && pointerRef.current.active ? pointerRef.current.x : 0;
@@ -356,6 +366,36 @@ export function Live2DCharacter({
       )}
     </div>
   );
+}
+
+// 감정 표정 파라미터를 모델에 얹는다. 최종 눈뜸 = 감정 베이스(expr.eyeOpen) × 깜빡임(blinkFactor)
+// 이라 눈뜸의 출처를 여기 하나로 둔다 — 호출부는 깜빡임 진행도만 넘긴다.
+// 눈썹은 좌우 대칭으로 같은 값을 넣는다(비대칭 표정은 아직 미사용). 모델 키폼 범위를 벗어나는
+// 값은 Cubism이 파라미터별 min/max로 자동 클램프하므로 오버슈트는 안전하다.
+function applyExpression(
+  setP: (id: string, v: number) => void,
+  expr: MoodExpression,
+  blinkFactor = 1,
+) {
+  const eyeOpen = expr.eyeOpen * blinkFactor;
+  setP('ParamEyeLOpen', eyeOpen);
+  setP('ParamEyeROpen', eyeOpen);
+  setP('ParamEyeLSmile', expr.eyeSmile);
+  setP('ParamEyeRSmile', expr.eyeSmile);
+  setP('ParamMouthForm', expr.mouthForm);
+  setP('ParamMouthOpenY', expr.mouthOpen);
+  setP('ParamBrowLY', expr.browY);
+  setP('ParamBrowRY', expr.browY);
+  setP('ParamBrowLForm', expr.browForm);
+  setP('ParamBrowRForm', expr.browForm);
+  setP('ParamCheek', expr.cheek);
+}
+
+// reduce-motion 정적 렌더용. 티커가 없으므로 보간·깜빡임 없이 목표 표정을 즉시 얹고 1회 배치한다.
+function applyStaticExpression(model: Live2DModel, mood: Mood | undefined) {
+  const core = model.internalModel.coreModel as unknown as CubismCoreModel;
+  applyExpression((id, v) => core.setParameterValueById(id, v), getMoodExpression(mood));
+  model.update(16);
 }
 
 // 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 털(BODY_TINT_DRAWABLES)은

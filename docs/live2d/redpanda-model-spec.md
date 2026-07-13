@@ -2,7 +2,20 @@
 
 > 목적: 첨부한 레서판다 캐릭터를 **크레이지 아케이드/Live2D 수준으로 살아 움직이는 2D 캐릭터**로 만들기 위한 제작 설계도.
 > 대상 독자: 일러스트레이터 · Live2D 리거 · 프론트 연동 개발자.
-> 상태: 방향 검토 단계. POC(`spike/#23/live2d-poc`)에서 Live2D가 우리 앱에서 도는 것은 검증 완료.
+> 상태: **이 문서는 초기 기획 설계도(historical)다.** 아래 배너의 "현재 구현 상태"가 실제와 맞다.
+
+---
+
+## ⚠️ 현재 구현 상태 (실제 모델과 이 스펙의 차이)
+
+이 문서는 방향 검토 단계에 쓴 **이상적 설계도**다. 이후 redpanda 모델을 **자체 제작(DIY)·연동·테마·표정까지 완료**했고, 실제 구조는 몇 군데 다르다. 새로 참고할 땐 아래를 기준으로 볼 것.
+
+- **실드로어블(10개)**: `tail`, `ear_L/R`, `arm_L/R`, `eye_L/R`, `heart`, `body_base`(크림 얼굴), `body_fur`(주황 털). §1의 세분 레이어(흰자/눈동자/**윗·아랫눈꺼풀** 분리 등)와 다르다.
+- **눈**: `eye_L/R` **단일 메쉬**. 별도 흰자·눈꺼풀 드로어블 없음, 깜빡임은 메쉬 **키폼**(EyeOpen 0↔1)으로 처리. ⚠️ 감은 눈꺼풀이 한때 `body_fur` 텍스처에 그려박혀 있어 반개 시 삐져나오던 걸 2026-07-13 PSD에서 제거함.
+- **이목구비**: 코·입·눈썹(brow_L/R)·볼(cheek)은 `body_base`에서 분리해 표정 리깅됨(§1의 별도 레이어 취지와 결과적으로 유사).
+- **테마 색**: §3의 "전체 톤 vs 부위별" 결정은 **부위별 per-part Multiply로 확정·구현**됨(pixi7 + `pixi-live2d-display-lipsyncpatch` fork). 털은 그레이스케일 전제(`npm run assets:desaturate-fur`).
+- **표정**: §2-3의 `.exp3` 파일 방식이 아니라 **코드에서 파라미터 직접 세팅**(`src/constants/mood-expression.ts` + `Live2DCharacter`의 mood 보간).
+- **연동·렌더 상세·함정**: [frontend-integration.md](frontend-integration.md) 참고(싱글톤 앱, 재마운트 버그, 프레이밍, mood prop 등).
 
 ---
 
@@ -146,6 +159,8 @@ redpanda/
 
 ### 프로토타입 결과 (2026-07-06, `spike/#23/live2d-poc`) ✅
 
+> ℹ️ 아래는 2026-07-06 프로토타입 시점의 **historical 기록**이다. §3의 "전체 톤 vs 부위별" 결정은 상단 배너대로 **부위별 per-part Multiply로 확정·구현**됐다([frontend-integration.md](frontend-integration.md), `Live2DCharacter`의 `tinted` 참고).
+
 - **런타임 색교체 자체는 앱에서 검증됨.** 샘플 모델에 테마 색 적용·전환·복원 동작, 그동안 애니메이션(호흡·깜빡)도 유지.
 - 단, 검증에 쓴 건 **Pixi ColorMatrixFilter = 전체 균일 틴트**(모든 부위 동시 곱셈). `pixi-live2d-display@0.4.0`은 네이티브 per-part multiply(`setDrawableMultiplyColor`)를 **노출 안 함**(undefined). 로드된 Cubism Core는 4.2(드로어블 134개 감지)라 **코어 차원 지원은 존재**.
 - **판정:**
@@ -153,7 +168,7 @@ redpanda/
   - "털만 테마색, 눈·크림·코는 유지"(부위별) → **네이티브 per-part Multiply 필요** = Cubism Web Framework 직접 사용 or per-part API 노출하는 최신 plugin fork로 배선. 코어가 지원하므로 실현 가능(연동 추가 작업).
   - 원본 아트는 **채도 약간 낮게** 그려야 곱셈 틴트가 예쁘게 먹음.
 
-> 결정 필요: 테마를 **전체 톤 틴트**로 갈지 **부위별(털만)**로 갈지 → 전자는 즉시, 후자는 per-part 배선 추가.
+> ~~결정 필요: 테마를 **전체 톤 틴트**로 갈지 **부위별(털만)**로 갈지 → 전자는 즉시, 후자는 per-part 배선 추가.~~ → **결정됨: 부위별 per-part Multiply로 배선 완료**(상단 배너 참고).
 
 ---
 

@@ -2,38 +2,52 @@
 
 import { useState } from 'react';
 
-import dynamic from 'next/dynamic';
-
+import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { COLOR_THEMES, getThemeRoles } from '@/constants/avatar';
+import { MOOD_EXPRESSION } from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
 import type { ColorTheme } from '@/types/avatar';
+import type { Mood } from '@/types/mypage/model';
 
-// 실제 아바타 탭과 동일한 로딩 경로(dynamic ssr:false)로 npm 런타임을 검증한다.
-const Live2DCharacter = dynamic(
-  () => import('@/components/avatar/Live2DCharacter').then((m) => m.Live2DCharacter),
-  { ssr: false },
-);
+// Mood 유니온을 손으로 다시 나열하면 감정이 추가돼도 타입 검사에 안 걸린다 → 상수 테이블에서 파생.
+const MOODS = Object.keys(MOOD_EXPRESSION) as Mood[];
 
-const MODEL_URL = '/live2d/redpanda/menhering.model3.json';
-
-// A단계 검증 하네스: npm 번들(pixi + pixi-live2d-display) + 자체 호스팅 Cubism Core로
-// 우리 모델이 렌더·모션·틴트되는지 확인한다. 색은 아직 전체 틴트(B에서 부위별로 교체).
+// 감정·테마 검증 하네스. 실제 아바타 탭과 **같은 AvatarHero**를 쓴다 —
+// 오버레이 층 순서·심볼 앵커·모델 경로를 여기서 따로 조립하면 POC가 실물과 조용히 어긋난다.
+// 아바타 탭에는 없는 무색(tinted=false) 토글과 감정 셀렉터만 여기서 얹는다.
 export function Live2dPoc() {
   const [theme, setTheme] = useState<ColorTheme>('클래식');
-  // false = 무색(틴트 없이 원본 텍스처 그대로).
+  // false = 무색(틴트 없이 원본 텍스처 그대로). 털 그레이스케일이 살아있는지 확인할 때 쓴다.
   const [tinted, setTinted] = useState(true);
+  const [mood, setMood] = useState<Mood>('보통');
 
   return (
     <div className="flex flex-col items-center gap-4 py-8">
       <div className="bg-coral-soft/40 flex size-[360px] items-center justify-center rounded-3xl">
-        <Live2DCharacter
-          modelUrl={MODEL_URL}
+        <AvatarHero
+          characterType="레서판다"
           colorTheme={theme}
+          mood={mood}
           tinted={tinted}
           size={320}
-          interactive
           title="레서판다 Live2D"
         />
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        {MOODS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setMood(value)}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-sm transition',
+              mood === value ? 'border-coral bg-coral-soft/40' : 'border-cream',
+            )}
+          >
+            {value}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">

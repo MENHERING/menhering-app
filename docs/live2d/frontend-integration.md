@@ -33,7 +33,13 @@
 
 ```tsx
 // 렌더 (히어로 스위처: live2d 있으면 Live2D, 실패 시 SVG 폴백)
-<AvatarHero characterType={characterType} colorTheme={colorTheme} size={288} className="size-72" />
+<AvatarHero
+  characterType={characterType}
+  colorTheme={colorTheme}
+  mood={mood} // 감정 상태 → 표정 + 만화 심볼·기운 배경(선택, 생략 시 무표정)
+  size={288}
+  className="size-72"
+/>
 ```
 
 렌더러를 직접 쓰려면:
@@ -42,6 +48,7 @@
 <Live2DCharacter
   modelUrl="/live2d/redpanda/menhering.model3.json"
   colorTheme={colorTheme}
+  mood={mood}         // 감정 상태 → 표정(입/눈/눈썹/볼). 생략 시 무표정
   size={288}          // 정사각 캔버스 한 변(px). className(컨테이너)과 맞출 것
   interactive         // 포인터 따라 살짝 기울임
   onError={() => ...} // 로드 실패 시(상위에서 SVG 폴백 권장)
@@ -50,6 +57,15 @@
 
 - SSR 금지(WebGL). `AvatarHero`는 `dynamic(..., { ssr: false })`로 지연 로드함. 직접 쓸 때도 동일하게.
 - `size`는 **캔버스 px**, `className`은 **컨테이너 크기**(SVG 폴백에도 적용). 둘을 일치시킬 것(예: `size={288}` + `size-72`).
+- `tinted`(기본 true)를 false로 주면 테마색을 안 곱하고 원본 텍스처 색으로 렌더한다(검증용).
+
+### 2-1. 감정 표정(`mood`)
+
+`mood`(`행복/보통/우울/지침/화남`, `@/types/mypage/model`)를 넘기면 감정→표정이 반영된다.
+
+- **표정 파라미터 매핑**은 `src/constants/mood-expression.ts`(`MOOD_EXPRESSION`)에 값으로 있고, `Live2DCharacter`가 매 프레임 목표값으로 부드럽게 보간(lerp)해 얹는다. `.exp3` 파일이 아니라 **코드에서 파라미터 직접 세팅** 방식이다.
+- **`AvatarHero`는 표정 외에** `MoodBackdrop`(기운 배경 타원)·`MoodSymbol`(눈물·하트 등 만화 심볼)도 같이 얹는다. SVG 폴백엔 기운 배경만 반영된다(심볼 좌표가 Live2D 실루엣 기준이라).
+- 모델 리깅 상태에 따라 반영되는 채널이 다르다 — 현재 redpanda는 입/눈웃음/볼/눈썹/눈뜸이 작동. 눈뜸(졸린 눈)은 눈 뒤가 `body_fur`라 0.8 미만에서 주황이 드러나는 제약이 있어 지침만 0.8로 얕게 쓴다(상세는 `mood-expression.ts` 주석).
 
 ## 3. ⚠️ 제약·함정 (다른 페이지에서 쓰기 전 필독)
 
@@ -64,7 +80,8 @@
 ### 3-2. 색 테마 = 회색 털 텍스처 전제
 
 부위별 색은 **드로어블별 Multiply**로 입힌다(`applyTint`: 털만 테마색, 나머지 흰색). Multiply는 곱셈이라 **털 텍스처가 주황이면** 민트 등 다른 테마색을 곱해도 **탁한 색**이 나온다(주황의 낮은 파랑값이 결과를 막음).
-→ 깨끗한 테마색을 원하면 **털 드로어블 텍스처를 그레이스케일로** 만들어 재출력해야 함(회색 × 테마색 = 테마색). 리깅/텍스처 작업.
+→ 깨끗한 테마색을 원하면 **털 드로어블 텍스처를 그레이스케일로** 만들어 재출력해야 함(회색 × 테마색 = 테마색).
+→ 이 그레이스케일화는 **`npm run assets:desaturate-fur`**(`scripts/desaturate-fur.mjs`)가 자동으로 한다 — moc3에서 털 드로어블(`body_fur`·`tail`·`arm_L`·`arm_R`) UV를 읽어 그 부분만 회색화(크림·눈·하트는 색 유지). **Cubism에서 텍스처를 재출력하면 원본 주황색으로 돌아오므로, 재출력할 때마다 이 스크립트를 다시 돌려야 한다.** PSD를 회색으로 만들지 말 것(원본 색은 편집 소스로 유지).
 
 ### 3-3. HMR 주의(개발 전용)
 
