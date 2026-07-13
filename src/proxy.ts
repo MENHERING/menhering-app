@@ -27,10 +27,13 @@ function withSessionCookies(from: NextResponse, to: NextResponse) {
 }
 
 export async function proxy(request: NextRequest) {
-  const { supabaseResponse, user } = await updateSession(request);
+  const { supabaseResponse, user, authCheckFailed } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
-  if (!user && !isPublicPath(pathname)) {
+  // authCheckFailed(네트워크 오류로 인증 확인 자체가 실패)면 로그인으로 튕기지 않고 통과시킨다.
+  // 일시적 Supabase 도달 실패가 로그인 유저를 로그아웃시키거나 Server Action을 깨는 것을 막는다.
+  // 실제 데이터 접근은 RLS가 보호하므로 통과시켜도 안전하다.
+  if (!user && !authCheckFailed && !isPublicPath(pathname)) {
     // 원래 요청의 쿼리가 로그인 URL로 새어나가지 않도록, 경로만 바꾸고 쿼리는 비운다.
     const loginUrl = new URL('/login', request.nextUrl.origin);
     // 로그인 후 원래 가려던 경로로 되돌려보내기 위해 보관한다. (쿼리스트링까지 함께)
@@ -43,6 +46,11 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // 정적 자산·이미지 최적화 경로는 제외(세션 갱신·가드 불필요).
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  // 정적 자산은 세션 갱신·가드가 불필요하므로 제외한다. 제외하지 않으면 정적 파일 요청마다
+  // getUser()(네트워크)가 붙어, 특히 Live2D 에셋(model3.json/moc3/텍스처)이 매번 세션 확인에 막힌다.
+  // - _next/static·_next/image·favicon, public/live2d/** 경로
+  // - 정적 확장자(이미지·폰트·오디오·Live2D json/moc3 등)
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|live2d/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json|moc3|moc|woff2?|ttf|otf|mp3|wav|m4a)$).*)',
+  ],
 };
