@@ -31,10 +31,10 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!user && !isPublicPath(pathname)) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = '/login';
-    // 로그인 후 원래 가려던 경로로 되돌려보내기 위해 보관한다.
-    loginUrl.searchParams.set('next', pathname);
+    // 원래 요청의 쿼리가 로그인 URL로 새어나가지 않도록, 경로만 바꾸고 쿼리는 비운다.
+    const loginUrl = new URL('/login', request.nextUrl.origin);
+    // 로그인 후 원래 가려던 경로로 되돌려보내기 위해 보관한다. (쿼리스트링까지 함께)
+    loginUrl.searchParams.set('next', `${pathname}${request.nextUrl.search}`);
 
     return withSessionCookies(supabaseResponse, NextResponse.redirect(loginUrl));
   }
