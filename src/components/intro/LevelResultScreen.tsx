@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
-import { LEVELS } from '@/constants/levels';
+import { LEVELS } from '@/constants/level';
 import { cn } from '@/lib/cn';
+import { useUserLevelStore } from '@/stores/user-level-store';
 
 interface LevelResultScreenProps {
   // 채점 결과 추천 레벨 (기본 초급)
@@ -15,9 +16,11 @@ interface LevelResultScreenProps {
 
 export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProps) {
   const router = useRouter();
+  const setStep = useUserLevelStore((state) => state.setStep);
   const level = LEVELS.find((l) => l.step === recommendedStep) ?? LEVELS[1];
 
   const handleStart = () => {
+    setStep(level.step);
     router.push('/home');
   };
 

@@ -5,14 +5,18 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
-import { LEVELS } from '@/constants/levels';
+import { LEVELS } from '@/constants/level';
 import { cn } from '@/lib/cn';
+import { useUserLevelStore } from '@/stores/user-level-store';
 
 export function LevelSelectScreen() {
   const router = useRouter();
-  const [selected, setSelected] = useState(3);
+  const step = useUserLevelStore((state) => state.step);
+  const setStep = useUserLevelStore((state) => state.setStep);
+  const [selected, setSelected] = useState(step);
 
   const handleComplete = () => {
+    setStep(selected);
     router.push('/home');
   };
 
