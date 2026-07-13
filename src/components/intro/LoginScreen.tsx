@@ -8,6 +8,8 @@ type LoginVariant = 'new' | 'returning';
 interface LoginScreenProps {
   // 신규(안녕하세요) / 복귀(다시 시작해요)
   variant?: LoginVariant;
+  // 로그인 성공 후 이동할 경로
+  next?: string;
 }
 
 const COPY: Record<
@@ -28,7 +30,7 @@ const COPY: Record<
   },
 };
 
-export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
+export function LoginScreen({ variant = 'new', next }: LoginScreenProps) {
   const copy = COPY[variant];
 
   return (
@@ -75,7 +77,7 @@ export function LoginScreen({ variant = 'new' }: LoginScreenProps) {
         </div>
 
         <div className="mt-auto mb-10 flex flex-col gap-3">
-          <SocialLoginButtons kakaoLabel={copy.kakao} googleLabel={copy.google} />
+          <SocialLoginButtons kakaoLabel={copy.kakao} googleLabel={copy.google} next={next} />
 
           {/* 개발용 임시 이동 - OAuth 미설정 환경 우회 */}
           {process.env.NODE_ENV === 'development' && (
