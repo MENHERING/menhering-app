@@ -27,7 +27,13 @@ export async function updateSession(request: NextRequest) {
   );
 
   // 반드시 호출 — 세션 리프레시 트리거(생략 시 사용자가 임의로 로그아웃될 수 있음).
-  await supabase.auth.getUser();
+  // 이 함수는 거의 모든 요청에서 실행되므로, Supabase 장애가 전체 페이지 500으로 번지지 않게 격리한다.
+  // 실패해도 요청은 그대로 통과시키고, 세션 갱신만 이번 요청에서 생략된다.
+  try {
+    await supabase.auth.getUser();
+  } catch (error) {
+    console.error('Supabase 세션 갱신 실패:', error);
+  }
 
   return supabaseResponse;
 }
