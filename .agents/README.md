@@ -5,12 +5,13 @@
 
 ## 문서 목록
 
-| 카테고리    | 문서                                                               | 내용                                            |
-| ----------- | ------------------------------------------------------------------ | ----------------------------------------------- |
-| Git         | [git-convention/SKILLS.md](git-convention/SKILLS.md)               | Git Flow, 커밋/브랜치 규칙, PR·리뷰(CodeRabbit) |
-| 코드 스타일 | [code-style-convention/SKILLS.md](code-style-convention/SKILLS.md) | 네이밍·컴포넌트·TypeScript·스타일·import·주석   |
-| 폴더 구조   | [structure-convention/SKILLS.md](structure-convention/SKILLS.md)   | `src/` 디렉토리 구조·역할                       |
-| Supabase    | [supabase-convention/SKILLS.md](supabase-convention/SKILLS.md)     | 환경변수·클라이언트·RLS 기본                    |
+| 카테고리        | 문서                                                               | 내용                                            |
+| --------------- | ------------------------------------------------------------------ | ----------------------------------------------- |
+| Git             | [git-convention/SKILLS.md](git-convention/SKILLS.md)               | Git Flow, 커밋/브랜치 규칙, PR·리뷰(CodeRabbit) |
+| 코드 스타일     | [code-style-convention/SKILLS.md](code-style-convention/SKILLS.md) | 네이밍·컴포넌트·TypeScript·스타일·import·주석   |
+| 폴더 구조       | [structure-convention/SKILLS.md](structure-convention/SKILLS.md)   | `src/` 디렉토리 구조·역할                       |
+| Supabase        | [supabase-convention/SKILLS.md](supabase-convention/SKILLS.md)     | 환경변수·클라이언트·RLS 기본                    |
+| API / 서버 상태 | [api-convention/SKILLS.md](api-convention/SKILLS.md)               | TanStack Query·API client·query key·Zod 스키마  |
 
 ## 출처
 
