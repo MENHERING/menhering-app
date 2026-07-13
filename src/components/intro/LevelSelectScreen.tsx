@@ -5,8 +5,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
+import { Toast } from '@/components/common/Toast';
 import { LEVELS } from '@/constants/level';
+import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
+import { saveOnboardingLevel } from '@/lib/onboarding/actions';
 import { useUserLevelStore } from '@/stores/user-level-store';
 
 export function LevelSelectScreen() {
@@ -14,10 +17,30 @@ export function LevelSelectScreen() {
   const step = useUserLevelStore((state) => state.step);
   const setStep = useUserLevelStore((state) => state.setStep);
   const [selected, setSelected] = useState(step);
+  const [isSaving, setIsSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleComplete = () => {
-    setStep(selected);
-    router.push('/home');
+  const handleComplete = async () => {
+    setIsSaving(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await saveOnboardingLevel({ step: selected });
+
+      if (!result.ok) {
+        setErrorMessage(result.error);
+        return;
+      }
+
+      setStep(selected);
+      // replace: 레벨 확정 후 뒤로가기로 온보딩에 되돌아오지 않도록 한다.
+      router.replace(ROUTES.HOME);
+    } catch (error) {
+      console.error('[onboarding] 레벨 저장 중 오류:', error);
+      setErrorMessage('저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -66,14 +89,26 @@ export function LevelSelectScreen() {
 
         {/* CTA */}
         <div className="mt-auto mb-10 flex flex-col gap-3 pt-6">
-          <Button variant="secondary" isFullWidth onClick={() => router.push('/level-test')}>
+          <Button
+            variant="secondary"
+            isFullWidth
+            disabled={isSaving}
+            onClick={() => router.push(ROUTES.LEVEL_TEST)}
+          >
             간단 테스트로 추천받기
           </Button>
-          <Button variant="primary" isFullWidth onClick={handleComplete}>
+          <Button variant="primary" isFullWidth isLoading={isSaving} onClick={handleComplete}>
             선택 완료하고 홈으로
           </Button>
         </div>
       </div>
+
+      <Toast
+        isOpen={errorMessage !== null}
+        message={errorMessage ?? ''}
+        variant="error"
+        onClose={() => setErrorMessage(null)}
+      />
     </div>
   );
 }

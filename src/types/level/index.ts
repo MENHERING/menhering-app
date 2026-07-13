@@ -1,1 +1,1 @@
-export type { DifficultyLevel } from '@/types/level/model';
+export type { DifficultyLevel, LevelTitle } from '@/types/level/model';
