@@ -21,7 +21,7 @@ const Live2DCharacter = dynamic(
 interface AvatarHeroProps {
   characterType: CharacterType;
   colorTheme: ColorTheme;
-  /** 감정 상태 → Live2D 표정 + 만화적 심볼·기운 배경. SVG 폴백에는 기운 배경만 반영된다. */
+  /** 감정 상태 → Live2D 표정 + 만화적 심볼·기운 배경. SVG 폴백에는 표정을 뺀 심볼·기운 배경이 반영된다. */
   mood?: Mood;
   /** false면 Live2D 털에 테마색을 곱하지 않고 원본 텍스처 색으로 렌더(검증용). 기본 true. */
   tinted?: boolean;
@@ -61,10 +61,9 @@ export function AvatarHero({
   // 감정 오버레이는 캔버스/SVG와 형제인 절대배치라 relative 래퍼가 필요하다.
   // MoodBackdrop은 캐릭터보다 먼저(=뒤에), MoodSymbol은 나중에(=앞에) 그려진다.
   //
-  // ⚠️ MoodSymbol은 Live2D 경로에서만 켠다. 심볼 좌표(moodAnchors)가 그 Live2D 모델의 실루엣을
-  // 실측해 잡은 값이라, 비율이 다른 SVG 폴백에 얹으면 하트·눈물이 엉뚱한 데 뜬다.
-  // SVG에도 켜려면 CharacterRenderSpec에 SVG용 앵커를 재서 넣으면 된다.
-  // 반면 MoodBackdrop은 캔버스 중앙의 흐릿한 타원이라 렌더러와 무관하게 안전하다.
+  // MoodSymbol의 심볼 좌표는 렌더러마다 실루엣 비율이 달라 앵커를 나눠 쓴다:
+  // Live2D 경로는 캔버스 실측값(live2d.moodAnchors), SVG 폴백은 viewBox 기준값(svgMoodAnchors).
+  // MoodBackdrop은 캔버스 중앙의 흐릿한 타원이라 렌더러와 무관하게 안전하다.
   if (spec.live2d && !failed) {
     return (
       <div className="relative">
@@ -94,6 +93,7 @@ export function AvatarHero({
         className={className}
         title={title}
       />
+      <MoodSymbol mood={mood} anchors={spec.svgMoodAnchors} />
     </div>
   );
 }

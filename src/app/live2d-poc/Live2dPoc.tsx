@@ -4,13 +4,16 @@ import { useState } from 'react';
 
 import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { COLOR_THEMES, getThemeRoles } from '@/constants/avatar';
+import { CHARACTER_REGISTRY } from '@/constants/character-registry';
 import { MOOD_EXPRESSION } from '@/constants/mood-expression';
 import { cn } from '@/lib/cn';
-import type { ColorTheme } from '@/types/avatar';
+import type { CharacterType, ColorTheme } from '@/types/avatar';
 import type { Mood } from '@/types/mypage/model';
 
 // Mood 유니온을 손으로 다시 나열하면 감정이 추가돼도 타입 검사에 안 걸린다 → 상수 테이블에서 파생.
 const MOODS = Object.keys(MOOD_EXPRESSION) as Mood[];
+// 캐릭터도 레지스트리에서 파생. 레서판다=Live2D, 나머지=SVG 폴백이라 두 경로의 감정 심볼을 함께 검증한다.
+const CHARACTERS = Object.keys(CHARACTER_REGISTRY) as CharacterType[];
 
 // 감정·테마 검증 하네스. 실제 아바타 탭과 **같은 AvatarHero**를 쓴다 —
 // 오버레이 층 순서·심볼 앵커·모델 경로를 여기서 따로 조립하면 POC가 실물과 조용히 어긋난다.
@@ -20,18 +23,37 @@ export function Live2dPoc() {
   // false = 무색(틴트 없이 원본 텍스처 그대로). 털 그레이스케일이 살아있는지 확인할 때 쓴다.
   const [tinted, setTinted] = useState(true);
   const [mood, setMood] = useState<Mood>('보통');
+  const [characterType, setCharacterType] = useState<CharacterType>('레서판다');
 
   return (
     <div className="flex flex-col items-center gap-4 py-8">
       <div className="bg-coral-soft/40 flex size-[360px] items-center justify-center rounded-3xl">
         <AvatarHero
-          characterType="레서판다"
+          characterType={characterType}
           colorTheme={theme}
           mood={mood}
           tinted={tinted}
           size={320}
-          title="레서판다 Live2D"
+          // SVG 폴백은 className이 크기를 정한다(정사각이라야 오버레이 %가 실제 탭과 일치). Live2D는 size로 렌더.
+          className="size-80"
+          title={`${characterType} 아바타`}
         />
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        {CHARACTERS.map((value) => (
+          <button
+            key={value}
+            type="button"
+            onClick={() => setCharacterType(value)}
+            className={cn(
+              'rounded-full border px-3 py-1.5 text-sm transition',
+              characterType === value ? 'border-coral bg-coral-soft/40' : 'border-cream',
+            )}
+          >
+            {value}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-wrap justify-center gap-2">
