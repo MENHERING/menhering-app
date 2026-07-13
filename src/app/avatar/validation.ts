@@ -14,3 +14,12 @@ export const saveAvatarSchema = z.object({
 });
 
 export type SaveAvatarInput = z.infer<typeof saveAvatarSchema>;
+
+// 구매 입력 검증. kind에 따라 허용 value가 달라지므로 discriminated union으로 묶는다.
+// 서버 RPC(_avatar_item_valid)도 같은 화이트리스트를 재검증한다(방어적 이중 검증).
+export const buyAvatarItemSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('character'), value: z.enum(CHARACTER_TYPES) }),
+  z.object({ kind: z.literal('theme'), value: z.enum(COLOR_THEME_VALUES) }),
+]);
+
+export type BuyAvatarItemInput = z.infer<typeof buyAvatarItemSchema>;

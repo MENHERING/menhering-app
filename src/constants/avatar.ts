@@ -31,17 +31,11 @@ export const CHARACTER_TYPES = [
 ] as const satisfies readonly CharacterType[];
 
 // 코인 경제(모델: 한 번 구매하면 보유, 재선택 무료). 미보유 선택분만 결제한다.
+// ⚠️ 이 값은 표시 전용이다. 실제 결제 금액은 서버 RPC(buy_avatar_item)가 자체 보유한 값으로
+// 차감하므로, DB 함수 _avatar_item_cost와 반드시 일치시켜야 한다
+// (supabase/migrations/…_avatar_inventory_purchase.sql).
 export const CHARACTER_COST = 3000;
 export const THEME_COST = 100;
-
-// 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용.
-// TODO: 보유 테이블/컬럼 연동 시 서버 조회값으로 교체.
-export const OWNED_CHARACTERS: readonly CharacterType[] = [DEFAULT_CHARACTER_TYPE];
-// 테마는 선택 전환/효과음 확인을 위해 일부를 보유 상태로 개방(나머지는 잠금 유지).
-export const OWNED_THEMES: readonly ColorTheme[] = [DEFAULT_COLOR_THEME, '라벤더', '민트'];
-
-// 헤더 코인 잔액 placeholder. TODO: users.coin 실조회로 교체(auth 연동 후).
-export const PLACEHOLDER_COIN = 1000;
 
 interface ColorThemeConfig {
   value: ColorTheme;

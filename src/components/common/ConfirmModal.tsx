@@ -19,6 +19,8 @@ interface ConfirmModalProps {
   cancelLabel?: string;
   /** 확인 버튼 비활성 (예: 코인 부족) */
   confirmDisabled?: boolean;
+  /** 확인 처리 중(비동기). 확인 버튼 로딩·백드롭/취소 잠금으로 중복 제출을 막는다. */
+  confirmLoading?: boolean;
   /** 취소 버튼 숨김 → 단일 버튼 안내 모달로 사용 (예: "준비중입니다") */
   hideCancel?: boolean;
   onConfirm: () => void;
@@ -38,6 +40,7 @@ export function ConfirmModal({
   confirmLabel = '확인',
   cancelLabel = '취소',
   confirmDisabled = false,
+  confirmLoading = false,
   hideCancel = false,
   onConfirm,
   onCancel,
@@ -51,6 +54,12 @@ export function ConfirmModal({
     onCancelRef.current = onCancel;
   }, [onCancel]);
 
+  // 처리 중(confirmLoading)엔 취소를 막아야 하므로 최신 값을 ref로 들고 Esc 핸들러에서 참조한다.
+  const confirmLoadingRef = useRef(confirmLoading);
+  useEffect(() => {
+    confirmLoadingRef.current = confirmLoading;
+  }, [confirmLoading]);
+
   // 열릴 때: 다이얼로그로 포커스 이동(키보드 사용자가 모달 안에서 시작) + Esc로 닫기.
   useEffect(() => {
     if (!isOpen) return;
@@ -58,7 +67,7 @@ export function ConfirmModal({
     dialogRef.current?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancelRef.current();
+      if (e.key === 'Escape' && !confirmLoadingRef.current) onCancelRef.current();
     };
     document.addEventListener('keydown', handleKeyDown);
 
@@ -75,11 +84,12 @@ export function ConfirmModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
         >
-          {/* 백드롭: 클릭 시 취소 */}
+          {/* 백드롭: 클릭 시 취소. 처리 중엔 잠금(중복 제출·이탈 방지). */}
           <button
             type="button"
             aria-label="닫기"
             onClick={onCancel}
+            disabled={confirmLoading}
             className="absolute inset-0 bg-black/40"
           />
 
@@ -110,7 +120,13 @@ export function ConfirmModal({
 
             <div className="mt-5 flex gap-2">
               {!hideCancel && (
-                <Button variant="secondary" size="md" isFullWidth onClick={onCancel}>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  isFullWidth
+                  disabled={confirmLoading}
+                  onClick={onCancel}
+                >
                   {cancelLabel}
                 </Button>
               )}
@@ -119,6 +135,7 @@ export function ConfirmModal({
                 size="md"
                 isFullWidth
                 disabled={confirmDisabled}
+                isLoading={confirmLoading}
                 onClick={onConfirm}
               >
                 {confirmLabel}

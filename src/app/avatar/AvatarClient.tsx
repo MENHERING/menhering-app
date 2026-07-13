@@ -11,12 +11,13 @@ import { ConfirmModal } from '@/components/common/ConfirmModal';
 import { Footer } from '@/components/common/Footer';
 import { Header } from '@/components/common/Header';
 import { Toast } from '@/components/common/Toast';
+import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import { useAvatarEconomyStore } from '@/stores/avatar-economy-store';
 import { selectIsDirty, useAvatarStore } from '@/stores/avatar-store';
 import { useUnsavedChangesStore } from '@/stores/unsaved-changes-store';
 import type { Avatar } from '@/types/avatar';
 
-import { saveAvatar } from './actions';
+import { buyAvatarItem, saveAvatar, type OwnedItems } from './actions';
 
 interface Feedback {
   variant: 'success' | 'error';
@@ -26,11 +27,12 @@ interface Feedback {
 interface AvatarClientProps {
   initialAvatar: Avatar;
   initialCoin: number;
+  initialOwned: OwnedItems;
 }
 
-export function AvatarClient({ initialAvatar, initialCoin }: AvatarClientProps) {
+export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: AvatarClientProps) {
   // 서버 조회값으로 스토어를 최초 1회 동기 초기화 (기본값 플래시 방지).
-  // useState 지연 초기화는 마운트당 1회만 실행되며 initFrom/initCoin은 멱등이라 안전하다.
+  // useState 지연 초기화는 마운트당 1회만 실행되며 initFrom/initCoin/initOwned는 멱등이라 안전하다.
   useState(() => {
     useAvatarStore.getState().initFrom({
       characterType: initialAvatar.characterType,
@@ -38,6 +40,17 @@ export function AvatarClient({ initialAvatar, initialCoin }: AvatarClientProps) 
       nickname: initialAvatar.nickname,
     });
     useAvatarEconomyStore.getState().initCoin(initialCoin);
+    // 서버 보유목록에 기본값·현재 장착값을 항상 합집합으로 넣는다(중복 제거). 조회가 빈 배열이거나
+    // 일시 오류로 기본값만 폴백돼도, 장착 중인 항목이 픽커에서 잠금/재구매로 잘못 뜨는 것을 막는다
+    // (장착은 보유한 것만 가능하므로 장착값=보유값으로 간주해도 안전).
+    useAvatarEconomyStore.getState().initOwned({
+      characters: Array.from(
+        new Set([DEFAULT_CHARACTER_TYPE, initialAvatar.characterType, ...initialOwned.characters]),
+      ),
+      themes: Array.from(
+        new Set([DEFAULT_COLOR_THEME, initialAvatar.colorTheme, ...initialOwned.themes]),
+      ),
+    });
     return null;
   });
 
@@ -46,10 +59,12 @@ export function AvatarClient({ initialAvatar, initialCoin }: AvatarClientProps) 
   const nickname = useAvatarStore((s) => s.nickname);
   const isDirty = useAvatarStore(selectIsDirty);
 
-  // 코인 잔액은 서버(users.coin)에서 initCoin으로 주입된 값. 보유 목록·구매 차감은 아직 데모(새로고침 리셋).
+  // 코인 잔액·보유 목록은 서버(users.coin, avatar_inventory)에서 주입된 값. 구매는 서버 RPC로 반영.
   const coin = useAvatarEconomyStore((s) => s.coin);
   const pendingBuy = useAvatarEconomyStore((s) => s.pendingBuy);
-  const confirmBuy = useAvatarEconomyStore((s) => s.confirmBuy);
+  const isBuying = useAvatarEconomyStore((s) => s.isBuying);
+  const setBuying = useAvatarEconomyStore((s) => s.setBuying);
+  const applyPurchase = useAvatarEconomyStore((s) => s.applyPurchase);
   const cancelBuy = useAvatarEconomyStore((s) => s.cancelBuy);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -105,18 +120,40 @@ export function AvatarClient({ initialAvatar, initialCoin }: AvatarClientProps) 
     }
   };
 
-  // 구매 확정: 결제가 성공한 경우에만 산 항목을 장착 후보로 선택한다(실제 장착은 저장에서).
-  // 결제 실패(잔액 부족 등) 시엔 장착하지 않아 "안 산 항목이 장착되는" 어긋남을 막는다.
-  const handleConfirmBuy = () => {
+  // 구매 확정: 서버 RPC(buy_avatar_item)가 코인 차감·보유 지급을 원자적으로 처리한다.
+  // 성공 시에만 반환된 잔액을 반영하고 산 항목을 장착 후보로 선택한다(실제 장착은 저장에서).
+  // 실패(잔액 부족·이미 보유 등) 시엔 장착하지 않아 "안 산 항목이 장착되는" 어긋남을 막는다.
+  const handleConfirmBuy = async () => {
     const buy = pendingBuy;
-    if (!buy) return;
+    // isBuying(구독값)은 렌더 클로저라 한 박자 늦다 → 더블탭 시 두 번째 클릭이 낡은 false를 읽고
+    // 통과할 수 있으므로 라이브 스토어 값으로 재확인해 중복 제출을 막는다.
+    if (!buy || useAvatarEconomyStore.getState().isBuying) return;
 
-    if (!confirmBuy()) return;
+    setBuying(true);
 
-    if (buy.kind === 'character') {
-      useAvatarStore.getState().setCharacterType(buy.value);
-    } else {
-      useAvatarStore.getState().setColorTheme(buy.value);
+    try {
+      // buy(PendingBuy)를 그대로 넘긴다 — kind/value로 분해하면 판별 유니온 상관관계가 깨진다.
+      // 여분 필드(cost)는 스키마 파싱에서 걸러지고, 결제 금액은 서버가 자체 값으로 정한다.
+      const result = await buyAvatarItem(buy);
+
+      if (result.ok) {
+        applyPurchase(buy, result.coin);
+        if (buy.kind === 'character') {
+          useAvatarStore.getState().setCharacterType(buy.value);
+        } else {
+          useAvatarStore.getState().setColorTheme(buy.value);
+        }
+        setFeedback({ variant: 'success', message: '구매했어요!' });
+      } else {
+        cancelBuy();
+        setFeedback({ variant: 'error', message: result.error });
+      }
+    } catch (error) {
+      console.error('[avatar] 구매 중 오류:', error);
+      cancelBuy();
+      setFeedback({ variant: 'error', message: '구매 중 오류가 발생했습니다.' });
+    } finally {
+      setBuying(false);
     }
   };
 
@@ -177,7 +214,8 @@ export function AvatarClient({ initialAvatar, initialCoin }: AvatarClientProps) 
           canAfford ? '구매하면 계속 보유하고 무료로 사용할 수 있어요.' : '코인이 부족해요.'
         }
         confirmLabel="구매"
-        confirmDisabled={!canAfford}
+        confirmDisabled={!canAfford || isBuying}
+        confirmLoading={isBuying}
         onConfirm={handleConfirmBuy}
         onCancel={cancelBuy}
       />
