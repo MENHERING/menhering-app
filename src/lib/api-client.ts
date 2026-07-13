@@ -25,7 +25,9 @@ async function coreFetch<T>(
   });
 
   if (res.status === 401 && redirectOn401 && typeof window !== 'undefined') {
-    window.location.href = '/sign-in';
+    window.location.href = '/login';
+
+    return new Promise(() => {});
   }
 
   if (!res.ok) {
