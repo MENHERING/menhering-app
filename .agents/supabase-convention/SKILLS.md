@@ -20,6 +20,13 @@
 - 브라우저용/서버용 클라이언트를 분리합니다. (`@supabase/ssr` 사용)
   - `src/lib/supabase/client.ts` (브라우저), `src/lib/supabase/server.ts` (서버 컴포넌트/Route Handler) — 기본 보일러플레이트 제공됨
 
+## 세션 갱신 / 라우트 보호 (Proxy)
+
+- Next.js 16부터 기존 `middleware.ts`는 `src/proxy.ts`로 대체됩니다. 로그인 여부에 따른 라우트 보호는 이 파일에서 처리합니다.
+- Supabase 세션 쿠키 갱신 로직은 `src/lib/supabase/middleware.ts`의 `updateSession()`에 두고, `proxy.ts`는 이를 호출해 `user` 유무만 판단합니다.
+- 로그인 없이 접근 가능한 경로는 `proxy.ts`의 `PUBLIC_PATHS`(정확히 일치하는 경로) / `PUBLIC_PREFIXES`(접두사)에 추가합니다. 새로운 공개 페이지·공개 API를 추가할 때 여기 등록하지 않으면 로그인 페이지로 리다이렉트됩니다.
+- 비로그인 사용자가 보호된 경로에 접근하면 `/login?next=<원래 경로>`로 리다이렉트합니다.
+
 ## RLS / 마이그레이션 (기본 원칙)
 
 - 모든 테이블에 **RLS(Row Level Security)를 활성화**하고, 정책 없이 공개하지 않습니다.

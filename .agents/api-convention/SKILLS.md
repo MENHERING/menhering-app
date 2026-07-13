@@ -82,8 +82,12 @@ export type Health = z.infer<typeof HealthSchema>;
 // src/app/api/health/route.ts
 import { NextResponse } from 'next/server';
 
+import { HealthSchema } from '@/schemas/health.schema';
+
 export async function GET() {
-  return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const body = HealthSchema.parse({ status: 'ok', timestamp: new Date().toISOString() });
+
+  return NextResponse.json(body);
 }
 ```
 
