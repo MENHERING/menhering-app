@@ -46,9 +46,6 @@ const QUESTIONS: Question[] = [
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
-// 진행바 폭 — 문항 수(QUESTIONS.length)에 맞춘 분수 클래스 (인라인 스타일 대체)
-const PROGRESS_WIDTH = ['w-1/3', 'w-2/3', 'w-full'];
-
 // TODO: 실제 추천 알고리즘으로 교체. 임시: 선택지 인덱스(0~3) 평균 → 레벨 1~5 매핑
 function calcRecommendedStep(answers: number[]): number {
   if (answers.length === 0) return 2;
@@ -65,6 +62,8 @@ export function LevelTestScreen() {
   const question = QUESTIONS[index];
   const selected = answers[index];
   const isLast = index === QUESTIONS.length - 1;
+  // 문항 수 무관 진행률(%) — 동적 값이라 인라인 스타일로 처리
+  const progressPercent = ((index + 1) / QUESTIONS.length) * 100;
 
   const handleSelect = (optionIndex: number) => {
     setAnswers((prev) => {
@@ -98,11 +97,10 @@ export function LevelTestScreen() {
         {/* 진행바 */}
         <div className="mt-6 flex flex-col items-center gap-2">
           <div className="bg-coral-soft/50 h-1.5 w-full overflow-hidden rounded-full">
+            {/* 진행바 폭은 문항 수에 무관한 런타임 값이라 인라인 스타일 예외 허용 (Tailwind 정적 클래스로 표현 불가) */}
             <div
-              className={cn(
-                'bg-coral h-full rounded-full transition-[width]',
-                PROGRESS_WIDTH[index] ?? 'w-full',
-              )}
+              className="bg-coral h-full rounded-full transition-[width]"
+              style={{ width: `${progressPercent}%` }}
             />
           </div>
           <span className="text-coral text-xs font-bold">

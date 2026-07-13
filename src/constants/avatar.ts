@@ -18,11 +18,22 @@ export const CHARACTER_TYPES = [
   '고양이',
 ] as const satisfies readonly CharacterType[];
 
+// 코인 경제(모델: 한 번 구매하면 보유, 재선택 무료). 미보유 선택분만 결제한다.
+export const CHARACTER_COST = 3000;
+export const THEME_COST = 100;
+
+// 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용.
+// TODO: 보유 테이블/컬럼 연동 시 서버 조회값으로 교체.
+export const OWNED_CHARACTERS: readonly CharacterType[] = [DEFAULT_CHARACTER_TYPE];
+// 테마는 선택 전환/효과음 확인을 위해 일부를 보유 상태로 개방(나머지는 잠금 유지).
+export const OWNED_THEMES: readonly ColorTheme[] = [DEFAULT_COLOR_THEME, '라벤더', '민트'];
+
+// 헤더 코인 잔액 placeholder. TODO: users.coin 실조회로 교체(auth 연동 후).
+export const PLACEHOLDER_COIN = 1000;
+
 interface ColorThemeConfig {
   value: ColorTheme;
-  // 프리셋 스와치 미리보기(밝은 → 어두운). roles와 별개로 UI 표시용.
-  swatches: readonly [string, string, string];
-  // 캐릭터 SVG 색 슬롯 매핑
+  // 캐릭터 색 슬롯 매핑. body는 픽커 스와치·Live2D 틴트에 함께 쓰인다.
   roles: ThemeRoles;
 }
 
@@ -30,33 +41,27 @@ interface ColorThemeConfig {
 export const COLOR_THEMES: readonly ColorThemeConfig[] = [
   {
     value: '클래식',
-    swatches: ['#E8563A', '#F0D9CC', '#3D3D3D'],
     roles: { body: '#E8563A', secondary: '#F0D9CC', accent: '#3D3D3D' },
   },
   {
     value: '라벤더',
-    swatches: ['#C9B8F0', '#B191E8', '#7A3FB0'],
     roles: { body: '#B191E8', secondary: '#EFE7FB', accent: '#4A2A73' },
   },
   {
     value: '민트',
-    swatches: ['#A7E8C6', '#7BD3A6', '#1E5B3A'],
     roles: { body: '#7BD3A6', secondary: '#E4F7ED', accent: '#154A2E' },
   },
   {
     value: '피치',
-    swatches: ['#F9C6D3', '#F79EC0', '#C81E3A'],
     roles: { body: '#F79EC0', secondary: '#FDE7EE', accent: '#8E1327' },
   },
   {
     value: '스카이',
-    swatches: ['#BFE1F3', '#8CCDEC', '#12405F'],
     roles: { body: '#8CCDEC', secondary: '#E6F4FC', accent: '#123F5E' },
   },
   {
     value: '선샤인',
-    swatches: ['#E8C15C', '#F1DFA0', '#7A5A1E'],
-    roles: { body: '#E8C15C', secondary: '#FBF1CF', accent: '#6E5017' },
+    roles: { body: '#FFD400', secondary: '#FAF3E6', accent: '#6B4A22' },
   },
 ];
 
