@@ -20,6 +20,9 @@ export const KAKAO_NEXT_COOKIE = 'kakao_oauth_next';
 // 인가 요청~콜백 사이에만 유효하면 되는 일회성 쿠키.
 export const KAKAO_COOKIE_MAX_AGE = 600;
 
+// 토큰 교환 요청 제한 시간. 카카오 응답이 지연돼도 로그인 흐름이 멈추지 않게 한다.
+export const KAKAO_TOKEN_TIMEOUT_MS = 5000;
+
 export const KAKAO_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',

@@ -5,6 +5,7 @@ import {
   KAKAO_NEXT_COOKIE,
   KAKAO_NONCE_COOKIE,
   KAKAO_STATE_COOKIE,
+  KAKAO_TOKEN_TIMEOUT_MS,
   KAKAO_TOKEN_URL,
   getKakaoRedirectUri,
 } from '@/lib/auth/kakao';
@@ -39,25 +40,36 @@ export async function GET(request: Request) {
     return NextResponse.redirect(failureUrl);
   }
 
-  const tokenResponse = await fetch(KAKAO_TOKEN_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'authorization_code',
-      client_id: process.env.KAKAO_REST_API_KEY,
-      client_secret: process.env.KAKAO_CLIENT_SECRET,
-      redirect_uri: getKakaoRedirectUri(request),
-      code,
-    }),
-  });
+  let tokens: KakaoTokenResponse;
 
-  if (!tokenResponse.ok) {
-    console.error('카카오 토큰 교환 실패:', tokenResponse.status);
+  try {
+    const tokenResponse = await fetch(KAKAO_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: process.env.KAKAO_REST_API_KEY,
+        client_secret: process.env.KAKAO_CLIENT_SECRET,
+        redirect_uri: getKakaoRedirectUri(request),
+        code,
+      }),
+      // 카카오 응답 지연 시 로그인 요청이 무한정 대기하지 않도록 제한한다.
+      signal: AbortSignal.timeout(KAKAO_TOKEN_TIMEOUT_MS),
+    });
+
+    if (!tokenResponse.ok) {
+      console.error('카카오 토큰 교환 실패:', tokenResponse.status);
+      return NextResponse.redirect(failureUrl);
+    }
+
+    tokens = await tokenResponse.json();
+  } catch (error) {
+    // 네트워크 장애·타임아웃·JSON 파싱 실패 → 로그인 화면으로 되돌린다.
+    console.error('카카오 토큰 요청 오류:', error);
     return NextResponse.redirect(failureUrl);
   }
 
-  const { id_token: idToken, access_token: accessToken }: KakaoTokenResponse =
-    await tokenResponse.json();
+  const { id_token: idToken, access_token: accessToken } = tokens;
 
   if (!idToken) {
     console.error('카카오 응답에 id_token 없음 (OpenID Connect 활성화 여부 확인)');
