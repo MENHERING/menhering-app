@@ -25,17 +25,19 @@ interface Feedback {
 
 interface AvatarClientProps {
   initialAvatar: Avatar;
+  initialCoin: number;
 }
 
-export function AvatarClient({ initialAvatar }: AvatarClientProps) {
+export function AvatarClient({ initialAvatar, initialCoin }: AvatarClientProps) {
   // 서버 조회값으로 스토어를 최초 1회 동기 초기화 (기본값 플래시 방지).
-  // useState 지연 초기화는 마운트당 1회만 실행되며 initFrom은 멱등이라 안전하다.
+  // useState 지연 초기화는 마운트당 1회만 실행되며 initFrom/initCoin은 멱등이라 안전하다.
   useState(() => {
     useAvatarStore.getState().initFrom({
       characterType: initialAvatar.characterType,
       colorTheme: initialAvatar.colorTheme,
       nickname: initialAvatar.nickname,
     });
+    useAvatarEconomyStore.getState().initCoin(initialCoin);
     return null;
   });
 
@@ -44,7 +46,7 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
   const nickname = useAvatarStore((s) => s.nickname);
   const isDirty = useAvatarStore(selectIsDirty);
 
-  // 코인/보유는 클라이언트 데모 스토어(새로고침 시 리셋). TODO: 서버(users.coin+보유)로 교체.
+  // 코인 잔액은 서버(users.coin)에서 initCoin으로 주입된 값. 보유 목록·구매 차감은 아직 데모(새로고침 리셋).
   const coin = useAvatarEconomyStore((s) => s.coin);
   const pendingBuy = useAvatarEconomyStore((s) => s.pendingBuy);
   const confirmBuy = useAvatarEconomyStore((s) => s.confirmBuy);
@@ -126,7 +128,7 @@ export function AvatarClient({ initialAvatar }: AvatarClientProps) {
       <Header
         title="아바타"
         leftType="none"
-        // 코인 잔액(헤더 우측). TODO: users.coin 실조회로 교체(auth 후)
+        // 코인 잔액(헤더 우측) — users.coin 실조회값.
         rightElement={<CoinBadge amount={coin} />}
       />
 

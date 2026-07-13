@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AvatarPage() {
-  const avatar = await getMyAvatar();
+  const { avatar, coin } = await getMyAvatar();
 
-  return <AvatarClient initialAvatar={avatar} />;
+  return <AvatarClient initialAvatar={avatar} initialCoin={coin} />;
 }

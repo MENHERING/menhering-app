@@ -21,7 +21,7 @@ function fallbackAvatar(): Avatar {
 }
 
 // Postgres 함수 get_my_avatar가 돌려주는 행(untyped supabase 클라이언트라 반환 타입을 명시).
-// users 기준 left join avatars이므로, 아바타가 아직 없으면 avatar 필드는 null이고 nickname만 온다.
+// users 기준 left join avatars이므로, 아바타가 아직 없으면 avatar 필드는 null이고 nickname·coin만 온다.
 interface AvatarRpcRow {
   id: string | null;
   user_id: string;
@@ -30,42 +30,53 @@ interface AvatarRpcRow {
   created_at: string | null;
   updated_at: string | null;
   nickname: string | null;
+  coin: number | null;
+}
+
+// 아바타 페이지 초기 데이터: 아바타 + 코인 잔액(users.coin). 같은 조회에서 함께 받아 왕복을 줄인다.
+export interface MyAvatarData {
+  avatar: Avatar;
+  coin: number;
 }
 
 /**
- * 로그인 유저의 아바타(+닉네임)를 Postgres 함수 get_my_avatar 하나로 조회한다(왕복 3→1).
+ * 로그인 유저의 아바타·닉네임·코인을 Postgres 함수 get_my_avatar 하나로 조회한다(왕복 3→1).
  * 유저 식별은 함수 내부 auth.uid()가 하고 RLS(본인 행)로 스코프된다. 함수는 users 기준이라
- * 아바타 row가 없어도(첫 저장 전) 닉네임은 온다 — 실제 아바타 생성은 저장(save_avatar upsert) 시.
+ * 아바타 row가 없어도(첫 저장 전) 닉네임·코인은 온다 — 실제 아바타 생성은 저장(save_avatar upsert) 시.
  */
-export async function getMyAvatar(): Promise<Avatar> {
+export async function getMyAvatar(): Promise<MyAvatarData> {
   const supabase = await createClient();
 
   const { data, error } = await supabase.rpc('get_my_avatar').maybeSingle<AvatarRpcRow>();
 
   if (error) {
     console.error('[avatar] 아바타 조회 실패:', error);
-    return fallbackAvatar();
+    return { avatar: fallbackAvatar(), coin: 0 };
   }
 
   // users 행이 없으면(비로그인) 전체 폴백.
-  if (!data) return fallbackAvatar();
+  if (!data) return { avatar: fallbackAvatar(), coin: 0 };
 
   const nickname = data.nickname ?? DEFAULT_NICKNAME;
+  const coin = data.coin ?? 0;
 
   // 아바타 row가 아직 없으면(첫 저장 전) 기본 아바타에 실제 닉네임만 얹는다.
   // 닉네임을 avatars 존재 여부와 분리해, 신규 유저가 기본 닉네임으로 덮이는 것을 막는다.
   if (!data.id) {
-    return { ...fallbackAvatar(), userId: data.user_id, nickname };
+    return { avatar: { ...fallbackAvatar(), userId: data.user_id, nickname }, coin };
   }
 
   return {
-    id: data.id,
-    userId: data.user_id,
-    characterType: (data.character_type ?? DEFAULT_CHARACTER_TYPE) as CharacterType,
-    colorTheme: (data.color_theme ?? DEFAULT_COLOR_THEME) as ColorTheme,
-    nickname,
-    createdAt: data.created_at ?? new Date().toISOString(),
-    updatedAt: data.updated_at ?? new Date().toISOString(),
+    avatar: {
+      id: data.id,
+      userId: data.user_id,
+      characterType: (data.character_type ?? DEFAULT_CHARACTER_TYPE) as CharacterType,
+      colorTheme: (data.color_theme ?? DEFAULT_COLOR_THEME) as ColorTheme,
+      nickname,
+      createdAt: data.created_at ?? new Date().toISOString(),
+      updatedAt: data.updated_at ?? new Date().toISOString(),
+    },
+    coin,
   };
 }
 
