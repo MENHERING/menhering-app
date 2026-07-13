@@ -28,18 +28,24 @@ export function SocialLoginButtons({
 
   const handleGoogleLogin = async () => {
     setPending('google');
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
-    });
 
-    // 정상 흐름에선 provider 페이지로 리다이렉트되어 이 아래는 실행되지 않음.
-    // 에러 시에만 도달 → pending 해제해 재시도 가능하게.
-    if (error) {
-      console.error('소셜 로그인 실패:', error.message);
+    // 정상 흐름에선 provider 페이지로 리다이렉트되어 아래 에러 처리는 실행되지 않는다.
+    // 실패 시에만 도달 → pending을 해제해 버튼이 비활성으로 고착되지 않게 한다.
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+
+      if (error) {
+        console.error('소셜 로그인 실패:', error.message);
+        setPending(null);
+      }
+    } catch (error) {
+      console.error('소셜 로그인 실패:', error);
       setPending(null);
     }
   };
