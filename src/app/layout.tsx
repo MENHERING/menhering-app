@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 
 import './globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: '멘헤링',
@@ -22,7 +23,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="h-full antialiased">
-      <body className="bg-sand text-plum flex min-h-full flex-col">{children}</body>
+      <body className="bg-sand text-plum flex min-h-full flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

@@ -92,6 +92,13 @@ export function ProductCard({ id, name, price, onSelect }: ProductCardProps) {
 - ❌ 인라인 스타일 금지 → Tailwind CSS 사용
 - ❌ `any` 타입 사용 금지
 
+**예외 (default export 필수)**: Next.js App Router 예약 파일은 프레임워크 요구사항으로 default export가 강제되며, `eslint.config.mjs`에서도 아래 파일 패턴에 대해 `import/no-default-export` 규칙을 명시적으로 off 처리합니다. 이 경로들은 default export 사용이 컨벤션 위반이 아닙니다.
+
+- `src/app/**/page.tsx`, `layout.tsx`, `error.tsx`, `loading.tsx`, `not-found.tsx`, `template.tsx`
+- 설정 파일: `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`, `eslint.config.mjs`, `commitlint.config.mjs`
+
+> `route.ts`는 default export 대상이 아닙니다. Route Handler는 `GET`/`POST` 등 HTTP 메서드명의 named export를 사용하므로 1번 규칙(`export function` 사용)을 그대로 따릅니다.
+
 ---
 
 ## 3. TypeScript
@@ -124,6 +131,7 @@ const user: User = response as User;
 - `interface`: 확장 가능한 객체 형태에 사용
 - `type`: 유니온 / 유틸리티 타입에 사용
 - `any` 사용 금지 → `unknown` 또는 명시적 타입으로 대체
+- 타입 단언(`as`)은 최소화: 옵셔널/필수 불일치를 `as`로 덮어쓰지 말고, 실제 사용 패턴에 맞게 원본 타입 정의(옵셔널 여부 등)를 먼저 수정할 것 (`as const`처럼 리터럴 타입을 좁히는 용도는 예외)
 
 ---
 
@@ -146,10 +154,10 @@ const user: User = response as User;
 ESLint `import/order` 규칙에 의해 자동 정렬됩니다. (`eslint.config.mjs`)
 
 ```tsx
-// 1. builtin (React)
+// 1. builtin (React가 external 그룹 내 최우선)
 import { useState, useEffect } from 'react';
 
-// 2. external (node_modules)
+// 2. external (node_modules, 그 외 알파벳순)
 import { create } from 'zustand';
 
 // 3. internal (@/ alias)
@@ -161,7 +169,9 @@ import { formatDate } from '../utils';
 import { ProductCard } from './ProductCard';
 ```
 
-순서: `builtin` → `external` → `internal(@/)` → `parent/sibling`
+- 순서: `builtin` → `external`(react 최우선) → `internal(@/)` → `parent/sibling`
+- 그룹 간 빈 줄 필수 (`newlines-between: 'always'`)
+- 그룹 내 알파벳 정렬 (`alphabetize: asc, caseInsensitive`)
 
 ---
 
