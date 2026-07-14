@@ -1,4 +1,4 @@
-import type { DifficultyLevel, LevelTitle } from '@/types/level';
+import type { DifficultyLevel } from '@/types/level';
 
 // 실력 단계 — 온보딩 레벨 선택과 학습 화면 난이도 드롭다운이 함께 쓰는 단일 출처.
 export const LEVELS: DifficultyLevel[] = [
@@ -36,17 +36,6 @@ export const LEVELS: DifficultyLevel[] = [
 
 // 온보딩에서 아무것도 안 고른 상태의 기본 선택(가운데 단계).
 export const DEFAULT_LEVEL_STEP = 3;
-
-export const LEVEL_STEPS = LEVELS.map(({ step }) => step);
-
-// DB(user_progress.level) 저장값. Zod enum이 리터럴 튜플을 요구해 LEVELS와 별도로 둔다.
-export const LEVEL_TITLES = [
-  '입문',
-  '초급',
-  '중급',
-  '고급',
-  '전문가',
-] as const satisfies readonly LevelTitle[];
 
 export function findLevelByStep(step: number): DifficultyLevel | undefined {
   return LEVELS.find((level) => level.step === step);
