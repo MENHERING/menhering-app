@@ -1,6 +1,28 @@
-import Image from 'next/image';
+'use client';
 
-export function SplashScreen() {
+import { useEffect } from 'react';
+
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+// 브랜드 노출 시간(ms)
+const SPLASH_DURATION_MS = 2000;
+
+interface SplashScreenProps {
+  // 노출이 끝난 뒤 이동할 경로 (서버에서 세션·레벨 상태로 결정)
+  nextPath: string;
+}
+
+export function SplashScreen({ nextPath }: SplashScreenProps) {
+  const router = useRouter();
+
+  useEffect(() => {
+    // replace: 뒤로가기로 스플래시에 되돌아오지 않도록 한다.
+    const timer = setTimeout(() => router.replace(nextPath), SPLASH_DURATION_MS);
+
+    return () => clearTimeout(timer);
+  }, [router, nextPath]);
+
   return (
     <div className="bg-sand relative flex min-h-dvh w-full flex-col items-center overflow-hidden px-6">
       <div className="flex w-full max-w-[430px] flex-1 flex-col items-center justify-center gap-10">

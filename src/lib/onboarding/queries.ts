@@ -48,13 +48,28 @@ export async function getOnboardingStatus(): Promise<OnboardingStatus> {
 }
 
 /**
- * 로그인 직후 이동할 경로.
- * 레벨이 없는 신규 유저만 온보딩으로 보내고, 그 외에는 원래 가려던 경로로 보낸다.
+ * 온보딩 상태 → 이동 경로. 세션·레벨 상태를 이미 조회한 곳에서 재조회 없이 쓰는 순수 함수다.
+ * 레벨이 없는 신규 유저만 온보딩으로 보내고, 그 외에는 next로 보낸다.
  * 판별 불가(unknown)일 때 온보딩으로 보내지 않는 이유: 저장이 함께 실패하는 상황이면
  * 온보딩을 끝낼 수 없어 로그인할 때마다 같은 화면에 갇히기 때문이다.
  */
-export async function resolvePostLoginPath(next: string): Promise<string> {
-  const onboarding = await getOnboardingStatus();
+export function toEntryPath(onboarding: OnboardingStatus, next: string = ROUTES.HOME): string {
+  switch (onboarding.status) {
+    case 'unauthenticated':
+      return ROUTES.LOGIN;
+    case 'incomplete':
+      return ROUTES.LEVEL;
+    default:
+      return next;
+  }
+}
 
-  return onboarding.status === 'incomplete' ? ROUTES.LEVEL : next;
+// 로그인 직후 이동할 경로. next는 로그인 전에 가려던 경로다.
+export async function resolvePostLoginPath(next: string): Promise<string> {
+  return toEntryPath(await getOnboardingStatus(), next);
+}
+
+// 앱에 다시 진입했을 때(스플래시) 보여줄 경로. 세션이 살아 있으면 로그인 화면을 다시 띄우지 않는다.
+export async function resolveEntryPath(): Promise<string> {
+  return toEntryPath(await getOnboardingStatus());
 }
