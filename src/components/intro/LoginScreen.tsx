@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 import { SocialLoginButtons } from '@/components/intro/SocialLoginButtons';
 
@@ -78,13 +77,6 @@ export function LoginScreen({ variant = 'new', next }: LoginScreenProps) {
 
         <div className="mt-auto mb-10 flex flex-col gap-3">
           <SocialLoginButtons kakaoLabel={copy.kakao} googleLabel={copy.google} next={next} />
-
-          {/* 개발용 임시 이동 - OAuth 미설정 환경 우회 */}
-          {process.env.NODE_ENV === 'development' && (
-            <Link href="/level" className="text-primary/90 mt-1 text-center text-xl font-medium">
-              [개발용] 로그인 패스(레벨 테스트)
-            </Link>
-          )}
         </div>
       </div>
     </div>
