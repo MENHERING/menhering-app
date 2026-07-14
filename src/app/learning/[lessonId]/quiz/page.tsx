@@ -87,6 +87,8 @@ export default function QuizPage() {
         },
         {
           onSuccess: (result) => {
+            // TODO(#53 후속): result.isSuccess를 쿼리로 넘겨서 실패 시 결과 화면이
+            // 분기되게 해야 한다. 지금은 버려지고 있어 실패해도 항상 성공 UI로 렌더됨.
             router.push(
               `/learning/${lessonId}/result?correct=${result.correctCount}&wrong=${result.wrongCount}`,
             );

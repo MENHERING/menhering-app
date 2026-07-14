@@ -53,6 +53,9 @@ export default async function QuizResultPage({
   const gainPercent = correctCount * MOOD_GAIN_PER_CORRECT;
   const xpReward = correctCount * XP_PER_CORRECT;
 
+  // TODO(#53 후속): 스테이지 실패(5문제 전부 정답 못함) 시 결과 화면을 성공과 다르게 분기해야 한다.
+  // submit_quiz_result RPC의 isSuccess를 퀴즈 페이지에서 여기로 쿼리로 넘겨받아,
+  // 실패면 타이틀·XP 뱃지·CTA(재도전 우선 노출)를 다르게 보여줘야 함. 지금은 항상 성공 UI로만 렌더됨.
   return (
     <>
       <QuizAvatarRing happinessPercent={happinessPercent} />
