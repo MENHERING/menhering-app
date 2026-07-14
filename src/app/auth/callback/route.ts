@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { getBaseUrl, sanitizeNextPath } from '@/lib/auth/redirect';
+import { resolvePostLoginPath } from '@/lib/onboarding/queries';
 import { createClient } from '@/lib/supabase/server';
 
 // Supabase 소셜 로그인(구글) 콜백. 인가 코드를 세션으로 교환한 뒤 next 경로로 이동한다.
@@ -16,7 +17,10 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      return NextResponse.redirect(`${baseUrl}${next}`);
+      // 레벨을 아직 안 정한 신규 유저는 홈 대신 온보딩으로 보낸다.
+      const destination = await resolvePostLoginPath(next);
+
+      return NextResponse.redirect(`${baseUrl}${destination}`);
     }
 
     console.error('소셜 로그인 세션 교환 실패:', error.message);

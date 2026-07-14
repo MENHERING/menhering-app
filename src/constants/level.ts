@@ -33,3 +33,10 @@ export const LEVELS: DifficultyLevel[] = [
     resultDesc: '아키텍처와 엣지케이스를 아우르는 단계예요.',
   },
 ];
+
+// 온보딩에서 아무것도 안 고른 상태의 기본 선택(가운데 단계).
+export const DEFAULT_LEVEL_STEP = 3;
+
+export function findLevelByStep(step: number): DifficultyLevel | undefined {
+  return LEVELS.find((level) => level.step === step);
+}

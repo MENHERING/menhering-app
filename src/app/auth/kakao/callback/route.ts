@@ -11,6 +11,7 @@ import {
   getKakaoRedirectUri,
 } from '@/lib/auth/kakao';
 import { getBaseUrl, sanitizeNextPath } from '@/lib/auth/redirect';
+import { resolvePostLoginPath } from '@/lib/onboarding/queries';
 import { createClient } from '@/lib/supabase/server';
 
 interface KakaoTokenResponse {
@@ -118,5 +119,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(failureUrl);
   }
 
-  return NextResponse.redirect(`${baseUrl}${next}`);
+  // 레벨을 아직 안 정한 신규 유저는 홈 대신 온보딩으로 보낸다.
+  const destination = await resolvePostLoginPath(next);
+
+  return NextResponse.redirect(`${baseUrl}${destination}`);
 }
