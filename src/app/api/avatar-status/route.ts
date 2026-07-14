@@ -23,8 +23,9 @@ export async function GET() {
     return NextResponse.json({ message: '감정 상태를 불러오지 못했습니다.' }, { status: 500 });
   }
 
-  // DB 값이 범위를 벗어나도(0~100 밖) 스키마 검증에서 throw나지 않도록 클램프한다.
-  const moodValue = Math.min(100, Math.max(0, data?.mood_value ?? DEFAULT_MOOD_VALUE));
+  // DB 값이 범위(0~100)를 벗어나거나 비정수여도 스키마(z.number().int())에서 throw나지 않도록
+  // 클램프 후 반올림한다. 클램프만으로는 소수점이 남아 int 검증이 잡히지 않는 500을 낼 수 있다.
+  const moodValue = Math.round(Math.min(100, Math.max(0, data?.mood_value ?? DEFAULT_MOOD_VALUE)));
 
   // 수치→라벨 가공은 여기(서버)서 끝내고, 프론트는 표시만 하도록 mood를 함께 내려준다.
   const body = AvatarStatusSchema.parse({

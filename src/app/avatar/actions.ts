@@ -6,6 +6,7 @@ import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';
 
 import {
   buyAvatarItemSchema,
+  inventoryRowsSchema,
   saveAvatarSchema,
   type BuyAvatarItemInput,
   type SaveAvatarInput,
@@ -91,11 +92,6 @@ export interface OwnedItems {
   themes: ColorTheme[];
 }
 
-interface InventoryRow {
-  item_kind: string;
-  item_value: string;
-}
-
 /**
  * 로그인 유저의 보유 목록을 조회한다. 유저 식별은 함수 내부 auth.uid()가 하고 RLS로 스코프된다.
  * 조회 실패 시 최소 기본값(레서판다/클래식)으로 폴백해, 최소한 기본 항목은 장착·선택 가능하게 한다.
@@ -105,13 +101,16 @@ export async function getMyAvatarItems(): Promise<OwnedItems> {
 
   const { data, error } = await supabase.rpc('get_my_avatar_items');
 
-  if (error || !data) {
+  const parsed = inventoryRowsSchema.safeParse(data);
+
+  if (error || !parsed.success) {
     if (error) console.error('[avatar] 보유 목록 조회 실패:', error);
+    else console.error('[avatar] 보유 목록 형식 오류:', parsed.error);
 
     return { characters: [DEFAULT_CHARACTER_TYPE], themes: [DEFAULT_COLOR_THEME] };
   }
 
-  const rows = data as InventoryRow[];
+  const rows = parsed.data;
   const characters = rows
     .filter((row) => row.item_kind === 'character')
     .map((row) => row.item_value as CharacterType);
