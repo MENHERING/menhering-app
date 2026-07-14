@@ -30,9 +30,12 @@ export interface MoodSymbolAnchors {
 
 // 캐릭터별 렌더 방식의 단일 출처.
 // - Svg: 항상 존재. 픽커 썸네일·홈/마이페이지 재사용·Live2D 폴백에 쓰는 벡터 렌더.
+// - svgMoodAnchors: SVG 렌더 시 감정 심볼 위치. viewBox(0 0 200 200) 기준이라 좌표를 그대로
+//   %(=좌표/2)로 환산해 잡는다. Live2D 실루엣과 비율이 달라 live2d.moodAnchors와 값이 다르다.
 // - live2d: 있으면 히어로(메인 프리뷰)에서 Live2D로 렌더한다. 없으면 SVG.
 export interface CharacterRenderSpec {
   Svg: CharacterSvg;
+  svgMoodAnchors: MoodSymbolAnchors;
   live2d?: { modelUrl: string; moodAnchors: MoodSymbolAnchors };
   // 있으면 픽커 썸네일을 이 이미지의 얼굴 크롭으로 렌더한다. 없으면 Svg 썸네일.
   thumbnail?: string;
@@ -43,6 +46,13 @@ export interface CharacterRenderSpec {
 export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
   레서판다: {
     Svg: RedPandaSvg,
+    // SVG 폴백용(viewBox %): 눈 cy106·눈 cx80/120. 하트 높이(top-45%)에서 머리 가장자리 ~18.5/81.5(귀는 위라 안 걸림).
+    svgMoodAnchors: {
+      tear: 'top-[58%] left-[59%] w-[7%]',
+      vein: 'top-[38%] left-[63%] w-[11%]',
+      heartLeft: 'top-[45%] left-[8%] w-[9%]',
+      heartRight: 'top-[45%] left-[83%] w-[9%]',
+    },
     // 히어로만 Live2D로 렌더. 로드 실패 시 폴백은 위 Svg를 쓴다.
     live2d: {
       modelUrl: '/live2d/redpanda/menhering.model3.json',
@@ -59,7 +69,34 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
     // 픽커 썸네일은 실제 캐릭터 아트(투명 배경)의 얼굴 크롭.
     thumbnail: '/images/avatar/menhering_1_img.webp',
   },
-  토끼: { Svg: RabbitSvg },
-  강아지: { Svg: DogSvg },
-  고양이: { Svg: CatSvg },
+  토끼: {
+    Svg: RabbitSvg,
+    // 눈 cy114, 머리 cx100 rx60(좌우 20~80).
+    svgMoodAnchors: {
+      tear: 'top-[62%] left-[59%] w-[7%]',
+      vein: 'top-[42%] left-[63%] w-[11%]',
+      heartLeft: 'top-[50%] left-[9%] w-[9%]',
+      heartRight: 'top-[50%] left-[82%] w-[9%]',
+    },
+  },
+  강아지: {
+    Svg: DogSvg,
+    // 눈 cy100, 하트 높이(top-43%)에서 머리 가장자리 ~20/80(접힌 귀는 더 아래라 이 높이엔 안 걸림).
+    svgMoodAnchors: {
+      tear: 'top-[55%] left-[59%] w-[7%]',
+      vein: 'top-[35%] left-[63%] w-[11%]',
+      heartLeft: 'top-[43%] left-[9%] w-[9%]',
+      heartRight: 'top-[43%] left-[82%] w-[9%]',
+    },
+  },
+  고양이: {
+    Svg: CatSvg,
+    // 눈 cy108 ry11, 머리 cx100 rx60(좌우 20~80).
+    svgMoodAnchors: {
+      tear: 'top-[60%] left-[59%] w-[7%]',
+      vein: 'top-[39%] left-[63%] w-[11%]',
+      heartLeft: 'top-[47%] left-[9%] w-[9%]',
+      heartRight: 'top-[47%] left-[82%] w-[9%]',
+    },
+  },
 };

@@ -50,11 +50,13 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
     cancelEdit();
   };
 
-  const commit = () => {
+  // restoreFocus: 저장 후 연필 버튼으로 포커스를 되돌릴지. 키보드(Enter·스페이스)로 저장할 때만 true.
+  // 마우스 클릭 저장 시엔 false → 프로그램적 포커스로 인한 :focus-visible 링(빨간 테두리)이 안 뜬다.
+  const commit = (restoreFocus: boolean) => {
     const next = draft.trim();
     if (!next) return; // 빈 닉네임은 저장하지 않음(체크 버튼도 비활성).
     onSave(next);
-    restoreFocusRef.current = true;
+    restoreFocusRef.current = restoreFocus;
     setIsEditing(false);
   };
 
@@ -75,7 +77,7 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
           // 포커스 아웃(탭 아웃)은 "취소"로 간주해 기존 닉네임으로 복원한다.
           onBlur={cancelEdit}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') commit();
+            if (e.key === 'Enter') commit(true);
             if (e.key === 'Escape') cancelEditWithFocus();
           }}
           aria-label="닉네임"
@@ -86,7 +88,8 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
           type="button"
           // 버튼 클릭 시 input의 onBlur(cancelEdit)가 먼저 발생해 commit이 취소되는 것을 막는다.
           onMouseDown={(e) => e.preventDefault()}
-          onClick={commit}
+          // e.detail===0 = 키보드(스페이스·Enter)로 활성화 → 포커스 복귀. 마우스 클릭(>0)이면 링 생략.
+          onClick={(e) => commit(e.detail === 0)}
           disabled={!canSave}
           aria-label="닉네임 저장"
           className="text-coral focus-visible:ring-coral flex size-6 shrink-0 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"

@@ -1,34 +1,16 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
-
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME, DEFAULT_NICKNAME } from '@/constants/avatar';
-import { ROUTES } from '@/constants/routes';
 import { createClient } from '@/lib/supabase/server';
 import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';
 
-import { saveAvatarSchema, type SaveAvatarInput } from './validation';
-
-interface AvatarRow {
-  id: string;
-  user_id: string;
-  character_type: string;
-  color_theme: string;
-  created_at: string;
-  updated_at: string;
-}
-
-function toAvatar(row: AvatarRow, nickname: string): Avatar {
-  return {
-    id: row.id,
-    userId: row.user_id,
-    characterType: row.character_type as CharacterType,
-    colorTheme: row.color_theme as ColorTheme,
-    nickname,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
+import {
+  buyAvatarItemSchema,
+  inventoryRowsSchema,
+  saveAvatarSchema,
+  type BuyAvatarItemInput,
+  type SaveAvatarInput,
+} from './validation';
 
 function fallbackAvatar(): Avatar {
   const now = new Date().toISOString();
@@ -44,61 +26,108 @@ function fallbackAvatar(): Avatar {
   };
 }
 
+// Postgres 함수 get_my_avatar가 돌려주는 행(untyped supabase 클라이언트라 반환 타입을 명시).
+// users 기준 left join avatars이므로, 아바타가 아직 없으면 avatar 필드는 null이고 nickname·coin만 온다.
+interface AvatarRpcRow {
+  id: string | null;
+  user_id: string;
+  character_type: string | null;
+  color_theme: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  nickname: string | null;
+  coin: number | null;
+}
+
+// 아바타 페이지 초기 데이터: 아바타 + 코인 잔액(users.coin). 같은 조회에서 함께 받아 왕복을 줄인다.
+export interface MyAvatarData {
+  avatar: Avatar;
+  coin: number;
+}
+
 /**
- * 로그인 유저의 아바타를 조회한다. 아바타 row가 없으면 기본값으로 생성한다.
- * 닉네임은 users.nickname에서 함께 읽는다.
- * 로그인 세션이 없으면(아직 auth 미연동) 기본 아바타를 반환해 UI만 렌더한다.
+ * 로그인 유저의 아바타·닉네임·코인을 Postgres 함수 get_my_avatar 하나로 조회한다(왕복 3→1).
+ * 유저 식별은 함수 내부 auth.uid()가 하고 RLS(본인 행)로 스코프된다. 함수는 users 기준이라
+ * 아바타 row가 없어도(첫 저장 전) 닉네임·코인은 온다 — 실제 아바타 생성은 저장(save_avatar upsert) 시.
  */
-export async function getMyAvatar(): Promise<Avatar> {
+export async function getMyAvatar(): Promise<MyAvatarData> {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.rpc('get_my_avatar').maybeSingle<AvatarRpcRow>();
 
-  if (!user) return fallbackAvatar();
-
-  // 독립적인 두 조회는 병렬 실행
-  const [userResult, avatarResult] = await Promise.all([
-    supabase.from('users').select('nickname').eq('id', user.id).maybeSingle(),
-    supabase
-      .from('avatars')
-      .select('id, user_id, character_type, color_theme, created_at, updated_at')
-      .eq('user_id', user.id)
-      .maybeSingle(),
-  ]);
-
-  if (userResult.error) console.error('[avatar] users 조회 실패:', userResult.error);
-
-  const nickname = (userResult.data?.nickname as string | undefined) ?? DEFAULT_NICKNAME;
-
-  // 조회 오류는 "row 없음"과 구분한다: 일시적 조회 실패를 새 아바타 생성으로 오인하지 않도록 폴백 반환.
-  if (avatarResult.error) {
-    console.error('[avatar] avatars 조회 실패:', avatarResult.error);
-    return { ...fallbackAvatar(), userId: user.id, nickname };
+  if (error) {
+    console.error('[avatar] 아바타 조회 실패:', error);
+    return { avatar: fallbackAvatar(), coin: 0 };
   }
 
-  if (avatarResult.data) return toAvatar(avatarResult.data as AvatarRow, nickname);
+  // users 행이 없으면(비로그인) 전체 폴백.
+  if (!data) return { avatar: fallbackAvatar(), coin: 0 };
 
-  // 조회 성공 + row 없음일 때만 기본 아바타 생성 (color_theme은 DB 기본값 '클래식')
-  const { data: inserted, error: insertError } = await supabase
-    .from('avatars')
-    .insert({ user_id: user.id, character_type: DEFAULT_CHARACTER_TYPE })
-    .select('id, user_id, character_type, color_theme, created_at, updated_at')
-    .single();
+  const nickname = data.nickname ?? DEFAULT_NICKNAME;
+  const coin = data.coin ?? 0;
 
-  if (insertError) console.error('[avatar] 기본 아바타 생성 실패:', insertError);
+  // 아바타 row가 아직 없으면(첫 저장 전) 기본 아바타에 실제 닉네임만 얹는다.
+  // 닉네임을 avatars 존재 여부와 분리해, 신규 유저가 기본 닉네임으로 덮이는 것을 막는다.
+  if (!data.id) {
+    return { avatar: { ...fallbackAvatar(), userId: data.user_id, nickname }, coin };
+  }
 
-  return inserted
-    ? toAvatar(inserted as AvatarRow, nickname)
-    : { ...fallbackAvatar(), userId: user.id, nickname };
+  return {
+    avatar: {
+      id: data.id,
+      userId: data.user_id,
+      characterType: (data.character_type ?? DEFAULT_CHARACTER_TYPE) as CharacterType,
+      colorTheme: (data.color_theme ?? DEFAULT_COLOR_THEME) as ColorTheme,
+      nickname,
+      createdAt: data.created_at ?? new Date().toISOString(),
+      updatedAt: data.updated_at ?? new Date().toISOString(),
+    },
+    coin,
+  };
+}
+
+// 보유 목록(기본 보유 ∪ 구매분). get_my_avatar_items RPC가 종류별 행으로 돌려준다.
+export interface OwnedItems {
+  characters: CharacterType[];
+  themes: ColorTheme[];
+}
+
+/**
+ * 로그인 유저의 보유 목록을 조회한다. 유저 식별은 함수 내부 auth.uid()가 하고 RLS로 스코프된다.
+ * 조회 실패 시 최소 기본값(레서판다/클래식)으로 폴백해, 최소한 기본 항목은 장착·선택 가능하게 한다.
+ */
+export async function getMyAvatarItems(): Promise<OwnedItems> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc('get_my_avatar_items');
+
+  const parsed = inventoryRowsSchema.safeParse(data);
+
+  if (error || !parsed.success) {
+    if (error) console.error('[avatar] 보유 목록 조회 실패:', error);
+    else console.error('[avatar] 보유 목록 형식 오류:', parsed.error);
+
+    return { characters: [DEFAULT_CHARACTER_TYPE], themes: [DEFAULT_COLOR_THEME] };
+  }
+
+  const rows = parsed.data;
+  const characters = rows
+    .filter((row) => row.item_kind === 'character')
+    .map((row) => row.item_value as CharacterType);
+  const themes = rows
+    .filter((row) => row.item_kind === 'theme')
+    .map((row) => row.item_value as ColorTheme);
+
+  return { characters, themes };
 }
 
 export type SaveAvatarResult = { ok: true } | { ok: false; error: string };
 
 /**
  * 아바타 커스터마이징(character_type/color_theme)을 avatars에, 닉네임을 users.nickname에 저장한다.
- * RLS가 auth.uid() 기준이므로 로그인 세션이 있어야 실제로 반영된다.
+ * 여러 번의 왕복(getUser + avatars upsert + users update)을 Postgres 함수 save_avatar 하나로 묶어
+ * 단일 왕복으로 처리한다(느린 회선에서 타임아웃이 쌓이는 것을 막음). 유저 식별은 함수 내부 auth.uid()가
+ * 하고, RLS(본인 행)로 스코프되므로 서버에서 별도 getUser가 필요 없다.
  */
 export async function saveAvatar(input: SaveAvatarInput): Promise<SaveAvatarResult> {
   const parsed = saveAvatarSchema.safeParse(input);
@@ -108,53 +137,71 @@ export async function saveAvatar(input: SaveAvatarInput): Promise<SaveAvatarResu
   }
 
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { ok: false, error: '로그인이 필요합니다.' };
-  }
-
   const { characterType, colorTheme, nickname } = parsed.data;
-  const now = new Date().toISOString();
 
-  // avatars: 있으면 update, 없으면 insert (user_id 유니크 제약에 의존하지 않도록 분기)
-  const { data: updatedRows, error: updateError } = await supabase
-    .from('avatars')
-    .update({ character_type: characterType, color_theme: colorTheme, updated_at: now })
-    .eq('user_id', user.id)
-    .select('id');
+  const { error } = await supabase.rpc('save_avatar', {
+    p_character_type: characterType,
+    p_color_theme: colorTheme,
+    p_nickname: nickname,
+  });
 
-  if (updateError) {
-    console.error('[avatar] avatars 업데이트 실패:', updateError);
-    return { ok: false, error: '아바타 저장에 실패했습니다.' };
+  if (error) {
+    console.error('[avatar] 저장 실패:', error);
+    // 함수에서 미인증 시 raise(errcode 28000)
+    if (error.code === '28000') return { ok: false, error: '로그인이 필요합니다.' };
+
+    return { ok: false, error: '저장에 실패했습니다.' };
   }
 
-  if (!updatedRows || updatedRows.length === 0) {
-    const { error: insertError } = await supabase
-      .from('avatars')
-      .insert({ user_id: user.id, character_type: characterType, color_theme: colorTheme });
-
-    if (insertError) {
-      console.error('[avatar] avatars 생성 실패:', insertError);
-      return { ok: false, error: '아바타 저장에 실패했습니다.' };
-    }
-  }
-
-  // 닉네임은 users 테이블 소관 (users RLS: auth.uid() = id)
-  const { error: nicknameError } = await supabase
-    .from('users')
-    .update({ nickname, updated_at: now })
-    .eq('id', user.id);
-
-  if (nicknameError) {
-    console.error('[avatar] 닉네임 저장 실패:', nicknameError);
-    return { ok: false, error: '닉네임 저장에 실패했습니다.' };
-  }
-
-  revalidatePath(ROUTES.AVATAR);
-
+  // revalidatePath는 쓰지 않는다: /avatar는 동적 라우트라 다음 방문 때 새로 읽고, 저장 성공 시
+  // 클라이언트(AvatarClient)가 이미 상태를 갱신한다. 재검증은 Server Action 응답에 /avatar 재렌더
+  // (getMyAvatar 재조회)를 끼워 넣어 느린 회선에서 저장을 수십 초 지연시킨다.
   return { ok: true };
+}
+
+// 성공 시 서버가 차감한 실제 잔액(coin)을 돌려준다 → 클라가 이 값으로 잔액을 덮는다.
+// coin이 null이면(반환값이 유한수가 아닌 이상치) 클라가 자체 계산(현재 잔액 - 결제액)으로 폴백한다.
+export type BuyAvatarItemResult = { ok: true; coin: number | null } | { ok: false; error: string };
+
+// RPC가 raise한 SQLSTATE → 사용자 메시지. 함수에서 던진 메시지를 그대로 신뢰하지 않고
+// 코드로 매핑해, 원인이 바뀌어도 노출 문구를 서버 액션이 통제한다.
+const BUY_ERROR_MESSAGE: Record<string, string> = {
+  '28000': '로그인이 필요합니다.',
+  '22023': '구매할 수 없는 항목이에요.',
+  PT409: '이미 보유한 항목이에요.',
+  PT402: '코인이 부족해요.',
+};
+
+/**
+ * 코인으로 아바타 항목(테마/캐릭터)을 구매한다. 결제 금액과 보유 지급은 서버 RPC(buy_avatar_item)가
+ * 단일 트랜잭션에서 원자적으로 처리한다 — 클라가 넘긴 값으로 차감하지 않는다(가격 위조 차단).
+ */
+export async function buyAvatarItem(input: BuyAvatarItemInput): Promise<BuyAvatarItemResult> {
+  const parsed = buyAvatarItemSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return { ok: false, error: '구매할 수 없는 항목이에요.' };
+  }
+
+  const supabase = await createClient();
+  const { kind, value } = parsed.data;
+
+  const { data, error } = await supabase.rpc('buy_avatar_item', {
+    p_kind: kind,
+    p_value: value,
+  });
+
+  if (error) {
+    console.error('[avatar] 구매 실패:', error);
+
+    return { ok: false, error: BUY_ERROR_MESSAGE[error.code ?? ''] ?? '구매에 실패했습니다.' };
+  }
+
+  // 결제는 이미 트랜잭션으로 커밋됐으므로 반환값 형태가 이상해도 throw하지 않는다(성공을 실패로
+  // 뒤집으면 재시도→이미보유 오류로 이어짐). 유한수가 아니면 null로 내려 클라가 폴백하게 한다.
+  const coin = typeof data === 'number' && Number.isFinite(data) ? data : null;
+
+  if (coin === null) console.error('[avatar] 구매 반환 잔액 형식 오류:', data);
+
+  return { ok: true, coin };
 }

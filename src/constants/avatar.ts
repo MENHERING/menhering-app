@@ -15,6 +15,14 @@ export const DEFAULT_NICKNAME = '멘헤링이';
 // 감정 상태를 아직 못 읽었을 때(로딩 중·비로그인) 쓸 기본값. 심볼·기운 배경이 없는 중립 상태.
 export const DEFAULT_MOOD: Mood = '보통';
 
+// 감정 수치(mood_value 0~100) 기본값. avatar_status 행이 없거나(신규 유저) 조회 실패 시 폴백.
+// DB avatar_status.mood_value의 기본값과 동일하게 60으로 맞춘다(60~79 보통 구간이라 moodFromValue(60)===DEFAULT_MOOD '보통').
+export const DEFAULT_MOOD_VALUE = 60;
+
+// Mood 5종의 런타임 목록(단일 출처). 타입 Mood는 유니온이라 런타임 값이 없어서,
+// Zod z.enum 등 런타임 검증에 쓸 튜플을 여기서 파생시킨다.
+export const MOODS = ['행복', '보통', '우울', '지침', '화남'] as const satisfies readonly Mood[];
+
 export const CHARACTER_TYPES = [
   '레서판다',
   '토끼',
@@ -23,17 +31,11 @@ export const CHARACTER_TYPES = [
 ] as const satisfies readonly CharacterType[];
 
 // 코인 경제(모델: 한 번 구매하면 보유, 재선택 무료). 미보유 선택분만 결제한다.
+// ⚠️ 이 값은 표시 전용이다. 실제 결제 금액은 서버 RPC(buy_avatar_item)가 자체 보유한 값으로
+// 차감하므로, DB 함수 _avatar_item_cost와 반드시 일치시켜야 한다
+// (supabase/migrations/…_avatar_inventory_purchase.sql).
 export const CHARACTER_COST = 3000;
 export const THEME_COST = 100;
-
-// 보유 목록 placeholder — 보유 데이터 모델(DB) 확정 전 UI 데모용.
-// TODO: 보유 테이블/컬럼 연동 시 서버 조회값으로 교체.
-export const OWNED_CHARACTERS: readonly CharacterType[] = [DEFAULT_CHARACTER_TYPE];
-// 테마는 선택 전환/효과음 확인을 위해 일부를 보유 상태로 개방(나머지는 잠금 유지).
-export const OWNED_THEMES: readonly ColorTheme[] = [DEFAULT_COLOR_THEME, '라벤더', '민트'];
-
-// 헤더 코인 잔액 placeholder. TODO: users.coin 실조회로 교체(auth 연동 후).
-export const PLACEHOLDER_COIN = 1000;
 
 interface ColorThemeConfig {
   value: ColorTheme;
