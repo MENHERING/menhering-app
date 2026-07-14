@@ -50,11 +50,15 @@ begin
     return; -- 미인증: 빈 결과 → route가 기본값 폴백
   end if;
 
+  -- for update of s: 감쇠는 읽고→계산→되쓰는 read-modify-write라, 읽은 직후 다른 트랜잭션이
+  -- mood_value를 올리면(향후 먹이주기·문제풀이 보상) stale 값 기반 감쇠가 그 상승을 덮어쓸 수 있다
+  -- (lost update). 상태행을 잠가 동시 쓰기와 직렬화한다. avatar_status만 잠그면 충분(avatars는 안 씀).
   select s.mood_value, s.updated_at
     into v_mood, v_updated
   from public.avatar_status s
   join public.avatars a on a.id = s.avatar_id
   where a.user_id = v_user
+  for update of s
   limit 1;
 
   if not found then
