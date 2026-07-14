@@ -14,6 +14,7 @@ export default async function LevelTestResultPage({
   const onboarding = await getOnboardingStatus();
 
   // 레벨은 최초 1회만 설정한다(레벨 선택 화면과 동일 규칙).
+  if (onboarding.status === 'unauthenticated') redirect(ROUTES.LOGIN);
   if (onboarding.status === 'completed') redirect(ROUTES.HOME);
 
   const { step } = await searchParams;

@@ -6,9 +6,13 @@ import type { LevelTitle } from '@/types/level';
 // 온보딩(레벨 설정) 완료 여부.
 // - completed: user_progress.level 이 채워져 있음
 // - incomplete: 세션은 있는데 레벨이 없음(행 자체가 없는 신규 유저 포함)
-// - unknown: 세션이 없거나 조회에 실패해 판별 불가
+// - unauthenticated: 세션이 없음 → 로그인부터 해야 한다
+// - unknown: 세션은 있으나 조회에 실패해 레벨 유무를 판별하지 못함
 export type OnboardingStatus =
-  { status: 'completed'; level: LevelTitle } | { status: 'incomplete' } | { status: 'unknown' };
+  | { status: 'completed'; level: LevelTitle }
+  | { status: 'incomplete' }
+  | { status: 'unauthenticated' }
+  | { status: 'unknown' };
 
 export async function getOnboardingStatus(): Promise<OnboardingStatus> {
   const supabase = await createClient();
@@ -17,7 +21,7 @@ export async function getOnboardingStatus(): Promise<OnboardingStatus> {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { status: 'unknown' };
+  if (!user) return { status: 'unauthenticated' };
 
   const { data, error } = await supabase
     .from('user_progress')
