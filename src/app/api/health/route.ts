@@ -1,5 +1,13 @@
 import { NextResponse } from 'next/server';
 
+import { toSuccessResult } from '@/lib/api-response';
+import { HealthSchema } from '@/schemas/health.schema';
+
 export async function GET() {
-  return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() });
+  const { body, status } = toSuccessResult(HealthSchema, {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
+
+  return NextResponse.json(body, { status });
 }
