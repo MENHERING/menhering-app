@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { Footer } from '@/components/common/Footer';
 import { CurriculumBar } from '@/components/learning/CurriculumBar';
@@ -33,8 +33,30 @@ function buildLessons(curriculum: Curriculum): Lesson[] {
   }));
 }
 
+const LOADING_FALLBACK = (
+  <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
+    <main className="flex flex-1 items-center justify-center">
+      <p className="text-brown-soft text-sm">불러오는 중...</p>
+    </main>
+    <Footer />
+  </div>
+);
+
+// useSearchParams()는 프리렌더 시 Suspense 경계가 필요하다.
 export default function LearningPage() {
+  return (
+    <Suspense fallback={LOADING_FALLBACK}>
+      <LearningPageContent />
+    </Suspense>
+  );
+}
+
+function LearningPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // 퀴즈/결과 화면에서 "방금 있던 레벨"을 ?level=로 넘겨주면 그 레벨을 기본으로 보여준다.
+  // 없으면 아래에서 내 배정 레벨(myStep)로 폴백한다.
+  const levelFromQuery = searchParams.get('level');
   const { data: progress, isLoading, isError } = useLearningProgress();
   const { data: avatar } = useMyAvatar();
 
@@ -54,7 +76,8 @@ export default function LearningPage() {
   // 기본 선택 커리큘럼은 내 레벨과 같은 난이도. 온보딩을 다시 거쳐 내 레벨(myStep)이
   // 바뀌면 렌더 중에 override를 리셋해 새 레벨의 커리큘럼을 다시 기본값으로 보여준다.
   const [lastSyncedStep, setLastSyncedStep] = useState(myStep);
-  const [curriculumOverrideId, setCurriculumOverrideId] = useState<string | null>(null);
+  // URL의 ?level=이 있으면 그 레벨을 초기 선택으로 쓴다(퀴즈/결과 화면에서 돌아온 경우).
+  const [curriculumOverrideId, setCurriculumOverrideId] = useState<string | null>(levelFromQuery);
   if (myStep !== lastSyncedStep) {
     setLastSyncedStep(myStep);
     setCurriculumOverrideId(null);
@@ -97,14 +120,7 @@ export default function LearningPage() {
   };
 
   if (isLoading || !selectedCurriculum) {
-    return (
-      <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
-        <main className="flex flex-1 items-center justify-center">
-          <p className="text-brown-soft text-sm">불러오는 중...</p>
-        </main>
-        <Footer />
-      </div>
-    );
+    return LOADING_FALLBACK;
   }
 
   if (isError) {

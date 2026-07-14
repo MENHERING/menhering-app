@@ -3,6 +3,7 @@ import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
+import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
 import { createClient } from '@/lib/supabase/server';
 
 // submit_quiz_result RPC와 동일한 값(정답 1개당 XP·행복도 증가폭)을 화면 표시에도 그대로 쓴다.
@@ -19,11 +20,18 @@ function parseCount(value: string | undefined): number {
 export default async function QuizResultPage({
   searchParams,
 }: {
-  searchParams: Promise<{ correct?: string; wrong?: string }>;
+  searchParams: Promise<{ correct?: string; wrong?: string; level?: string; stage?: string }>;
 }) {
-  const { correct, wrong } = await searchParams;
+  const { correct, wrong, level, stage } = await searchParams;
   const correctCount = parseCount(correct);
   const wrongCount = parseCount(wrong);
+
+  // "다음 스테이지" 버튼의 실제 목적지. 방금 푼 레벨의 마지막 스테이지였으면 다음 스테이지가 없다.
+  const stageNumber = Number(stage);
+  const nextLessonId =
+    level && Number.isInteger(stageNumber) && stageNumber < (CURRICULUM_TOTAL_COUNT[level] ?? 0)
+      ? `${level}-${stageNumber + 1}`
+      : null;
 
   const supabase = await createClient();
   const {
@@ -65,7 +73,7 @@ export default async function QuizResultPage({
       </div>
       <HappinessGauge happinessPercent={happinessPercent} gainPercent={gainPercent} />
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
-      <QuizResultActions wrongCount={wrongCount} />
+      <QuizResultActions wrongCount={wrongCount} nextLessonId={nextLessonId} level={level ?? ''} />
     </>
   );
 }
