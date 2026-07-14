@@ -75,12 +75,16 @@ function LearningPageContent() {
 
   // 기본 선택 커리큘럼은 내 레벨과 같은 난이도. 온보딩을 다시 거쳐 내 레벨(myStep)이
   // 바뀌면 렌더 중에 override를 리셋해 새 레벨의 커리큘럼을 다시 기본값으로 보여준다.
-  const [lastSyncedStep, setLastSyncedStep] = useState(myStep);
+  // lastSyncedStep을 null로 시작해서, "로딩 중 임시값(0) → 실제 값"으로 바뀌는 최초 1회는
+  // 진짜 재온보딩이 아니므로 리셋하지 않는다 — 안 그러면 ?level= 오버라이드가 로딩 완료
+  // 시점에 매번 지워진다.
+  const [lastSyncedStep, setLastSyncedStep] = useState<number | null>(null);
   // URL의 ?level=이 있으면 그 레벨을 초기 선택으로 쓴다(퀴즈/결과 화면에서 돌아온 경우).
   const [curriculumOverrideId, setCurriculumOverrideId] = useState<string | null>(levelFromQuery);
-  if (myStep !== lastSyncedStep) {
+  if (!isLoading && myStep !== lastSyncedStep) {
+    const isFirstSync = lastSyncedStep === null;
     setLastSyncedStep(myStep);
-    setCurriculumOverrideId(null);
+    if (!isFirstSync) setCurriculumOverrideId(null);
   }
   const selectedCurriculumId = curriculumOverrideId ?? defaultCurriculumId;
 
