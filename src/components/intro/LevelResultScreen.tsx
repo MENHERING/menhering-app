@@ -1,7 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -10,9 +8,8 @@ import { Header } from '@/components/common/Header';
 import { Toast } from '@/components/common/Toast';
 import { LEVELS } from '@/constants/level';
 import { ROUTES } from '@/constants/routes';
+import { useSaveOnboardingLevel } from '@/hooks/onboarding/use-save-onboarding-level';
 import { cn } from '@/lib/cn';
-import { saveOnboardingLevel } from '@/lib/onboarding/actions';
-import { useUserLevelStore } from '@/stores/user-level-store';
 
 interface LevelResultScreenProps {
   // 채점 결과 추천 레벨 (기본 초급)
@@ -21,33 +18,10 @@ interface LevelResultScreenProps {
 
 export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProps) {
   const router = useRouter();
-  const setStep = useUserLevelStore((state) => state.setStep);
   const level = LEVELS.find((l) => l.step === recommendedStep) ?? LEVELS[1];
-  const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { save, isSaving, errorMessage, clearError } = useSaveOnboardingLevel();
 
-  const handleStart = async () => {
-    setIsSaving(true);
-    setErrorMessage(null);
-
-    try {
-      const result = await saveOnboardingLevel({ step: level.step });
-
-      if (!result.ok) {
-        setErrorMessage(result.error);
-        return;
-      }
-
-      setStep(level.step);
-      // replace: 레벨 확정 후 뒤로가기로 온보딩에 되돌아오지 않도록 한다.
-      router.replace(ROUTES.HOME);
-    } catch (error) {
-      console.error('[onboarding] 레벨 저장 중 오류:', error);
-      setErrorMessage('저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const handleStart = () => save(level.step);
 
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center">
@@ -120,7 +94,7 @@ export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProp
         isOpen={errorMessage !== null}
         message={errorMessage ?? ''}
         variant="error"
-        onClose={() => setErrorMessage(null)}
+        onClose={clearError}
       />
     </div>
   );

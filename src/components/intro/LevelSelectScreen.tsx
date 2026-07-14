@@ -8,40 +8,17 @@ import { Button } from '@/components/common/Button';
 import { Toast } from '@/components/common/Toast';
 import { LEVELS } from '@/constants/level';
 import { ROUTES } from '@/constants/routes';
+import { useSaveOnboardingLevel } from '@/hooks/onboarding/use-save-onboarding-level';
 import { cn } from '@/lib/cn';
-import { saveOnboardingLevel } from '@/lib/onboarding/actions';
 import { useUserLevelStore } from '@/stores/user-level-store';
 
 export function LevelSelectScreen() {
   const router = useRouter();
   const step = useUserLevelStore((state) => state.step);
-  const setStep = useUserLevelStore((state) => state.setStep);
   const [selected, setSelected] = useState(step);
-  const [isSaving, setIsSaving] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { save, isSaving, errorMessage, clearError } = useSaveOnboardingLevel();
 
-  const handleComplete = async () => {
-    setIsSaving(true);
-    setErrorMessage(null);
-
-    try {
-      const result = await saveOnboardingLevel({ step: selected });
-
-      if (!result.ok) {
-        setErrorMessage(result.error);
-        return;
-      }
-
-      setStep(selected);
-      // replace: 레벨 확정 후 뒤로가기로 온보딩에 되돌아오지 않도록 한다.
-      router.replace(ROUTES.HOME);
-    } catch (error) {
-      console.error('[onboarding] 레벨 저장 중 오류:', error);
-      setErrorMessage('저장 중 오류가 발생했습니다.');
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const handleComplete = () => save(selected);
 
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center px-6">
@@ -107,7 +84,7 @@ export function LevelSelectScreen() {
         isOpen={errorMessage !== null}
         message={errorMessage ?? ''}
         variant="error"
-        onClose={() => setErrorMessage(null)}
+        onClose={clearError}
       />
     </div>
   );
