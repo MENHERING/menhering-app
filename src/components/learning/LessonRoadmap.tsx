@@ -29,6 +29,7 @@ export function LessonRoadmap({
   const selectedIndex = lessons.findIndex((lesson) => lesson.id === selectedLessonId);
   const selectedLesson = selectedIndex === -1 ? null : lessons[selectedIndex];
   const scrollTargetRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   // 커리큘럼을 다 클리어해 "현재" 스테이지가 없는 경우엔 마지막 스테이지로 스크롤한다.
   const scrollTargetId =
     lessons.find((lesson) => lesson.status === 'current')?.id ?? lessons.at(-1)?.id;
@@ -37,6 +38,31 @@ export function LessonRoadmap({
   useEffect(() => {
     scrollTargetRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [scrollTargetId]);
+
+  // 시작하기 카드가 열려 있을 때 Esc, 또는 카드 바깥(스테이지 사이 빈 배경 포함) 클릭으로도
+  // 닫을 수 있게 한다. 스테이지 노드(버튼) 클릭은 자기 자신의 토글 로직에 맡기고 건드리지 않는다
+  // — 여기서 같이 닫아버리면 열린 노드를 다시 눌러 닫으려 할 때 닫혔다 바로 재열림하는 충돌이 난다.
+  // onSelectLesson은 같은 id를 다시 넘기면 토글되어 닫히는 로직이라 그대로 재사용한다.
+  useEffect(() => {
+    if (!selectedLessonId) return;
+
+    const close = () => onSelectLesson(selectedLessonId);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') close();
+    };
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (target.closest('button')) return;
+      if (cardRef.current && !cardRef.current.contains(target)) close();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [selectedLessonId, onSelectLesson]);
 
   return (
     <div className="relative flex flex-col items-center gap-20 py-8">
@@ -68,6 +94,7 @@ export function LessonRoadmap({
 
       {selectedLesson && (
         <div
+          ref={cardRef}
           className="absolute left-1/2 w-[calc(100%-7rem)] -translate-x-1/2"
           style={{
             top: TOP_PADDING_PX + selectedIndex * (NODE_SIZE_PX + ROW_GAP_PX) + NODE_SIZE_PX,
