@@ -8,14 +8,12 @@ import { AvatarStatusSchema } from '@/schemas/avatar-status.schema';
 export async function GET() {
   const supabase = await createClient();
 
-  // RLS(`본인 조회`: avatar_id가 auth.uid() 소유 아바타)로 이미 본인 행만 걸러지므로,
-  // getUser나 avatars 조인 없이 한 번의 조회로 끝낸다(왕복 3→1). 라우트는 proxy가 인증 보호하고,
-  // 비로그인/행 없음이면 빈 결과 → 기본 감정 수치로 폴백한다.
+  // 조회 시점에 마지막 정산 이후 경과분만큼 mood_value를 깎아 되쓰는 lazy 감쇠를 RPC 한 곳에서 처리한다
+  // (get_avatar_status). 유저 식별은 함수 내부 auth.uid()가 하고 RLS(본인 아바타)로 스코프되므로 별도
+  // getUser·조인이 필요 없다(왕복 1). 미인증/상태행 없음이면 빈 결과 → 기본 감정 수치로 폴백한다.
   const { data, error } = await supabase
-    .from('avatar_status')
-    .select('mood_value, updated_at')
-    .limit(1)
-    .maybeSingle();
+    .rpc('get_avatar_status')
+    .maybeSingle<{ mood_value: number; updated_at: string }>();
 
   if (error) {
     console.error('[avatar-status] 조회 실패:', error);

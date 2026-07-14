@@ -17,6 +17,13 @@ create table if not exists public.avatar_inventory (
   primary key (user_id, item_kind, item_value)
 );
 
+-- 대시보드 테이블 목록에 다른 테이블처럼 설명이 뜨도록 코멘트를 단다(이미 적용된 경우 이 문장만 실행).
+comment on table public.avatar_inventory is
+  '아바타 코인 구매 보유 항목. users와 1:N. (user_id, item_kind, item_value) PK로 유저당 항목 1개. 기본 보유(클래식/레서판다)는 행으로 두지 않고 조회/구매 함수(get_my_avatar_items/buy_avatar_item)에서 암시 처리.';
+comment on column public.avatar_inventory.item_kind is '항목 종류: character | theme';
+comment on column public.avatar_inventory.item_value is '항목 값(한글 저장값). character=레서판다/토끼/…, theme=클래식/라벤더/…';
+comment on column public.avatar_inventory.acquired_at is '구매(지급) 시각.';
+
 alter table public.avatar_inventory enable row level security;
 
 -- 본인 보유만 조회 가능. INSERT 정책은 두지 않는다 → 클라 직접 삽입 불가,
