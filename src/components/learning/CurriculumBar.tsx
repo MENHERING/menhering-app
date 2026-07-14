@@ -1,4 +1,4 @@
-import { BarChart3, ChevronDown } from 'lucide-react';
+import { ChevronDown, Trophy } from 'lucide-react';
 
 import { cn } from '@/lib/cn';
 
@@ -9,7 +9,7 @@ interface CurriculumBarProps {
   totalCount: number;
   isDropdownOpen: boolean;
   onTogglePress: () => void;
-  onStatsPress?: () => void;
+  onRankingPress?: () => void;
 }
 
 export function CurriculumBar({
@@ -19,7 +19,7 @@ export function CurriculumBar({
   totalCount,
   isDropdownOpen,
   onTogglePress,
-  onStatsPress,
+  onRankingPress,
 }: CurriculumBarProps) {
   return (
     <div className="flex items-stretch gap-2 px-5">
@@ -43,11 +43,11 @@ export function CurriculumBar({
 
       <button
         type="button"
-        onClick={onStatsPress}
-        aria-label="학습 통계"
+        onClick={onRankingPress}
+        aria-label="랭킹"
         className="bg-coral flex w-[52px] shrink-0 items-center justify-center rounded-2xl text-white shadow-[0_3px_10px_rgba(0,0,0,0.12)]"
       >
-        <BarChart3 size={20} />
+        <Trophy size={20} />
       </button>
     </div>
   );

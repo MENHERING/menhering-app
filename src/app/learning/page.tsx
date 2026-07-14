@@ -135,7 +135,7 @@ export default function LearningPage() {
             totalCount={selectedCurriculum.totalCount}
             isDropdownOpen={isDropdownOpen}
             onTogglePress={() => setIsDropdownOpen((prev) => !prev)}
-            onStatsPress={() => router.push(ROUTES.RANKING)}
+            onRankingPress={() => router.push(ROUTES.RANKING)}
           />
           {isDropdownOpen && (
             <>
