@@ -12,4 +12,7 @@ export const queryKeys = {
     all: ['avatar'] as const,
     me: () => [...queryKeys.avatar.all, 'me'] as const,
   },
+  avatarStatus: {
+    all: ['avatar-status'] as const,
+  },
 };

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
+import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
 
 interface Question {
@@ -84,7 +85,7 @@ export function LevelTestScreen() {
   const handleNext = () => {
     if (isLast) {
       const step = calcRecommendedStep(answers);
-      router.push(`/level-test/result?step=${step}`);
+      router.push(`${ROUTES.LEVEL_TEST_RESULT}?step=${step}`);
       return;
     }
     setIndex((prev) => prev + 1);

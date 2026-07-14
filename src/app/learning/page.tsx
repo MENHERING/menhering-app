@@ -142,7 +142,7 @@ function LearningPageContent() {
     <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
       <main className="flex-1 pb-6">
         <UserStatusBar
-          nickname={avatar?.nickname ?? DEFAULT_NICKNAME}
+          nickname={avatar?.avatar.nickname ?? DEFAULT_NICKNAME}
           level={MOCK_USER_PROGRESS.level}
           xp={MOCK_USER_PROGRESS.xp}
           avatarSrc={MOCK_USER_PROGRESS.avatarSrc}

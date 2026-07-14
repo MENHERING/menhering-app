@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
+import { Toast } from '@/components/common/Toast';
 import { LEVELS } from '@/constants/level';
+import { ROUTES } from '@/constants/routes';
+import { useSaveOnboardingLevel } from '@/hooks/onboarding/use-save-onboarding-level';
 import { cn } from '@/lib/cn';
-import { useUserLevelStore } from '@/stores/user-level-store';
 
 interface LevelResultScreenProps {
   // 채점 결과 추천 레벨 (기본 초급)
@@ -16,13 +18,10 @@ interface LevelResultScreenProps {
 
 export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProps) {
   const router = useRouter();
-  const setStep = useUserLevelStore((state) => state.setStep);
   const level = LEVELS.find((l) => l.step === recommendedStep) ?? LEVELS[1];
+  const { save, isSaving, errorMessage, clearError } = useSaveOnboardingLevel();
 
-  const handleStart = () => {
-    setStep(level.step);
-    router.push('/home');
-  };
+  const handleStart = () => save(level.step);
 
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center">
@@ -77,14 +76,26 @@ export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProp
         </div>
 
         <div className="mt-auto mb-10 flex flex-col gap-3 pt-6">
-          <Button variant="secondary" isFullWidth onClick={() => router.push('/level')}>
+          <Button
+            variant="secondary"
+            isFullWidth
+            disabled={isSaving}
+            onClick={() => router.push(ROUTES.LEVEL)}
+          >
             직접 다시 고르기
           </Button>
-          <Button variant="primary" isFullWidth onClick={handleStart}>
+          <Button variant="primary" isFullWidth isLoading={isSaving} onClick={handleStart}>
             {level.title}으로 시작
           </Button>
         </div>
       </div>
+
+      <Toast
+        isOpen={errorMessage !== null}
+        message={errorMessage ?? ''}
+        variant="error"
+        onClose={clearError}
+      />
     </div>
   );
 }

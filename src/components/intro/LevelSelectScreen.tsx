@@ -5,20 +5,20 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
+import { Toast } from '@/components/common/Toast';
 import { LEVELS } from '@/constants/level';
+import { ROUTES } from '@/constants/routes';
+import { useSaveOnboardingLevel } from '@/hooks/onboarding/use-save-onboarding-level';
 import { cn } from '@/lib/cn';
 import { useUserLevelStore } from '@/stores/user-level-store';
 
 export function LevelSelectScreen() {
   const router = useRouter();
   const step = useUserLevelStore((state) => state.step);
-  const setStep = useUserLevelStore((state) => state.setStep);
   const [selected, setSelected] = useState(step);
+  const { save, isSaving, errorMessage, clearError } = useSaveOnboardingLevel();
 
-  const handleComplete = () => {
-    setStep(selected);
-    router.push('/home');
-  };
+  const handleComplete = () => save(selected);
 
   return (
     <div className="bg-sand flex min-h-dvh w-full flex-col items-center px-6">
@@ -66,14 +66,26 @@ export function LevelSelectScreen() {
 
         {/* CTA */}
         <div className="mt-auto mb-10 flex flex-col gap-3 pt-6">
-          <Button variant="secondary" isFullWidth onClick={() => router.push('/level-test')}>
+          <Button
+            variant="secondary"
+            isFullWidth
+            disabled={isSaving}
+            onClick={() => router.push(ROUTES.LEVEL_TEST)}
+          >
             간단 테스트로 추천받기
           </Button>
-          <Button variant="primary" isFullWidth onClick={handleComplete}>
+          <Button variant="primary" isFullWidth isLoading={isSaving} onClick={handleComplete}>
             선택 완료하고 홈으로
           </Button>
         </div>
       </div>
+
+      <Toast
+        isOpen={errorMessage !== null}
+        message={errorMessage ?? ''}
+        variant="error"
+        onClose={clearError}
+      />
     </div>
   );
 }
