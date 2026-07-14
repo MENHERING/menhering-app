@@ -60,8 +60,17 @@ export function toEntryPath(onboarding: OnboardingStatus, next: string = ROUTES.
     case 'incomplete':
       return ROUTES.LEVEL;
     default:
-      return next;
+      // 로그인한 유저를 로그인 화면으로 되돌리지 않는다.
+      // `?next=/login?next=/login...`처럼 중첩된 경로는 한 홉에 한 겹씩 벗겨지며 리다이렉트를 반복하므로,
+      // 목적지가 로그인 화면이면 홈으로 끊는다.
+      return isLoginPath(next) ? ROUTES.HOME : next;
   }
+}
+
+// 경로가 로그인 화면인지 판별한다. 쿼리스트링(`/login?next=...`)까지 포함하되,
+// `/login`으로 시작하는 다른 경로(`/login-history` 등)는 걸리지 않게 한다.
+function isLoginPath(path: string): boolean {
+  return path === ROUTES.LOGIN || path.startsWith(`${ROUTES.LOGIN}?`);
 }
 
 // 로그인 직후 이동할 경로. next는 로그인 전에 가려던 경로다.
