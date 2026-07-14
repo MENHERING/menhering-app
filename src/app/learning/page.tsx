@@ -9,8 +9,10 @@ import { CurriculumBar } from '@/components/learning/CurriculumBar';
 import { CurriculumDropdown } from '@/components/learning/CurriculumDropdown';
 import { LessonRoadmap } from '@/components/learning/LessonRoadmap';
 import { UserStatusBar } from '@/components/learning/UserStatusBar';
+import { DEFAULT_NICKNAME } from '@/constants/avatar';
 import { CURRICULUM_TITLE } from '@/constants/curriculum';
 import { ROUTES } from '@/constants/routes';
+import { useMyAvatar } from '@/hooks/avatar/use-my-avatar';
 import { useLearningProgress } from '@/hooks/learning/use-learning-progress';
 import { getLessonStatus } from '@/lib/curriculum-lock';
 import { MOCK_USER_PROGRESS } from '@/mocks/lessons';
@@ -34,6 +36,7 @@ function buildLessons(curriculum: Curriculum): Lesson[] {
 export default function LearningPage() {
   const router = useRouter();
   const { data: progress, isLoading, isError } = useLearningProgress();
+  const { data: avatar } = useMyAvatar();
 
   const curricula: Curriculum[] =
     progress?.curricula.map((c) => ({
@@ -119,6 +122,7 @@ export default function LearningPage() {
     <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
       <main className="flex-1 pb-6">
         <UserStatusBar
+          nickname={avatar?.nickname ?? DEFAULT_NICKNAME}
           level={MOCK_USER_PROGRESS.level}
           xp={MOCK_USER_PROGRESS.xp}
           avatarSrc={MOCK_USER_PROGRESS.avatarSrc}
