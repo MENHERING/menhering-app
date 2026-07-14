@@ -1,14 +1,7 @@
 import { z } from 'zod';
 
-class ApiError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-    this.name = 'ApiError';
-  }
-}
+import { ApiError } from '@/lib/api-error';
+import { ApiResponseSchema, ErrorResponseSchema } from '@/schemas/api-response.schema';
 
 interface CoreFetchOptions extends RequestInit {
   redirectOn401?: boolean;
@@ -31,10 +24,14 @@ async function coreFetch<T>(
   }
 
   if (!res.ok) {
-    throw new ApiError(res.status, await res.text());
+    const { statusCode, message, data } = ErrorResponseSchema.parse(await res.json());
+
+    throw new ApiError(statusCode, message, data);
   }
 
-  return schema.parse(await res.json());
+  const { data } = ApiResponseSchema(schema).parse(await res.json());
+
+  return data;
 }
 
 // 로그인 불필요: 회원가입, 로그인, 헬스체크 등
