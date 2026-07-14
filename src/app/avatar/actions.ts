@@ -160,7 +160,8 @@ export async function saveAvatar(input: SaveAvatarInput): Promise<SaveAvatarResu
 }
 
 // 성공 시 서버가 차감한 실제 잔액(coin)을 돌려준다 → 클라가 이 값으로 잔액을 덮는다.
-export type BuyAvatarItemResult = { ok: true; coin: number } | { ok: false; error: string };
+// coin이 null이면(반환값이 유한수가 아닌 이상치) 클라가 자체 계산(현재 잔액 - 결제액)으로 폴백한다.
+export type BuyAvatarItemResult = { ok: true; coin: number | null } | { ok: false; error: string };
 
 // RPC가 raise한 SQLSTATE → 사용자 메시지. 함수에서 던진 메시지를 그대로 신뢰하지 않고
 // 코드로 매핑해, 원인이 바뀌어도 노출 문구를 서버 액션이 통제한다.
@@ -196,5 +197,11 @@ export async function buyAvatarItem(input: BuyAvatarItemInput): Promise<BuyAvata
     return { ok: false, error: BUY_ERROR_MESSAGE[error.code ?? ''] ?? '구매에 실패했습니다.' };
   }
 
-  return { ok: true, coin: data as number };
+  // 결제는 이미 트랜잭션으로 커밋됐으므로 반환값 형태가 이상해도 throw하지 않는다(성공을 실패로
+  // 뒤집으면 재시도→이미보유 오류로 이어짐). 유한수가 아니면 null로 내려 클라가 폴백하게 한다.
+  const coin = typeof data === 'number' && Number.isFinite(data) ? data : null;
+
+  if (coin === null) console.error('[avatar] 구매 반환 잔액 형식 오류:', data);
+
+  return { ok: true, coin };
 }

@@ -137,7 +137,8 @@ export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: Avata
       const result = await buyAvatarItem(buy);
 
       if (result.ok) {
-        applyPurchase(buy, result.coin);
+        // 서버가 유효 잔액을 못 준 이상치(coin === null)면 현재 잔액에서 결제액을 뺀 값으로 폴백한다.
+        applyPurchase(buy, result.coin ?? Math.max(0, coin - buy.cost));
         if (buy.kind === 'character') {
           useAvatarStore.getState().setCharacterType(buy.value);
         } else {
