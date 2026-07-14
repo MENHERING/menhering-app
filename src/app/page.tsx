@@ -1,25 +1,10 @@
-'use client';
-
-import { useEffect } from 'react';
-
-import { useRouter } from 'next/navigation';
-
 import { SplashScreen } from '@/components/intro/SplashScreen';
+import { resolveEntryPath } from '@/lib/onboarding/queries';
 
-// 스플래시 노출 시간(ms)
-const SPLASH_DURATION_MS = 2000;
+// 스플래시는 브랜드를 잠깐 보여주는 화면이라, 어디로 갈지는 서버에서 미리 정해 내려보낸다.
+// (세션 없음 → 로그인 / 레벨 없음 → 온보딩 / 그 외 → 홈)
+export default async function Page() {
+  const nextPath = await resolveEntryPath();
 
-export default function Page() {
-  const router = useRouter();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      // replace: 뒤로가기 시 스플래시로 되돌아가지 않도록 함.
-      router.replace('/login');
-    }, SPLASH_DURATION_MS);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
-  return <SplashScreen />;
+  return <SplashScreen nextPath={nextPath} />;
 }
