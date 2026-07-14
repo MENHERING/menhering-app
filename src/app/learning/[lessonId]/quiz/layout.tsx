@@ -4,19 +4,19 @@ import { notFound, useParams, useRouter } from 'next/navigation';
 
 import { Header } from '@/components/common/Header';
 import { ROUTES } from '@/constants/routes';
-import { MOCK_LESSONS } from '@/mocks/lessons';
+import { parseLessonId } from '@/lib/parse-lesson-id';
 
 export default function QuizLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { lessonId } = useParams<{ lessonId: string }>();
-  const lesson = MOCK_LESSONS.find((item) => item.id === lessonId);
+  const { stage } = parseLessonId(lessonId);
 
-  if (!lesson) notFound();
+  if (!Number.isInteger(stage) || stage < 1) notFound();
 
   return (
     <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
       <Header
-        title={`스테이지 ${lesson.order}`}
+        title={`스테이지 ${stage}`}
         leftType="none"
         rightType="close"
         onRightPress={() => router.push(ROUTES.LEARNING)}

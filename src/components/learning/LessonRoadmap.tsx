@@ -43,7 +43,8 @@ export function LessonRoadmap({
       {lessons.map((lesson, index) => {
         // 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다.
         const offset = index % 2 === 0 ? NODE_OFFSET_PX : -NODE_OFFSET_PX;
-        const isCurrent = lesson.status === 'current';
+        // 완료된 스테이지도 복습으로 다시 풀 수 있게 클릭 가능하게 둔다. 잠긴 것만 막는다.
+        const isSelectable = lesson.status !== 'locked';
 
         return (
           <div
@@ -59,7 +60,7 @@ export function LessonRoadmap({
               order={lesson.order}
               status={lesson.status}
               isSelected={lesson.id === selectedLessonId}
-              onPress={isCurrent ? () => onSelectLesson(lesson.id) : undefined}
+              onPress={isSelectable ? () => onSelectLesson(lesson.id) : undefined}
             />
           </div>
         );
