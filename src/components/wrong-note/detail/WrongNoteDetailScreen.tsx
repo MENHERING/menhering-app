@@ -107,7 +107,7 @@ export function WrongNoteDetailScreen({
       <main className="flex-1 p-4 pb-8">
         <Section className="shadow-card flex flex-col gap-4 p-4">
           <WrongNoteSubjectTags label={item.label} />
-          <p className="text-brown-ink text-[15px] leading-[22px] font-bold">{item.question}</p>
+          <p className="text-brown-ink text-[15px] leading-[22px] font-bold">Q. {item.question}</p>
         </Section>
 
         <div className="mt-6 flex flex-col gap-2">
