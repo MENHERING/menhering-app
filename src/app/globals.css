@@ -85,6 +85,22 @@
   --subject-js: #f59e0b;
   --subject-react-surface: #e0f7f4;
   --subject-react: #00897b;
+  --subject-typescript-surface: #e8ecfd;
+  --subject-typescript: #4338ca;
+  --subject-git-surface: #fde9e2;
+  --subject-git: #c2410c;
+  --subject-nextjs-surface: #e5e7eb;
+  --subject-nextjs: #111827;
+  --subject-async-surface: #f1e9fd;
+  --subject-async: #7c3aed;
+  --subject-browser-surface: #e6f4ea;
+  --subject-browser: #2f855a;
+  --subject-state-surface: #fce7f6;
+  --subject-state: #be185d;
+  --subject-form-surface: #eef2f7;
+  --subject-form: #475569;
+  --subject-testing-surface: #fef3e0;
+  --subject-testing: #b45309;
 
   --gold: #fbbf24;
 
@@ -179,6 +195,22 @@
   --color-subject-js: var(--subject-js);
   --color-subject-react-surface: var(--subject-react-surface);
   --color-subject-react: var(--subject-react);
+  --color-subject-typescript-surface: var(--subject-typescript-surface);
+  --color-subject-typescript: var(--subject-typescript);
+  --color-subject-git-surface: var(--subject-git-surface);
+  --color-subject-git: var(--subject-git);
+  --color-subject-nextjs-surface: var(--subject-nextjs-surface);
+  --color-subject-nextjs: var(--subject-nextjs);
+  --color-subject-async-surface: var(--subject-async-surface);
+  --color-subject-async: var(--subject-async);
+  --color-subject-browser-surface: var(--subject-browser-surface);
+  --color-subject-browser: var(--subject-browser);
+  --color-subject-state-surface: var(--subject-state-surface);
+  --color-subject-state: var(--subject-state);
+  --color-subject-form-surface: var(--subject-form-surface);
+  --color-subject-form: var(--subject-form);
+  --color-subject-testing-surface: var(--subject-testing-surface);
+  --color-subject-testing: var(--subject-testing);
 
   --shadow-card: 0 1px 2px -1px rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
