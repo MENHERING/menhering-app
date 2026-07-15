@@ -23,8 +23,15 @@ export function WrongNoteScreen() {
   const resetSolveResults = useWrongNoteStore((state) => state.resetSolveResults);
   const [activeFilter, setActiveFilter] = useState<WrongNoteFilter>('all');
 
-  const { data, isPending, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useWrongNoteList();
+  const {
+    data,
+    isPending,
+    isError,
+    hasNextPage,
+    isFetchingNextPage,
+    isFetchNextPageError,
+    fetchNextPage,
+  } = useWrongNoteList();
 
   const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
   const stats = data?.pages[0]?.stats ?? EMPTY_STATS;
@@ -71,12 +78,12 @@ export function WrongNoteScreen() {
           {isPending && (
             <p className="text-brown-muted px-1 py-6 text-center text-sm">불러오는 중...</p>
           )}
-          {isError && (
+          {isError && items.length === 0 && (
             <p className="text-brown-muted px-1 py-6 text-center text-sm">
               오답노트를 불러오지 못했어요.
             </p>
           )}
-          {!isPending && !isError && filteredItems.length === 0 && (
+          {!isPending && !(isError && items.length === 0) && filteredItems.length === 0 && (
             <p className="text-brown-muted px-1 py-6 text-center text-sm">
               아직 기록된 오답이 없어요.
             </p>
@@ -87,6 +94,11 @@ export function WrongNoteScreen() {
         </div>
         {hasNextPage && (
           <div className="px-4 pt-3">
+            {isFetchNextPageError && (
+              <p className="text-coral-accent pb-2 text-center text-xs">
+                목록을 더 불러오지 못했어요. 다시 시도해주세요.
+              </p>
+            )}
             <Button
               isFullWidth
               variant="outline"

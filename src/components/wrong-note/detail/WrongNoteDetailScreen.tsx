@@ -6,6 +6,7 @@ import { notFound, useRouter } from 'next/navigation';
 
 import { Header } from '@/components/common/Header';
 import { Section } from '@/components/common/Section';
+import { Toast } from '@/components/common/Toast';
 import { WrongNoteDetailOptionRow } from '@/components/wrong-note/detail/WrongNoteDetailOptionRow';
 import { WrongNoteExplanationCard } from '@/components/wrong-note/detail/WrongNoteExplanationCard';
 import { WrongNoteProgressBar } from '@/components/wrong-note/detail/WrongNoteProgressBar';
@@ -40,6 +41,8 @@ export function WrongNoteDetailScreen({
   const recordSolveResult = useWrongNoteStore((state) => state.recordSolveResult);
   // 선택은 한 번만 가능하며, 정답/오답 여부와 무관하게 즉시 정답을 함께 공개한다.
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
+  // 복습 완료(PATCH) 실패 시 사용자에게 알려줄 에러 메시지. 성공은 캐시 무효화로 충분해 별도 표시 없음.
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const correctNumber = useMemo(
     () => item?.options.find((option) => option.state === 'correct')?.number,
@@ -54,7 +57,9 @@ export function WrongNoteDetailScreen({
     const isFirstTryCorrect = number === correctNumber;
     // 정답을 맞혔을 때만 복습 완료로 처리하고, 틀리면 미복습 상태를 유지해 다시 풀 수 있게 한다.
     if (isFirstTryCorrect) {
-      markReviewed(item.id);
+      markReviewed(item.id, {
+        onError: () => setErrorMessage('복습 완료 처리에 실패했어요.'),
+      });
     }
     recordSolveResult(item.id, isFirstTryCorrect);
   };
@@ -128,6 +133,15 @@ export function WrongNoteDetailScreen({
           />
         )}
       </main>
+
+      <Toast
+        isOpen={errorMessage !== null}
+        message={errorMessage ?? ''}
+        variant="error"
+        duration={0}
+        dismissible
+        onClose={() => setErrorMessage(null)}
+      />
     </>
   );
 }
