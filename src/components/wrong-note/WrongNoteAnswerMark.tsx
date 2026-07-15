@@ -1,7 +1,7 @@
 import { Check, X } from 'lucide-react';
 
 import { cn } from '@/lib/cn';
-import type { OptionState } from '@/types/wrong-note';
+import type { OptionState } from '@/schemas/wrong-note.schema';
 
 interface WrongNoteAnswerMarkProps {
   state: OptionState;

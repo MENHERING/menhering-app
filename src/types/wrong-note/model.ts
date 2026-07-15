@@ -1,22 +1,6 @@
-export type WrongNoteSubject =
-  | 'HTML'
-  | 'CSS'
-  | 'JS'
-  | 'React'
-  | 'Next.js'
-  | 'TypeScript'
-  | '비동기'
-  | '폼'
-  | '상태관리'
-  | 'Git'
-  | '브라우저'
-  | '테스팅';
+import type { OptionState, QuestionLevel, ReviewStatus } from '@/schemas/wrong-note.schema';
 
-export type ReviewStatus = 'unreviewed' | 'reviewed';
-
-export type OptionState = 'my_wrong' | 'correct' | 'neutral';
-
-export type WrongNoteFilter = 'all' | 'unreviewed' | 'reviewed' | WrongNoteSubject;
+export type WrongNoteFilter = 'all' | ReviewStatus | string;
 
 export interface WrongNoteOption {
   number: number;
@@ -26,17 +10,12 @@ export interface WrongNoteOption {
 
 export interface WrongNoteItem {
   id: string;
-  subject: WrongNoteSubject;
-  topic: string;
+  level: QuestionLevel;
+  stage: number;
+  label: string;
   question: string;
   options: WrongNoteOption[];
   reviewStatus: ReviewStatus;
-  daysAgo: string;
+  createdAt: string;
   explanation: string;
-}
-
-export interface WrongNoteStats {
-  total: number;
-  unreviewed: number;
-  reviewed: number;
 }
