@@ -10,23 +10,34 @@ import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
 import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
 import { QuizTimer } from '@/components/quiz/QuizTimer';
 import { ROUTES } from '@/constants/routes';
-import { MOCK_QUIZ_QUESTIONS, QUIZ_TIME_LIMIT_SECONDS } from '@/mocks/quiz';
+import { useQuiz } from '@/hooks/learning/use-quiz';
+import { useSubmitQuiz } from '@/hooks/learning/use-submit-quiz';
+import { parseLessonId } from '@/lib/parse-lesson-id';
+import { QUIZ_TIME_LIMIT_SECONDS } from '@/mocks/quiz';
 
 export default function QuizPage() {
   const router = useRouter();
   const { lessonId } = useParams<{ lessonId: string }>();
+  const { level, stage } = parseLessonId(lessonId);
+
+  const { data: questions, isLoading, isError } = useQuiz(level, stage);
+  const submitQuiz = useSubmitQuiz();
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(QUIZ_TIME_LIMIT_SECONDS);
-  const [correctCount, setCorrectCount] = useState(0);
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+  // { questionId: selectedOption(1~4) } 제출용 누적. 정답 판정은 서버가 한다.
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  // useState의 지연 초기화 함수는 마운트 시 한 번만 호출되므로 순수성 규칙에 안전하다.
+  const [startedAt, setStartedAt] = useState(() => Date.now());
 
-  const question = MOCK_QUIZ_QUESTIONS[currentIndex];
+  const question = questions?.[currentIndex];
   const hasAnswered = selectedIndex !== null;
-  const isLastQuestion = currentIndex === MOCK_QUIZ_QUESTIONS.length - 1;
+  const isLastQuestion = questions ? currentIndex === questions.length - 1 : false;
 
   useEffect(() => {
-    if (hasAnswered || showTimeoutModal) return;
+    if (!questions || hasAnswered || showTimeoutModal) return;
 
     const timer = setTimeout(() => {
       setSecondsLeft((prev) => {
@@ -39,7 +50,19 @@ export default function QuizPage() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [secondsLeft, hasAnswered, showTimeoutModal]);
+  }, [questions, secondsLeft, hasAnswered, showTimeoutModal]);
+
+  if (isError) {
+    return (
+      <p className="text-wrong px-5 py-16 text-center text-sm">
+        문제를 불러오지 못했어요. 다시 시도해주세요.
+      </p>
+    );
+  }
+
+  if (isLoading || !question) {
+    return <p className="text-brown-soft px-5 py-16 text-center text-sm">불러오는 중...</p>;
+  }
 
   const handleSelect = (index: number) => {
     if (hasAnswered) return;
@@ -47,16 +70,36 @@ export default function QuizPage() {
   };
 
   const handleNext = () => {
-    const finalCorrectCount =
-      selectedIndex === question.correctIndex ? correctCount + 1 : correctCount;
+    const finalAnswers = { ...answers, [question.id]: (selectedIndex ?? 0) + 1 };
 
     if (isLastQuestion) {
-      const wrongCount = MOCK_QUIZ_QUESTIONS.length - finalCorrectCount;
-      router.push(`/learning/${lessonId}/result?correct=${finalCorrectCount}&wrong=${wrongCount}`);
+      const durationSec = Math.round((Date.now() - startedAt) / 1000);
+
+      submitQuiz.mutate(
+        {
+          level,
+          stage,
+          durationSec,
+          answers: Object.entries(finalAnswers).map(([questionId, selectedOption]) => ({
+            questionId,
+            selectedOption,
+          })),
+        },
+        {
+          onSuccess: (result) => {
+            // TODO(#53 후속): result.isSuccess를 쿼리로 넘겨서 실패 시 결과 화면이
+            // 분기되게 해야 한다. 지금은 버려지고 있어 실패해도 항상 성공 UI로 렌더됨.
+            // level/stage는 결과 화면이 "다음 스테이지" 버튼의 실제 목적지를 계산하는 데 쓴다.
+            router.push(
+              `/learning/${lessonId}/result?correct=${result.correctCount}&wrong=${result.wrongCount}&level=${encodeURIComponent(level)}&stage=${stage}`,
+            );
+          },
+        },
+      );
       return;
     }
 
-    setCorrectCount(finalCorrectCount);
+    setAnswers(finalAnswers);
     setCurrentIndex((prev) => prev + 1);
     setSelectedIndex(null);
   };
@@ -65,8 +108,9 @@ export default function QuizPage() {
     setCurrentIndex(0);
     setSelectedIndex(null);
     setSecondsLeft(QUIZ_TIME_LIMIT_SECONDS);
-    setCorrectCount(0);
+    setAnswers({});
     setShowTimeoutModal(false);
+    setStartedAt(Date.now());
   };
 
   return (
@@ -75,7 +119,7 @@ export default function QuizPage() {
         secondsLeft={secondsLeft}
         totalSeconds={QUIZ_TIME_LIMIT_SECONDS}
         currentIndex={currentIndex}
-        totalQuestions={MOCK_QUIZ_QUESTIONS.length}
+        totalQuestions={questions.length}
       />
 
       <QuizQuestionCard order={question.order} prompt={question.prompt} />
@@ -105,7 +149,10 @@ export default function QuizPage() {
       {hasAnswered && <QuizExplanation explanation={question.explanation} onNext={handleNext} />}
 
       {showTimeoutModal && (
-        <QuizTimeoutModal onRetry={handleRetry} onLeave={() => router.push(ROUTES.LEARNING)} />
+        <QuizTimeoutModal
+          onRetry={handleRetry}
+          onLeave={() => router.push(`${ROUTES.LEARNING}?level=${encodeURIComponent(level)}`)}
+        />
       )}
     </>
   );

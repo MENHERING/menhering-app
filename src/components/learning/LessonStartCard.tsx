@@ -14,6 +14,9 @@ interface LessonStartCardProps {
 
 export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCardProps) {
   const router = useRouter();
+  // 이미 완료한 스테이지는 복습으로 다시 풀 수 있지만, 진행도 판단 기준(내가 "지금" 있는
+  // 스테이지)이 아니라 XP를 다시 주지 않는다 — 버튼에서도 XP를 약속하지 않는다.
+  const isReview = lesson.status === 'completed';
 
   return (
     <div className="relative w-full">
@@ -53,7 +56,7 @@ export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCard
           isFullWidth
           onClick={() => router.push(`/learning/${lesson.id}/quiz`)}
         >
-          시작하기 +{lesson.xpReward} XP
+          {isReview ? '복습하기' : `시작하기 +${lesson.xpReward} XP`}
         </Button>
       </div>
     </div>

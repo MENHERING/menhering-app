@@ -7,17 +7,23 @@ import { ROUTES } from '@/constants/routes';
 
 interface QuizResultActionsProps {
   wrongCount: number;
+  // 방금 푼 레벨의 다음 스테이지 id(`${level}-${stage+1}`). 마지막 스테이지였으면 null.
+  nextLessonId: string | null;
+  // 방금 풀던 레벨. "스테이지 목록"이 내 배정 레벨이 아니라 이 레벨을 기본으로 보여주게 넘긴다.
+  level: string;
 }
 
-export function QuizResultActions({ wrongCount }: QuizResultActionsProps) {
+export function QuizResultActions({ wrongCount, nextLessonId, level }: QuizResultActionsProps) {
   const router = useRouter();
-  const goToLearning = () => router.push(ROUTES.LEARNING);
+  const goToLearning = () => router.push(`${ROUTES.LEARNING}?level=${encodeURIComponent(level)}`);
   const goToWrongNote = () => router.push(ROUTES.WRONG_NOTE);
+  // 다음 스테이지가 없으면(레벨의 마지막 스테이지) 학습 목록으로 보낸다.
+  const goToNextStage = () =>
+    router.push(nextLessonId ? `/learning/${nextLessonId}/quiz` : ROUTES.LEARNING);
 
   return (
     <div className="mx-5 mt-auto flex flex-col gap-3">
-      {/* TODO: 다음 레슨으로 바로 진입하는 라우팅은 후속 이슈. 지금은 학습 로드맵으로 이동한다. */}
-      <Button variant="primary" size="lg" isFullWidth onClick={goToLearning}>
+      <Button variant="primary" size="lg" isFullWidth onClick={goToNextStage}>
         다음 스테이지
       </Button>
       <Button variant="secondary" size="lg" isFullWidth onClick={goToLearning}>

@@ -26,6 +26,7 @@ export default function TestLearningPage() {
     <main className="flex min-h-screen flex-col gap-8 bg-gray-50 px-4 py-16">
       {/* case 01: UserStatusBar */}
       <UserStatusBar
+        nickname="멘헤링이"
         level={MOCK_USER_PROGRESS.level}
         xp={MOCK_USER_PROGRESS.xp}
         avatarSrc={MOCK_USER_PROGRESS.avatarSrc}

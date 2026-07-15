@@ -3,7 +3,13 @@ import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
-import { MOCK_LESSONS } from '@/mocks/lessons';
+import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
+import { createClient } from '@/lib/supabase/server';
+
+// submit_quiz_result RPC와 동일한 값(정답 1개당 XP·행복도 증가폭)을 화면 표시에도 그대로 쓴다.
+const XP_PER_CORRECT = 10;
+const MOOD_GAIN_PER_CORRECT = 2;
+const DEFAULT_MOOD_VALUE = 60;
 
 // 음수/문자열 등 잘못된 쿼리값이 와도 0으로 안전하게 처리한다.
 function parseCount(value: string | undefined): number {
@@ -12,28 +18,52 @@ function parseCount(value: string | undefined): number {
 }
 
 export default async function QuizResultPage({
-  params,
   searchParams,
 }: {
-  params: Promise<{ lessonId: string }>;
-  searchParams: Promise<{ correct?: string; wrong?: string }>;
+  searchParams: Promise<{ correct?: string; wrong?: string; level?: string; stage?: string }>;
 }) {
-  const { lessonId } = await params;
-  const { correct, wrong } = await searchParams;
+  const { correct, wrong, level, stage } = await searchParams;
   const correctCount = parseCount(correct);
   const wrongCount = parseCount(wrong);
-  const totalCount = correctCount + wrongCount;
-  const correctRatio = totalCount > 0 ? correctCount / totalCount : 0;
 
-  // TODO: 실제로는 사용자의 누적 학습량에 따라 서버에서 계산된 행복도(0~100)를 받아와야 한다.
-  // 지금은 API가 없어 "이번 퀴즈 정답률"을 임시로 그 값처럼 사용한다.
-  // QuizAvatarRing/HappinessGauge는 값의 출처와 무관하게 0~100 숫자만 받으므로,
-  // 여기 계산식만 실제 API 값으로 바꾸면 두 컴포넌트는 그대로 재사용할 수 있다.
-  const happinessPercent = Math.round(correctRatio * 100);
-  // 상승 폭 텍스트("+n%p")는 이번 세션에서 오른 변화량이라 행복도와 별개로 계산한다.
-  const gainPercent = Math.round(correctRatio * 40);
-  const xpReward = MOCK_LESSONS.find((lesson) => lesson.id === lessonId)?.xpReward ?? 0;
+  // "다음 스테이지" 버튼의 실제 목적지. 방금 푼 레벨의 마지막 스테이지였으면 다음 스테이지가 없다.
+  const stageNumber = Number(stage);
+  const nextLessonId =
+    level && Number.isInteger(stageNumber) && stageNumber < (CURRICULUM_TOTAL_COUNT[level] ?? 0)
+      ? `${level}-${stageNumber + 1}`
+      : null;
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // 방금 submit_quiz_result가 이미 갱신을 마친 뒤라, 현재 행복도를 그대로 조회해서 보여준다.
+  let happinessPercent = DEFAULT_MOOD_VALUE;
+  if (user) {
+    const { data: avatar } = await supabase
+      .from('avatars')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (avatar) {
+      const { data: status } = await supabase
+        .from('avatar_status')
+        .select('mood_value')
+        .eq('avatar_id', avatar.id)
+        .maybeSingle();
+
+      happinessPercent = status?.mood_value ?? DEFAULT_MOOD_VALUE;
+    }
+  }
+
+  const gainPercent = correctCount * MOOD_GAIN_PER_CORRECT;
+  const xpReward = correctCount * XP_PER_CORRECT;
+
+  // TODO(#53 후속): 스테이지 실패(5문제 전부 정답 못함) 시 결과 화면을 성공과 다르게 분기해야 한다.
+  // submit_quiz_result RPC의 isSuccess를 퀴즈 페이지에서 여기로 쿼리로 넘겨받아,
+  // 실패면 타이틀·XP 뱃지·CTA(재도전 우선 노출)를 다르게 보여줘야 함. 지금은 항상 성공 UI로만 렌더됨.
   return (
     <>
       <QuizAvatarRing happinessPercent={happinessPercent} />
@@ -43,7 +73,7 @@ export default async function QuizResultPage({
       </div>
       <HappinessGauge happinessPercent={happinessPercent} gainPercent={gainPercent} />
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
-      <QuizResultActions wrongCount={wrongCount} />
+      <QuizResultActions wrongCount={wrongCount} nextLessonId={nextLessonId} level={level ?? ''} />
     </>
   );
 }
