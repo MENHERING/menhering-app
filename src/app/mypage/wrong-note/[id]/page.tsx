@@ -1,7 +1,4 @@
-import { notFound } from 'next/navigation';
-
 import { WrongNoteDetailScreen } from '@/components/wrong-note/detail/WrongNoteDetailScreen';
-import { MOCK_WRONG_NOTE_ITEMS } from '@/mocks/wrong-note.mock';
 
 interface WrongNoteDetailPageProps {
   params: Promise<{ id: string }>;
@@ -14,9 +11,6 @@ export default async function WrongNoteDetailPage({
 }: WrongNoteDetailPageProps) {
   const { id } = await params;
   const { mode, queue, index } = await searchParams;
-
-  const item = MOCK_WRONG_NOTE_ITEMS.find((wrongNoteItem) => wrongNoteItem.id === id);
-  if (!item) notFound();
 
   const isBatchMode = mode === 'batch' && Boolean(queue);
   const queueIds = isBatchMode ? (queue?.split(',') ?? []) : [id];
@@ -31,7 +25,7 @@ export default async function WrongNoteDetailPage({
   return (
     <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-107.5 flex-col">
       <WrongNoteDetailScreen
-        item={item}
+        id={id}
         isBatchMode={isBatchMode}
         current={currentIndex + 1}
         total={queueIds.length}

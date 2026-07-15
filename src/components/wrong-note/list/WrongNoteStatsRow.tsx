@@ -1,6 +1,6 @@
 import { Section } from '@/components/common/Section';
 import { cn } from '@/lib/cn';
-import type { WrongNoteStats } from '@/types/wrong-note';
+import type { WrongNoteStats } from '@/schemas/wrong-note.schema';
 
 interface WrongNoteStatsRowProps {
   stats: WrongNoteStats;

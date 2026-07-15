@@ -1,9 +1,1 @@
-export type {
-  WrongNoteSubject,
-  ReviewStatus,
-  OptionState,
-  WrongNoteFilter,
-  WrongNoteOption,
-  WrongNoteItem,
-  WrongNoteStats,
-} from '@/types/wrong-note/model';
+export type { WrongNoteFilter, WrongNoteOption, WrongNoteItem } from '@/types/wrong-note/model';

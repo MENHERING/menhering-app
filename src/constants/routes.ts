@@ -11,5 +11,5 @@ export const ROUTES = {
   MYPAGE_FRIENDS_ADD: '/mypage/friends/add',
   MYPAGE_SETTINGS: '/mypage/settings',
   RANKING: '/learning/ranking',
-  WRONG_NOTE: '/wrong-note',
+  WRONG_NOTE: '/mypage/wrong-note',
 } as const;
