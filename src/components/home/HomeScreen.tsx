@@ -19,9 +19,9 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
-import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
+import type { CharacterType, ColorTheme } from '@/types/avatar';
 import type { HomeSummary } from '@/types/home';
 
 interface HomeStat {
@@ -34,9 +34,15 @@ interface HomeStat {
 interface HomeScreenProps {
   // 서버에서 조회한 요약(스테이지·XP·연속일·오늘 완료·정답률)
   summary: HomeSummary;
+  // 서버에서 조회한 내 아바타(캐릭터·색상·닉네임)
+  avatar: {
+    characterType: CharacterType;
+    colorTheme: ColorTheme;
+    nickname: string;
+  };
 }
 
-export function HomeScreen({ summary }: HomeScreenProps) {
+export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   const router = useRouter();
 
   // 진행률(%)
@@ -71,8 +77,8 @@ export function HomeScreen({ summary }: HomeScreenProps) {
           <div className="flex items-center gap-2">
             <span className="bg-coral flex size-9 items-center justify-center overflow-hidden rounded-xl">
               <CharacterRenderer
-                characterType={DEFAULT_CHARACTER_TYPE}
-                colorTheme={DEFAULT_COLOR_THEME}
+                characterType={avatar.characterType}
+                colorTheme={avatar.colorTheme}
                 className="size-8 translate-y-1"
               />
             </span>
@@ -91,7 +97,7 @@ export function HomeScreen({ summary }: HomeScreenProps) {
         <div className="mt-4 flex justify-center">
           <div className="border-coral/30 relative rounded-full border-2 bg-white px-5 py-2.5 shadow-sm">
             <p className="text-plum flex items-center gap-1 text-sm font-bold">
-              {summary.greeting}
+              {avatar.nickname}님, {summary.greeting}
               <Sparkles className="text-coral size-4" aria-hidden />
             </p>
             <span className="border-coral/30 absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-r-2 border-b-2 bg-white" />
@@ -101,8 +107,8 @@ export function HomeScreen({ summary }: HomeScreenProps) {
         {/* 마스코트 */}
         <div className="mt-6 flex justify-center">
           <CharacterRenderer
-            characterType={DEFAULT_CHARACTER_TYPE}
-            colorTheme={DEFAULT_COLOR_THEME}
+            characterType={avatar.characterType}
+            colorTheme={avatar.colorTheme}
             className="size-44 drop-shadow-sm"
             title="내 아바타"
           />
