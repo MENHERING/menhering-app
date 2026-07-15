@@ -22,7 +22,7 @@ import { Section } from '@/components/common/Section';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import { ROUTES } from '@/constants/routes';
 import { cn } from '@/lib/cn';
-import { HOME_SUMMARY } from '@/mocks/home';
+import type { HomeSummary } from '@/types/home';
 
 interface HomeStat {
   Icon: LucideIcon;
@@ -31,9 +31,13 @@ interface HomeStat {
   label: string;
 }
 
-export function HomeScreen() {
+interface HomeScreenProps {
+  // 서버에서 조회한 요약(스테이지·XP·연속일·오늘 완료·정답률)
+  summary: HomeSummary;
+}
+
+export function HomeScreen({ summary }: HomeScreenProps) {
   const router = useRouter();
-  const summary = HOME_SUMMARY;
 
   // 진행률(%)
   const accessPercent = Math.min(100, (summary.accessStreak / summary.accessStreakMax) * 100);
