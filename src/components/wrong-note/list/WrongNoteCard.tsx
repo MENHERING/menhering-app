@@ -8,6 +8,7 @@ import { Section } from '@/components/common/Section';
 import { WrongNoteOptionRow } from '@/components/wrong-note/list/WrongNoteOptionRow';
 import { WrongNoteSubjectTags } from '@/components/wrong-note/WrongNoteSubjectTags';
 import { cn } from '@/lib/cn';
+import { formatRelativeTime } from '@/lib/date/format-relative-time';
 import type { WrongNoteItem } from '@/types/wrong-note';
 
 interface WrongNoteCardProps {
@@ -21,8 +22,10 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
   return (
     <Section className="shadow-card p-4">
       <div className="flex items-center justify-between">
-        <WrongNoteSubjectTags subject={item.subject} />
-        <span className="text-brown-muted text-[10px] leading-[15px]">{item.daysAgo}</span>
+        <WrongNoteSubjectTags label={item.label} />
+        <span className="text-brown-muted text-[10px] leading-[15px]">
+          {formatRelativeTime(item.createdAt)}
+        </span>
       </div>
 
       <p className="text-brown-ink mt-2.5 text-sm leading-5.5 font-bold">{item.question}</p>

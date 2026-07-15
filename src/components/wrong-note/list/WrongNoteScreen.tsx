@@ -11,24 +11,25 @@ import { WrongNoteCard } from '@/components/wrong-note/list/WrongNoteCard';
 import { WrongNoteFilterBar } from '@/components/wrong-note/list/WrongNoteFilterBar';
 import { WrongNoteStatsRow } from '@/components/wrong-note/list/WrongNoteStatsRow';
 import { ROUTES } from '@/constants/routes';
+import { useWrongNoteList } from '@/hooks/wrong-note/use-wrong-note-list';
+import type { WrongNoteStats } from '@/schemas/wrong-note.schema';
 import { useWrongNoteStore } from '@/stores/wrong-note-store';
-import type { WrongNoteFilter, WrongNoteStats, WrongNoteSubject } from '@/types/wrong-note';
+import type { WrongNoteFilter } from '@/types/wrong-note';
+
+const EMPTY_STATS: WrongNoteStats = { total: 0, unreviewed: 0, reviewed: 0 };
 
 export function WrongNoteScreen() {
   const router = useRouter();
-  const items = useWrongNoteStore((state) => state.items);
   const resetSolveResults = useWrongNoteStore((state) => state.resetSolveResults);
   const [activeFilter, setActiveFilter] = useState<WrongNoteFilter>('all');
 
-  const subjects = useMemo<WrongNoteSubject[]>(
-    () => [...new Set(items.map((item) => item.subject))],
-    [items],
-  );
+  const { data, isPending, isError, hasNextPage, isFetchingNextPage, fetchNextPage } =
+    useWrongNoteList();
 
-  const stats = useMemo<WrongNoteStats>(() => {
-    const reviewed = items.filter((item) => item.reviewStatus === 'reviewed').length;
-    return { total: items.length, unreviewed: items.length - reviewed, reviewed };
-  }, [items]);
+  const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data]);
+  const stats = data?.pages[0]?.stats ?? EMPTY_STATS;
+
+  const labels = useMemo(() => [...new Set(items.map((item) => item.label))], [items]);
 
   const filteredItems = useMemo(
     () =>
@@ -36,7 +37,7 @@ export function WrongNoteScreen() {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'unreviewed') return item.reviewStatus === 'unreviewed';
         if (activeFilter === 'reviewed') return item.reviewStatus === 'reviewed';
-        return item.subject === activeFilter;
+        return item.label === activeFilter;
       }),
     [items, activeFilter],
   );
@@ -64,13 +65,38 @@ export function WrongNoteScreen() {
           activeFilter={activeFilter}
           onChange={setActiveFilter}
           stats={stats}
-          subjects={subjects}
+          labels={labels}
         />
         <div className="flex flex-col gap-3 px-4 pt-3">
+          {isPending && (
+            <p className="text-brown-muted px-1 py-6 text-center text-sm">불러오는 중...</p>
+          )}
+          {isError && (
+            <p className="text-brown-muted px-1 py-6 text-center text-sm">
+              오답노트를 불러오지 못했어요.
+            </p>
+          )}
+          {!isPending && !isError && filteredItems.length === 0 && (
+            <p className="text-brown-muted px-1 py-6 text-center text-sm">
+              아직 기록된 오답이 없어요.
+            </p>
+          )}
           {filteredItems.map((item) => (
             <WrongNoteCard key={item.id} item={item} />
           ))}
         </div>
+        {hasNextPage && (
+          <div className="px-4 pt-3">
+            <Button
+              isFullWidth
+              variant="outline"
+              isLoading={isFetchingNextPage}
+              onClick={() => fetchNextPage()}
+            >
+              더보기
+            </Button>
+          </div>
+        )}
         {unreviewedIds.length > 0 && (
           <div className="sticky bottom-4 px-4 pt-6">
             <Button

@@ -1,5 +1,6 @@
 import { cn } from '@/lib/cn';
-import type { WrongNoteFilter, WrongNoteStats, WrongNoteSubject } from '@/types/wrong-note';
+import type { WrongNoteStats } from '@/schemas/wrong-note.schema';
+import type { WrongNoteFilter } from '@/types/wrong-note';
 
 interface FilterOption {
   value: WrongNoteFilter;
@@ -10,20 +11,20 @@ interface WrongNoteFilterBarProps {
   activeFilter: WrongNoteFilter;
   onChange: (filter: WrongNoteFilter) => void;
   stats: WrongNoteStats;
-  subjects: WrongNoteSubject[];
+  labels: string[];
 }
 
 export function WrongNoteFilterBar({
   activeFilter,
   onChange,
   stats,
-  subjects,
+  labels,
 }: WrongNoteFilterBarProps) {
   const options: FilterOption[] = [
     { value: 'all', label: `전체 ${stats.total}` },
     { value: 'unreviewed', label: `미복습 ${stats.unreviewed}` },
     { value: 'reviewed', label: `복습 완료 ${stats.reviewed}` },
-    ...subjects.map((s) => ({ value: s, label: s })),
+    ...labels.map((l) => ({ value: l, label: l })),
   ];
 
   return (
