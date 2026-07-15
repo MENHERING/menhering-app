@@ -121,7 +121,7 @@ export async function PATCH(
 
     const { data: wrongAnswer, error } = await supabase
       .from('wrong_answers')
-      .update({ review_status: 'reviewed', reviewed_at: new Date().toISOString() })
+      .update({ review_status: '복습완료', reviewed_at: new Date().toISOString() })
       .eq('id', id)
       .eq('user_id', user.id)
       .select()

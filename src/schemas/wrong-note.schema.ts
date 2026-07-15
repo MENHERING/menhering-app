@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const OptionStateSchema = z.enum(['my_wrong', 'correct', 'neutral']);
-const ReviewStatusSchema = z.enum(['unreviewed', 'reviewed']);
+const ReviewStatusSchema = z.enum(['미복습', '복습완료']);
 const QuestionLevelSchema = z.enum(['입문', '초급', '중급', '고급', '전문가']);
 
 const DbTimestampSchema = z.iso.datetime({ offset: true });

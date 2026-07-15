@@ -43,15 +43,15 @@ export function WrongNoteScreen() {
     () =>
       items.filter((item) => {
         if (activeFilter === 'all') return true;
-        if (activeFilter === 'unreviewed') return item.reviewStatus === 'unreviewed';
-        if (activeFilter === 'reviewed') return item.reviewStatus === 'reviewed';
+        if (activeFilter === '미복습') return item.reviewStatus === '미복습';
+        if (activeFilter === '복습완료') return item.reviewStatus === '복습완료';
         return item.label === activeFilter;
       }),
     [items, activeFilter],
   );
 
   const unreviewedIds = useMemo(
-    () => items.filter((item) => item.reviewStatus === 'unreviewed').map((item) => item.id),
+    () => items.filter((item) => item.reviewStatus === '미복습').map((item) => item.id),
     [items],
   );
 

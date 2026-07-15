@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
           .from('wrong_answers')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
-          .eq('review_status', 'unreviewed'),
+          .eq('review_status', '미복습'),
       ]);
 
     if (totalError || unreviewedError || total === null || unreviewed === null) {
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
           session_id: sessionId ?? null,
           selected_answer: selectedAnswer,
           correct_answer: correctAnswer,
-          review_status: 'unreviewed',
+          review_status: '미복습',
           reviewed_at: null,
           created_at: new Date().toISOString(),
         },

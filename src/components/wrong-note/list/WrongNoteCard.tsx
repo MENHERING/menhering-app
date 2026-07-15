@@ -17,7 +17,7 @@ interface WrongNoteCardProps {
 
 export function WrongNoteCard({ item }: WrongNoteCardProps) {
   const router = useRouter();
-  const isReviewed = item.reviewStatus === 'reviewed';
+  const isReviewed = item.reviewStatus === '복습완료';
 
   return (
     <Section className="shadow-card p-4">

@@ -22,8 +22,8 @@ export function WrongNoteFilterBar({
 }: WrongNoteFilterBarProps) {
   const options: FilterOption[] = [
     { value: 'all', label: `전체 ${stats.total}` },
-    { value: 'unreviewed', label: `미복습 ${stats.unreviewed}` },
-    { value: 'reviewed', label: `복습 완료 ${stats.reviewed}` },
+    { value: '미복습', label: `미복습 ${stats.unreviewed}` },
+    { value: '복습완료', label: `복습 완료 ${stats.reviewed}` },
     ...labels.map((l) => ({ value: l, label: l })),
   ];
 
