@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react';
 import Image from 'next/image';
 
 import { SocialLoginButtons } from '@/components/intro/SocialLoginButtons';
@@ -9,6 +10,8 @@ interface LoginScreenProps {
   variant?: LoginVariant;
   // 로그인 성공 후 이동할 경로
   next?: string;
+  // 로그인 실패 안내 문구 (콜백 실패 시 표시). null이면 배너 없음.
+  errorMessage?: string | null;
 }
 
 const COPY: Record<
@@ -29,7 +32,7 @@ const COPY: Record<
   },
 };
 
-export function LoginScreen({ variant = 'new', next }: LoginScreenProps) {
+export function LoginScreen({ variant = 'new', next, errorMessage }: LoginScreenProps) {
   const copy = COPY[variant];
 
   return (
@@ -76,6 +79,15 @@ export function LoginScreen({ variant = 'new', next }: LoginScreenProps) {
         </div>
 
         <div className="mt-auto mb-10 flex flex-col gap-3">
+          {errorMessage && (
+            <div
+              role="alert"
+              className="border-coral/30 bg-coral-soft/30 text-coral flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium"
+            >
+              <TriangleAlert className="size-4 shrink-0" aria-hidden />
+              <span>{errorMessage}</span>
+            </div>
+          )}
           <SocialLoginButtons kakaoLabel={copy.kakao} googleLabel={copy.google} next={next} />
         </div>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { Provider } from '@supabase/supabase-js';
 
@@ -19,6 +19,18 @@ export function SocialLoginButtons({
   next = '/home',
 }: SocialLoginButtonsProps) {
   const [pending, setPending] = useState<Provider | null>(null);
+
+  // provider 페이지로 이탈하면 이 페이지는 bfcache에 얼어붙은 채(=pending 유지) 저장된다.
+  // 동의 화면에서 뒤로가기로 복원되면 버튼이 계속 비활성으로 보이므로, bfcache 복원 시 pending을 푼다.
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setPending(null);
+    };
+
+    window.addEventListener('pageshow', handlePageShow);
+
+    return () => window.removeEventListener('pageshow', handlePageShow);
+  }, []);
 
   // 카카오는 Supabase 소셜 흐름을 쓰지 않고 자체 OIDC 라우트로 보낸다. (사유: lib/auth/kakao.ts)
   const handleKakaoLogin = () => {
