@@ -123,10 +123,6 @@ function LearningPageContent() {
     setIsDropdownOpen(false);
   };
 
-  if (isLoading || !selectedCurriculum) {
-    return LOADING_FALLBACK;
-  }
-
   if (isError) {
     return (
       <div className="bg-linen mx-auto flex min-h-dvh w-full max-w-[430px] flex-col">
@@ -136,6 +132,10 @@ function LearningPageContent() {
         <Footer />
       </div>
     );
+  }
+
+  if (isLoading || !selectedCurriculum) {
+    return LOADING_FALLBACK;
   }
 
   return (
