@@ -18,13 +18,23 @@ function parseCount(value: string | undefined): number {
 }
 
 export default async function QuizResultPage({
+  params,
   searchParams,
 }: {
-  searchParams: Promise<{ correct?: string; wrong?: string; level?: string; stage?: string }>;
+  params: Promise<{ lessonId: string }>;
+  searchParams: Promise<{
+    correct?: string;
+    wrong?: string;
+    level?: string;
+    stage?: string;
+    success?: string;
+  }>;
 }) {
-  const { correct, wrong, level, stage } = await searchParams;
+  const { lessonId } = await params;
+  const { correct, wrong, level, stage, success } = await searchParams;
   const correctCount = parseCount(correct);
   const wrongCount = parseCount(wrong);
+  const isSuccess = success === 'true';
 
   // "다음 스테이지" 버튼의 실제 목적지. 방금 푼 레벨의 마지막 스테이지였으면 다음 스테이지가 없다.
   const stageNumber = Number(stage);
@@ -61,9 +71,26 @@ export default async function QuizResultPage({
   const gainPercent = correctCount * MOOD_GAIN_PER_CORRECT;
   const xpReward = correctCount * XP_PER_CORRECT;
 
-  // TODO(#53 후속): 스테이지 실패(5문제 전부 정답 못함) 시 결과 화면을 성공과 다르게 분기해야 한다.
-  // submit_quiz_result RPC의 isSuccess를 퀴즈 페이지에서 여기로 쿼리로 넘겨받아,
-  // 실패면 타이틀·XP 뱃지·CTA(재도전 우선 노출)를 다르게 보여줘야 함. 지금은 항상 성공 UI로만 렌더됨.
+  if (!isSuccess) {
+    return (
+      <>
+        <QuizAvatarRing happinessPercent={happinessPercent} />
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h1 className="text-ink text-xl font-extrabold">아쉬워요!</h1>
+          <p className="text-brown-soft text-sm">오답이 너무 많아 스테이지를 통과하지 못했어요</p>
+        </div>
+        <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
+        <QuizResultActions
+          isSuccess={false}
+          wrongCount={wrongCount}
+          nextLessonId={nextLessonId}
+          level={level ?? ''}
+          lessonId={lessonId}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <QuizAvatarRing happinessPercent={happinessPercent} />
@@ -73,7 +100,13 @@ export default async function QuizResultPage({
       </div>
       <HappinessGauge happinessPercent={happinessPercent} gainPercent={gainPercent} />
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
-      <QuizResultActions wrongCount={wrongCount} nextLessonId={nextLessonId} level={level ?? ''} />
+      <QuizResultActions
+        isSuccess
+        wrongCount={wrongCount}
+        nextLessonId={nextLessonId}
+        level={level ?? ''}
+        lessonId={lessonId}
+      />
     </>
   );
 }
