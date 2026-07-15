@@ -6,6 +6,7 @@ import { notFound, useRouter } from 'next/navigation';
 
 import { Header } from '@/components/common/Header';
 import { Section } from '@/components/common/Section';
+import { Spinner } from '@/components/common/Spinner';
 import { Toast } from '@/components/common/Toast';
 import { WrongNoteDetailOptionRow } from '@/components/wrong-note/detail/WrongNoteDetailOptionRow';
 import { WrongNoteExplanationCard } from '@/components/wrong-note/detail/WrongNoteExplanationCard';
@@ -78,8 +79,8 @@ export function WrongNoteDetailScreen({
           onRightPress={() => router.back()}
         />
         <main className="flex-1 p-4 pb-8">
-          <p className="text-brown-muted py-10 text-center text-sm">
-            {error ? '오답 기록을 불러오지 못했어요.' : '불러오는 중...'}
+          <p className="text-brown-muted flex items-center justify-center py-10 text-sm">
+            {error ? '오답 기록을 불러오지 못했어요.' : <Spinner />}
           </p>
         </main>
       </>

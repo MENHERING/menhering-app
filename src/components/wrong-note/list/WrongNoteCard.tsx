@@ -28,7 +28,7 @@ export function WrongNoteCard({ item }: WrongNoteCardProps) {
         </span>
       </div>
 
-      <p className="text-brown-ink mt-2.5 text-sm leading-5.5 font-bold">{item.question}</p>
+      <p className="text-brown-ink mt-2.5 text-sm leading-5.5 font-bold">Q. {item.question}</p>
 
       <div className="mt-3 flex flex-col gap-2">
         {item.options.map((option) => (

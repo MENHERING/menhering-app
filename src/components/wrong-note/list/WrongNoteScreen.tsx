@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
+import { Spinner } from '@/components/common/Spinner';
 import { WrongNoteCard } from '@/components/wrong-note/list/WrongNoteCard';
 import { WrongNoteFilterBar } from '@/components/wrong-note/list/WrongNoteFilterBar';
 import { WrongNoteStatsRow } from '@/components/wrong-note/list/WrongNoteStatsRow';
@@ -76,7 +77,9 @@ export function WrongNoteScreen() {
         />
         <div className="flex flex-col gap-3 px-4 pt-3">
           {isPending && (
-            <p className="text-brown-muted px-1 py-6 text-center text-sm">불러오는 중...</p>
+            <p className="text-brown-muted flex items-center justify-center px-1 py-6 text-sm">
+              <Spinner />
+            </p>
           )}
           {isError && items.length === 0 && (
             <p className="text-brown-muted px-1 py-6 text-center text-sm">
