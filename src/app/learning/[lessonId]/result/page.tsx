@@ -1,3 +1,4 @@
+import { CoinBadge } from '@/components/common/CoinBadge';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
 import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
@@ -6,8 +7,8 @@ import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
 import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
 import { createClient } from '@/lib/supabase/server';
 
-// submit_quiz_result RPC와 동일한 값(정답 1개당 XP·행복도 증가폭)을 화면 표시에도 그대로 쓴다.
-const XP_PER_CORRECT = 10;
+// submit_quiz_result RPC와 동일한 값(정답 1개당 행복도 증가폭)을 화면 표시에도 그대로 쓴다.
+// XP·코인은 서버가 이미 계산한 값(첫 클리어 판정 포함)을 쿼리로 받아 그대로 표시만 한다.
 const MOOD_GAIN_PER_CORRECT = 2;
 const DEFAULT_MOOD_VALUE = 60;
 
@@ -28,13 +29,17 @@ export default async function QuizResultPage({
     level?: string;
     stage?: string;
     success?: string;
+    xp?: string;
+    coin?: string;
   }>;
 }) {
   const { lessonId } = await params;
-  const { correct, wrong, level, stage, success } = await searchParams;
+  const { correct, wrong, level, stage, success, xp, coin } = await searchParams;
   const correctCount = parseCount(correct);
   const wrongCount = parseCount(wrong);
   const isSuccess = success === 'true';
+  const xpReward = parseCount(xp);
+  const coinReward = parseCount(coin);
 
   // "다음 스테이지" 버튼의 실제 목적지. 방금 푼 레벨의 마지막 스테이지였으면 다음 스테이지가 없다.
   const stageNumber = Number(stage);
@@ -69,7 +74,6 @@ export default async function QuizResultPage({
   }
 
   const gainPercent = correctCount * MOOD_GAIN_PER_CORRECT;
-  const xpReward = correctCount * XP_PER_CORRECT;
 
   if (!isSuccess) {
     return (
@@ -96,7 +100,10 @@ export default async function QuizResultPage({
       <QuizAvatarRing happinessPercent={happinessPercent} />
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-ink text-xl font-extrabold">오늘의 클리어</h1>
-        <QuizXpBadge xp={xpReward} />
+        <div className="flex items-center gap-2">
+          <QuizXpBadge xp={xpReward} />
+          {coinReward > 0 && <CoinBadge amount={coinReward} />}
+        </div>
       </div>
       <HappinessGauge happinessPercent={happinessPercent} gainPercent={gainPercent} />
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />

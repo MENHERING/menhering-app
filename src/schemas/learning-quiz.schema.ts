@@ -29,6 +29,10 @@ export const SubmitQuizResultSchema = z.object({
   wrongCount: z.number().int(),
   isSuccess: z.boolean(),
   moodValue: z.number().int().nullable(),
+  // 그 스테이지를 이번에 처음 깼는지. XP·코인은 첫 클리어에만 지급되므로 결과 화면 표시에 쓴다.
+  isFirstClear: z.boolean(),
+  xpReward: z.number().int(),
+  coinReward: z.number().int(),
 });
 
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
