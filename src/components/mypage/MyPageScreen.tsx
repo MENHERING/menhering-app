@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
+import { Toast } from '@/components/common/Toast';
 import { FriendsSection } from '@/components/mypage/FriendsSection';
 import { LearningStatsSection } from '@/components/mypage/LearningStatsSection';
 import { LogoutSheet } from '@/components/mypage/logout/LogoutSheet';
@@ -11,6 +12,7 @@ import { MenuRow } from '@/components/mypage/MenuRow';
 import { ProfileSection } from '@/components/mypage/ProfileSection';
 import { StatCard } from '@/components/mypage/StatCard';
 import { ROUTES } from '@/constants/routes';
+import { useLogout } from '@/hooks/auth/use-logout';
 import {
   MOCK_MYPAGE_DAILY_CHART,
   MOCK_MYPAGE_FRIENDS,
@@ -26,11 +28,14 @@ import {
 export function MyPageScreen() {
   const router = useRouter();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { mutate: logout } = useLogout();
 
   const handleLogoutConfirm = () => {
     setIsLogoutOpen(false);
-    // TODO: 실제 인증 로그아웃 연동
-    router.push(ROUTES.HOME);
+    logout(undefined, {
+      onError: () => setErrorMessage('로그아웃에 실패했어요. 잠시 후 다시 시도해 주세요.'),
+    });
   };
 
   return (
@@ -101,6 +106,15 @@ export function MyPageScreen() {
         isOpen={isLogoutOpen}
         onClose={() => setIsLogoutOpen(false)}
         onConfirm={handleLogoutConfirm}
+      />
+
+      <Toast
+        isOpen={errorMessage !== null}
+        message={errorMessage ?? ''}
+        variant="error"
+        duration={0}
+        dismissible
+        onClose={() => setErrorMessage(null)}
       />
     </>
   );
