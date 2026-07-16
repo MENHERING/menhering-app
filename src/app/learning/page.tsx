@@ -145,7 +145,6 @@ function LearningPageContent() {
           nickname={avatar?.avatar.nickname ?? DEFAULT_NICKNAME}
           level={MOCK_USER_PROGRESS.level}
           xp={MOCK_USER_PROGRESS.xp}
-          avatarSrc={MOCK_USER_PROGRESS.avatarSrc}
         />
         <div className="relative">
           <CurriculumBar

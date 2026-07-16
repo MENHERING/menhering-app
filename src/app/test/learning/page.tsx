@@ -29,7 +29,6 @@ export default function TestLearningPage() {
         nickname="멘헤링이"
         level={MOCK_USER_PROGRESS.level}
         xp={MOCK_USER_PROGRESS.xp}
-        avatarSrc={MOCK_USER_PROGRESS.avatarSrc}
       />
 
       {/* case 02: LessonNode - completed / current / locked */}

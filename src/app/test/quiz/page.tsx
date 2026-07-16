@@ -64,9 +64,10 @@ export default function TestQuizPage() {
       {/* case 04: QuizExplanation */}
       <QuizExplanation explanation={question.explanation} onNext={() => {}} />
 
-      {/* case 05: QuizAvatarRing */}
-      <div className="flex justify-center rounded-2xl bg-white p-6">
+      {/* case 05: QuizAvatarRing - 정적 이미지(기본) / Live2D(결과 화면 전용) */}
+      <div className="flex justify-center gap-4 rounded-2xl bg-white p-6">
         <QuizAvatarRing />
+        <QuizAvatarRing useHero mood="행복" />
       </div>
 
       {/* case 06: HappinessGauge */}

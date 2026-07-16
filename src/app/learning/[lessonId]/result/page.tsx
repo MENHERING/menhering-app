@@ -3,8 +3,11 @@ import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
+import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
+import { moodFromValue } from '@/constants/mood';
 import { createClient } from '@/lib/supabase/server';
+import type { CharacterType, ColorTheme } from '@/types/avatar';
 
 // submit_quiz_result RPC와 동일한 값(정답 1개당 XP·행복도 증가폭)을 화면 표시에도 그대로 쓴다.
 const XP_PER_CORRECT = 10;
@@ -40,14 +43,19 @@ export default async function QuizResultPage({
 
   // 방금 submit_quiz_result가 이미 갱신을 마친 뒤라, 현재 행복도를 그대로 조회해서 보여준다.
   let happinessPercent = DEFAULT_MOOD_VALUE;
+  let characterType: CharacterType = DEFAULT_CHARACTER_TYPE;
+  let colorTheme: ColorTheme = DEFAULT_COLOR_THEME;
   if (user) {
     const { data: avatar } = await supabase
       .from('avatars')
-      .select('id')
+      .select('id, character_type, color_theme')
       .eq('user_id', user.id)
       .maybeSingle();
 
     if (avatar) {
+      characterType = (avatar.character_type as CharacterType) ?? DEFAULT_CHARACTER_TYPE;
+      colorTheme = (avatar.color_theme as ColorTheme) ?? DEFAULT_COLOR_THEME;
+
       const { data: status } = await supabase
         .from('avatar_status')
         .select('mood_value')
@@ -60,13 +68,20 @@ export default async function QuizResultPage({
 
   const gainPercent = correctCount * MOOD_GAIN_PER_CORRECT;
   const xpReward = correctCount * XP_PER_CORRECT;
+  const mood = moodFromValue(happinessPercent);
 
   // TODO(#53 후속): 스테이지 실패(5문제 전부 정답 못함) 시 결과 화면을 성공과 다르게 분기해야 한다.
   // submit_quiz_result RPC의 isSuccess를 퀴즈 페이지에서 여기로 쿼리로 넘겨받아,
   // 실패면 타이틀·XP 뱃지·CTA(재도전 우선 노출)를 다르게 보여줘야 함. 지금은 항상 성공 UI로만 렌더됨.
   return (
     <>
-      <QuizAvatarRing happinessPercent={happinessPercent} />
+      <QuizAvatarRing
+        happinessPercent={happinessPercent}
+        characterType={characterType}
+        colorTheme={colorTheme}
+        useHero
+        mood={mood}
+      />
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-ink text-xl font-extrabold">오늘의 클리어</h1>
         <QuizXpBadge xp={xpReward} />
