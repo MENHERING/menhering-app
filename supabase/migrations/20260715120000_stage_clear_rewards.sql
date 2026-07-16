@@ -10,6 +10,9 @@
 -- 수치(팀 합의, 2026-07-15): 일반 스테이지 첫 클리어 XP 50(기존 5문제×10과 동일 총량)/코인 70,
 -- 난이도 마지막 스테이지 첫 클리어는 코인 보너스 +180(총 250). 44스테이지 완주 시 코인 총 3,980으로,
 -- 캐릭터(1,000×3=3,000)+컬러(100×5=500) 목표 3,500을 커버한다.
+--
+-- wrong_answers.review_status는 chk_review_status 제약조건상 한글('미복습'/'복습완료')만
+-- 허용한다(오답노트 #54 쪽과 합의된 값, 2026-07-16 확인).
 create or replace function submit_quiz_result(
   p_level varchar,
   p_stage integer,
@@ -98,12 +101,12 @@ begin
       insert into wrong_answers
         (user_id, question_id, session_id, selected_answer, correct_answer, review_status)
       values
-        (v_user_id, rec.question_id, v_session_id, rec.selected_option, rec.correct_option, 'unreviewed')
+        (v_user_id, rec.question_id, v_session_id, rec.selected_option, rec.correct_option, '미복습')
       on conflict (user_id, question_id) do update
         set session_id = excluded.session_id,
             selected_answer = excluded.selected_answer,
             correct_answer = excluded.correct_answer,
-            review_status = 'unreviewed',
+            review_status = '미복습',
             reviewed_at = null,
             created_at = now();
     end if;
