@@ -29,6 +29,8 @@ export const SubmitQuizResultSchema = z.object({
   wrongCount: z.number().int(),
   isSuccess: z.boolean(),
   moodValue: z.number().int().nullable(),
+  xpReward: z.number().int(),
+  coinReward: z.number().int(),
 });
 
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
