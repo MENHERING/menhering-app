@@ -22,7 +22,7 @@
 
 ### 개요
 
-로그인한 사용자의 마이페이지 요약(현재 상태 · 스탯 · 학습 통계 차트)을 한 번에 반환한다. `profile`(현재 사용자 상태), `stats`(누적 스탯), `weeklyChart`/`dailyChart`(요일별 학습 통계) 4개 묶음으로 구성된다.
+로그인한 사용자의 마이페이지 요약(현재 상태 · 스탯 · 학습 통계 차트)을 한 번에 반환한다. `profile`(현재 사용자 상태), `stats`(누적 스탯), `chart`(요일별 학습 통계) 3개 묶음으로 구성된다.
 
 친구/랭킹(`FriendsSection`)과 아바타 이미지(`avatarUrl`)는 이 API가 다루지 않는다 — 친구 기능은 아직 미출시("출시 예정" 배지)라 프론트가 mock을 그대로 쓰고, 아바타 이미지도 자산/렌더링 방식이 팀 논의 중이라 마찬가지로 프론트 mock으로 채운다.
 
@@ -68,23 +68,14 @@ GET /api/mypage
       "totalXp": 1480,
       "accuracyPercent": 87
     },
-    "weeklyChart": [
-      { "label": "월", "value": 3 },
-      { "label": "화", "value": 4 },
-      { "label": "수", "value": 2 },
-      { "label": "목", "value": 5 },
-      { "label": "금", "value": 3 },
-      { "label": "토", "value": 4 },
-      { "label": "일", "value": 1 }
-    ],
-    "dailyChart": [
-      { "label": "월", "value": 5 },
-      { "label": "화", "value": 0 },
-      { "label": "수", "value": 3 },
-      { "label": "목", "value": 5 },
-      { "label": "금", "value": 0 },
-      { "label": "토", "value": 0 },
-      { "label": "일", "value": 0 }
+    "chart": [
+      { "label": "월", "value": 30 },
+      { "label": "화", "value": 55 },
+      { "label": "수", "value": 20 },
+      { "label": "목", "value": 90 },
+      { "label": "금", "value": 45 },
+      { "label": "토", "value": 65 },
+      { "label": "일", "value": 15 }
     ]
   }
 }
@@ -115,16 +106,15 @@ GET /api/mypage
 | totalXp           | number | `user_progress.xp` 누적 원본값 (레벨 진행용 currentXp와 다름)                              |
 | accuracyPercent   | number | 전체 세션의 `correct_count`/`total_count` 합산 퍼센트                                      |
 
-**weeklyChart / dailyChart** — 요일별 학습 통계 (`sessions.correct_count` 기준)
+**chart** — 요일별 학습 통계 (`sessions.correct_count` 기준, 최근 90일 구간 합계)
 
 | 필드  | 타입   | 설명                         |
 | ----- | ------ | ---------------------------- |
 | label | string | 요일 (월~일 순서로 7개 고정) |
-| value | number | 정답 문제 수                 |
+| value | number | 정답 문제 수 합계            |
 
-- `dailyChart`: 이번 주(KST, 월요일 시작)의 요일별 실제 정답 수.
-- `weeklyChart`: 최근 90일 구간의 요일별 **평균** 정답 수("이 요일엔 보통 얼마나 하는지"). ⚠️ 이 정의(일별=이번 주 실값 / 주별=90일 평균)는 확정된 사양이 아니라 구현 시점의 가정이다 — 다르게 정의돼야 하면 `app/api/mypage/route.ts`의 `buildWeekdayChart` 호출부만 바꾸면 된다.
 - 프론트는 여기에 `isHighlighted`(오늘 요일 여부)를 클라이언트에서 계산해 붙인다 — API는 순수 값만 반환.
+- 이전엔 일별/주별 두 구간을 토글로 보여줬으나 의미가 없다고 판단해 최근 90일 합계 하나로 통일했다.
 
 ### 실패 — 500 Internal Server Error
 
