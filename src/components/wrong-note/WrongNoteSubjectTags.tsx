@@ -1,13 +1,12 @@
 import { DEFAULT_SUBJECT_STYLE, SUBJECT_STYLE } from '@/constants/wrong-note';
 import { cn } from '@/lib/cn';
-import type { WrongNoteSubject } from '@/types/wrong-note';
 
 interface WrongNoteSubjectTagsProps {
-  subject: WrongNoteSubject;
+  label: string;
 }
 
-export function WrongNoteSubjectTags({ subject }: WrongNoteSubjectTagsProps) {
-  const { bg: subjectBg, text: subjectText } = SUBJECT_STYLE[subject] ?? DEFAULT_SUBJECT_STYLE;
+export function WrongNoteSubjectTags({ label }: WrongNoteSubjectTagsProps) {
+  const { bg: subjectBg, text: subjectText } = SUBJECT_STYLE[label] ?? DEFAULT_SUBJECT_STYLE;
 
   return (
     <div className="flex gap-1.5">
@@ -18,7 +17,7 @@ export function WrongNoteSubjectTags({ subject }: WrongNoteSubjectTagsProps) {
           subjectText,
         )}
       >
-        {subject}
+        {label}
       </span>
     </div>
   );

@@ -39,7 +39,7 @@ export function WrongNoteResultToast({ isCorrect, nextLabel, onNext }: WrongNote
           onClick={onNext}
           rightIcon={<ArrowRight className="size-4" strokeWidth={3} aria-hidden />}
           className={cn(
-            'gap-1.5 bg-white shadow-none transition-transform active:scale-[0.98]',
+            'gap-1.5 bg-white shadow-none transition-transform duration-200 hover:bg-white/90 active:scale-[0.98]',
             isCorrect ? 'text-answer-correct' : 'text-coral-accent',
           )}
         >

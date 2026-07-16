@@ -1,7 +1,8 @@
 import { WrongNoteAnswerMark } from '@/components/wrong-note/WrongNoteAnswerMark';
 import { OPTION_SYMBOLS } from '@/constants/wrong-note';
 import { cn } from '@/lib/cn';
-import type { OptionState, WrongNoteOption } from '@/types/wrong-note';
+import type { OptionState } from '@/schemas/wrong-note.schema';
+import type { WrongNoteOption } from '@/types/wrong-note';
 
 const OPTION_ROW_BG: Record<OptionState, string> = {
   my_wrong: 'bg-answer-wrong-soft',
