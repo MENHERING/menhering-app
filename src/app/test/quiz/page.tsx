@@ -9,6 +9,7 @@ import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizExplanation } from '@/components/quiz/QuizExplanation';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
+import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
 import { QuizTimer } from '@/components/quiz/QuizTimer';
@@ -78,6 +79,33 @@ export default function TestQuizPage() {
 
       {/* case 09: QuizXpBadge */}
       <QuizXpBadge xp={50} />
+
+      {/* case 10: 실패 결과 헤더 */}
+      <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-6">
+        <QuizAvatarRing happinessPercent={18} />
+        <div className="flex flex-col items-center gap-2 text-center">
+          <h2 className="text-ink text-xl font-extrabold">아쉬워요!</h2>
+          <p className="text-brown-soft text-sm">이번 스테이지는 통과하지 못했어요</p>
+        </div>
+      </div>
+
+      {/* case 11: QuizResultActions - 성공 / 실패 */}
+      <div className="flex flex-col gap-4 rounded-2xl bg-white p-6">
+        <QuizResultActions
+          isSuccess
+          wrongCount={2}
+          nextLessonId="입문-2"
+          level="입문"
+          lessonId="입문-1"
+        />
+        <QuizResultActions
+          isSuccess={false}
+          wrongCount={4}
+          nextLessonId="입문-2"
+          level="입문"
+          lessonId="입문-1"
+        />
+      </div>
 
       {/* case 08: QuizTimeoutModal */}
       <button
