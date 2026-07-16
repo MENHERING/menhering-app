@@ -173,7 +173,6 @@ begin
     'wrongCount', v_wrong_count,
     'isSuccess', v_is_success,
     'moodValue', v_mood_value,
-    'isFirstClear', v_is_first_clear,
     'xpReward', v_xp_reward,
     'coinReward', v_coin_reward
   );
