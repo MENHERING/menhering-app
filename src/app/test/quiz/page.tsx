@@ -65,10 +65,28 @@ export default function TestQuizPage() {
       {/* case 04: QuizExplanation */}
       <QuizExplanation explanation={question.explanation} onNext={() => {}} />
 
-      {/* case 05: QuizAvatarRing - 정적 이미지(기본) / Live2D(결과 화면 전용) */}
-      <div className="flex justify-center gap-4 rounded-2xl bg-white p-6">
-        <QuizAvatarRing />
-        <QuizAvatarRing useHero mood="행복" />
+      {/* case 05: QuizAvatarRing - 정적 이미지(기본) / Live2D 5단계 감정(결과 화면 전용) */}
+      <div className="flex flex-wrap justify-center gap-4 rounded-2xl bg-white p-6">
+        <div className="flex flex-col items-center gap-2">
+          <QuizAvatarRing />
+          <span className="text-brown-soft text-xs">기본(정적 이미지)</span>
+        </div>
+        {(
+          [
+            { happinessPercent: 10, mood: '화남' },
+            { happinessPercent: 30, mood: '지침' },
+            { happinessPercent: 50, mood: '우울' },
+            { happinessPercent: 70, mood: '보통' },
+            { happinessPercent: 90, mood: '행복' },
+          ] as const
+        ).map(({ happinessPercent, mood }) => (
+          <div key={mood} className="flex flex-col items-center gap-2">
+            <QuizAvatarRing useHero happinessPercent={happinessPercent} mood={mood} />
+            <span className="text-brown-soft text-xs">
+              {mood} ({happinessPercent}%)
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* case 06: HappinessGauge */}
