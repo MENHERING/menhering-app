@@ -17,8 +17,6 @@ export interface StatCardItem {
 export type StatCardVariant =
   'continuous_learning' | 'completed_learning' | 'total_learning' | 'total_exp' | 'correct_rate';
 
-export type ChartPeriod = 'daily' | 'weekly';
-
 export interface ChartBar {
   label: string;
   value: number;

@@ -32,8 +32,7 @@ export const ChartBarSchema = z.object({
 export const MyPageSummarySchema = z.object({
   profile: ProfileSummarySchema,
   stats: StatsSummarySchema,
-  weeklyChart: z.array(ChartBarSchema),
-  dailyChart: z.array(ChartBarSchema),
+  chart: z.array(ChartBarSchema),
 });
 
 export type Mood = z.infer<typeof MoodSchema>;

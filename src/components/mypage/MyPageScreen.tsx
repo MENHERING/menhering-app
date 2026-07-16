@@ -101,10 +101,7 @@ export function MyPageScreen() {
           ))}
         </section>
 
-        <LearningStatsSection
-          weeklyData={summary.weeklyChart.map(toChartBar)}
-          dailyData={summary.dailyChart.map(toChartBar)}
-        />
+        <LearningStatsSection data={summary.chart.map(toChartBar)} />
 
         <div className="flex flex-col gap-2 px-5 pt-4">
           <MenuRow

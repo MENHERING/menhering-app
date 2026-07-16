@@ -5,7 +5,7 @@ import { STATS_WINDOW_DAYS } from '@/constants/home';
 import { moodFromValue } from '@/constants/mood';
 import { ApiError, toErrorResult } from '@/lib/api-error';
 import { toSuccessResult } from '@/lib/api-response';
-import { getKstWeekStart, getKstWeekdayLabel } from '@/lib/date/kst';
+import { getKstWeekdayLabel } from '@/lib/date/kst';
 import { getLevelInfo } from '@/lib/level';
 import { createClient } from '@/lib/supabase/server';
 import { ProgressSummarySchema, SessionSummaryListSchema } from '@/schemas/home.schema';
@@ -35,9 +35,10 @@ function toPercent(correct: number, total: number): number {
   return Math.round((correct / total) * 100);
 }
 
+// 요일별 correct_count 합계. 평균으로 나누면 실데이터가 적은 지금 같은 상황에서 값이 0 근처로
+// 뭉개져 차트(0~100 고정 스케일)에 막대가 거의 안 보이게 된다 — 합계 그대로 쓴다.
 function buildWeekdayChart(
   rows: { correct_count: number | null; created_at: string }[],
-  divisor: number,
 ): ChartBarData[] {
   const sums = new Map<string, number>();
 
@@ -49,7 +50,7 @@ function buildWeekdayChart(
 
   return WEEKDAY_OUTPUT_ORDER.map((label) => ({
     label,
-    value: Math.round((sums.get(label) ?? 0) / divisor),
+    value: sums.get(label) ?? 0,
   }));
 }
 
@@ -119,10 +120,6 @@ export async function GET() {
     const windowStart = Date.now() - STATS_WINDOW_DAYS * MS_PER_DAY;
     const windowRows = allRows.filter((row) => new Date(row.created_at).getTime() >= windowStart);
 
-    // TODO: 주별 차트 추가
-    const weekStart = getKstWeekStart();
-    const thisWeekRows = allRows.filter((row) => new Date(row.created_at) >= weekStart);
-
     // TODO: 프로필 이미지 추가
     const summary: MyPageSummary = {
       profile: {
@@ -144,8 +141,7 @@ export async function GET() {
         totalXp: progress.success ? (progress.data.xp ?? 0) : 0,
         accuracyPercent: toPercent(completedProblems, answeredTotal),
       },
-      weeklyChart: buildWeekdayChart(windowRows, Math.max(1, Math.round(STATS_WINDOW_DAYS / 7))),
-      dailyChart: buildWeekdayChart(thisWeekRows, 1),
+      chart: buildWeekdayChart(windowRows),
     };
 
     const { body, status } = toSuccessResult(MyPageSummarySchema, summary);
