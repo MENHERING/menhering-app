@@ -170,17 +170,34 @@ begin
 
   -- 6) 행복도도 이제 첫 클리어일 때만 고정폭(v_mood_gain)만큼 오른다. 복습·반복 제출은
   -- mood_value를 그대로 둔다(단, 갱신 시각은 조회 위해 그대로 읽는다).
+  -- 반환하는 moodGain은 목표치가 아니라 "실제로 반영된" 증가량이어야 한다 — 100 상한에 걸려
+  -- 일부만 반영되거나(예: 98→100은 +5가 아니라 +2), 아바타/상태 행 자체가 없어 아예 반영이
+  -- 안 된 경우까지 정확히 잡아야 결과 화면의 "+N%p 상승" 표시가 실제 값과 어긋나지 않는다.
   select id into v_avatar_id from avatars where user_id = v_user_id;
   if v_avatar_id is not null then
     if v_mood_gain > 0 then
-      update avatar_status
-        set mood_value = least(100, greatest(0, mood_value + v_mood_gain)),
-            updated_at = now()
-        where avatar_id = v_avatar_id
-        returning mood_value into v_mood_value;
+      -- 잠근 뒤 현재 값 기준으로 상한(100)까지 실제 적용 가능한 만큼만 올린다.
+      select mood_value into v_mood_value
+        from avatar_status where avatar_id = v_avatar_id for update;
+
+      if found then
+        v_mood_gain := least(v_mood_gain, greatest(0, 100 - v_mood_value));
+
+        if v_mood_gain > 0 then
+          update avatar_status
+            set mood_value = mood_value + v_mood_gain,
+                updated_at = now()
+            where avatar_id = v_avatar_id
+            returning mood_value into v_mood_value;
+        end if;
+      else
+        v_mood_gain := 0;
+      end if;
     else
       select mood_value into v_mood_value from avatar_status where avatar_id = v_avatar_id;
     end if;
+  else
+    v_mood_gain := 0;
   end if;
 
   return jsonb_build_object(
