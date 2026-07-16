@@ -43,6 +43,8 @@ declare
   v_xp_per_stage constant integer := 50;
   v_base_coin constant integer := 70;
   v_final_stage_bonus_coin constant integer := 180;
+  v_answer_count integer;
+  v_distinct_valid_count integer;
   rec record;
 begin
   if v_user_id is null then
@@ -52,6 +54,20 @@ begin
   select count(*) into v_total_count from questions where level = p_level and stage = p_stage;
   if v_total_count = 0 then
     raise exception 'unknown level/stage: %/%', p_level, p_stage;
+  end if;
+
+  -- p_answers가 이 스테이지의 문제 집합과 정확히 1:1로 대응하는지 검증한다. 안 그러면
+  -- 이미 정답을 아는 question_id 하나를 문제 수만큼 반복 제출해도 v_correct_count가
+  -- v_total_count에 도달해 스테이지 클리어(+ 첫 클리어 보상)를 위조할 수 있다.
+  select count(*) into v_answer_count from jsonb_array_elements(p_answers);
+
+  select count(distinct q.id) into v_distinct_valid_count
+  from jsonb_array_elements(p_answers) a
+  join questions q on q.id = (a->>'question_id')::uuid
+  where q.level = p_level and q.stage = p_stage;
+
+  if v_answer_count != v_total_count or v_distinct_valid_count != v_total_count then
+    raise exception 'answers do not match questions for level/stage: %/%', p_level, p_stage;
   end if;
 
   select max(stage) into v_level_max_stage from questions where level = p_level;

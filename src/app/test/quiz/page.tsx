@@ -84,7 +84,7 @@ export default function TestQuizPage() {
         <QuizAvatarRing happinessPercent={18} />
         <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="text-ink text-xl font-extrabold">아쉬워요!</h2>
-          <p className="text-brown-soft text-sm">오답이 너무 많아 스테이지를 통과하지 못했어요</p>
+          <p className="text-brown-soft text-sm">이번 스테이지는 통과하지 못했어요</p>
         </div>
       </div>
 

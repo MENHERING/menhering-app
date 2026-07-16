@@ -81,7 +81,7 @@ export default async function QuizResultPage({
         <QuizAvatarRing happinessPercent={happinessPercent} />
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-ink text-xl font-extrabold">아쉬워요!</h1>
-          <p className="text-brown-soft text-sm">오답이 너무 많아 스테이지를 통과하지 못했어요</p>
+          <p className="text-brown-soft text-sm">이번 스테이지는 통과하지 못했어요</p>
         </div>
         <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
         <QuizResultActions
