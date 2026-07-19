@@ -58,6 +58,16 @@ export const WrongAnswerSchema = z.object({
   reviewedAt: DbTimestampSchema.nullable(),
 });
 
+// PATCH /wrong-note/id DTO
+export const WrongNoteReviewResultSchema = z.object({
+  wrongAnswer: WrongAnswerSchema,
+  xpReward: z.number().int().min(0),
+  moodValueBefore: z.number().int().min(0).max(100).nullable(),
+  moodValueAfter: z.number().int().min(0).max(100).nullable(),
+  streak: z.number().int().min(0).nullable(),
+  rewarded: z.boolean(),
+});
+
 export type OptionState = z.infer<typeof OptionStateSchema>;
 export type ReviewStatus = z.infer<typeof ReviewStatusSchema>;
 export type QuestionLevel = z.infer<typeof QuestionLevelSchema>;
@@ -66,3 +76,4 @@ export type WrongNoteStats = z.infer<typeof WrongNoteStatsSchema>;
 export type WrongNoteList = z.infer<typeof WrongNoteListSchema>;
 export type RecordWrongAnswer = z.infer<typeof RecordWrongAnswerSchema>;
 export type WrongAnswer = z.infer<typeof WrongAnswerSchema>;
+export type WrongNoteReviewResult = z.infer<typeof WrongNoteReviewResultSchema>;
