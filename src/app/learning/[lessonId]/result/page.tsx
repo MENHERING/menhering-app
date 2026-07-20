@@ -1,6 +1,6 @@
+import { AvatarRing } from '@/components/common/AvatarRing';
 import { CoinBadge } from '@/components/common/CoinBadge';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
-import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
@@ -78,7 +78,7 @@ export default async function QuizResultPage({
   if (!isSuccess) {
     return (
       <>
-        <QuizAvatarRing happinessPercent={happinessPercent} />
+        <AvatarRing happinessPercent={happinessPercent} />
         <div className="flex flex-col items-center gap-2 text-center">
           <h1 className="text-ink text-xl font-extrabold">아쉬워요!</h1>
           <p className="text-brown-soft text-sm">이번 스테이지는 통과하지 못했어요</p>
@@ -97,7 +97,7 @@ export default async function QuizResultPage({
 
   return (
     <>
-      <QuizAvatarRing happinessPercent={happinessPercent} />
+      <AvatarRing happinessPercent={happinessPercent} />
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-ink text-xl font-extrabold">오늘의 클리어</h1>
         <div className="flex items-center gap-2">

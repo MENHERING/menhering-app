@@ -4,8 +4,8 @@ import { useState } from 'react';
 
 import { notFound } from 'next/navigation';
 
+import { AvatarRing } from '@/components/common/AvatarRing';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
-import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizExplanation } from '@/components/quiz/QuizExplanation';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
@@ -65,9 +65,9 @@ export default function TestQuizPage() {
       {/* case 04: QuizExplanation */}
       <QuizExplanation explanation={question.explanation} onNext={() => {}} />
 
-      {/* case 05: QuizAvatarRing */}
+      {/* case 05: AvatarRing */}
       <div className="flex justify-center rounded-2xl bg-white p-6">
-        <QuizAvatarRing />
+        <AvatarRing />
       </div>
 
       {/* case 06: HappinessGauge */}
@@ -81,7 +81,7 @@ export default function TestQuizPage() {
 
       {/* case 10: 실패 결과 헤더 */}
       <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-6">
-        <QuizAvatarRing happinessPercent={18} />
+        <AvatarRing happinessPercent={18} />
         <div className="flex flex-col items-center gap-2 text-center">
           <h2 className="text-ink text-xl font-extrabold">아쉬워요!</h2>
           <p className="text-brown-soft text-sm">이번 스테이지는 통과하지 못했어요</p>

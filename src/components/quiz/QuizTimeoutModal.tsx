@@ -1,7 +1,7 @@
 import { Clock, X } from 'lucide-react';
 
+import { AvatarRing } from '@/components/common/AvatarRing';
 import { Button } from '@/components/common/Button';
-import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 
 interface QuizTimeoutModalProps {
   onRetry: () => void;
@@ -30,7 +30,7 @@ export function QuizTimeoutModal({ onRetry, onLeave }: QuizTimeoutModalProps) {
           <X size={20} />
         </button>
 
-        <QuizAvatarRing
+        <AvatarRing
           size={112}
           happinessPercent={20}
           badge={
