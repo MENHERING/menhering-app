@@ -59,7 +59,7 @@ export function LearningStatsSection({ data }: LearningStatsSectionProps) {
         <div className="flex items-center justify-between gap-2">
           <h3 className="text-brown-ink text-sm leading-5 font-bold">학습 통계</h3>
           <span className="bg-coral rounded-full px-2.5 py-1 text-[11px] leading-[16.5px] font-semibold text-white">
-            주별
+            일별
           </span>
         </div>
         <LearningChart data={data} />
