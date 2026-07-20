@@ -129,6 +129,7 @@ export async function GET() {
           : DEFAULT_DIFFICULTY,
         stage: progress.success ? (progress.data.stage ?? 1) : 1,
         mood: moodFromValue(moodValue),
+        moodValue,
         streakDays: streak,
         currentXp,
         targetXp,

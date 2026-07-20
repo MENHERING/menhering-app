@@ -8,6 +8,7 @@ export const ProfileSummarySchema = z.object({
   difficulty: z.string(),
   stage: z.number().int().min(1),
   mood: MoodSchema,
+  moodValue: z.number().int().min(0).max(100),
   streakDays: z.number().int().min(0),
   currentXp: z.number().int().min(0),
   targetXp: z.number().int().min(1),
