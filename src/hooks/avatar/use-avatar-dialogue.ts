@@ -46,17 +46,17 @@ export function useAvatarDialogue(mood: Mood): string {
   // 마지막 사용자 조작 시각(ms). 초기 0이라 마운트 직후엔 유휴로 간주돼 정상 회전한다.
   const lastInteractionRef = useRef(0);
   useEffect(() => {
-    const mark = () => {
+    const handleInteraction = () => {
       lastInteractionRef.current = Date.now();
     };
     // passive: 스크롤·탭 성능에 영향 안 주게. capture로 하위 stopPropagation에도 잡히게 한다.
     const opts = { passive: true, capture: true } as const;
-    window.addEventListener('pointerdown', mark, opts);
-    window.addEventListener('keydown', mark, opts);
+    window.addEventListener('pointerdown', handleInteraction, opts);
+    window.addEventListener('keydown', handleInteraction, opts);
 
     return () => {
-      window.removeEventListener('pointerdown', mark, opts);
-      window.removeEventListener('keydown', mark, opts);
+      window.removeEventListener('pointerdown', handleInteraction, opts);
+      window.removeEventListener('keydown', handleInteraction, opts);
     };
   }, []);
 
