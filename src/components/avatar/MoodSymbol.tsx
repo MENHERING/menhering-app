@@ -3,6 +3,8 @@
 import { useId } from 'react';
 
 import { HeartShape } from '@/components/avatar/HeartShape';
+import { TearShape } from '@/components/avatar/TearShape';
+import { VeinShape } from '@/components/avatar/VeinShape';
 import type { MoodSymbolAnchors } from '@/constants/character-registry';
 import { cn } from '@/lib/cn';
 import type { Mood } from '@/types/mypage/model';
@@ -24,14 +26,6 @@ import type { Mood } from '@/types/mypage/model';
 // ⚠️ 머리 위 top-[12%] 부근은 탭 반응 하트가 솟는 자리다(Live2DCharacter). 새 심볼을 거기 두지 말 것.
 
 const OVERLAY_BASE = 'pointer-events-none absolute';
-
-// 💢 핏줄을 이루는 안쪽 향 V 네 개. plum 밑선과 vein 윗선이 같은 모양을 겹쳐 그린다.
-const VEIN_MARKS = [
-  'M8 4.5 12 9.5 16 4.5',
-  'M8 19.5 12 14.5 16 19.5',
-  'M4.5 8 9.5 12 4.5 16',
-  'M19.5 8 14.5 12 19.5 16',
-];
 
 interface MoodSymbolProps {
   mood?: Mood;
@@ -68,48 +62,14 @@ export function MoodSymbol({ mood, anchors }: MoodSymbolProps) {
       return (
         // 눈가에서 맺혀 볼을 타고 흘러내린다. pointer-events-none으로 캐릭터 탭을 막지 않는다.
         <span className={cn('animate-tear-drop', OVERLAY_BASE, anchors.tear)}>
-          <svg viewBox="0 0 24 32" className="size-full" aria-hidden focusable="false">
-            <path
-              d="M12 1.5C12 1.5 3.5 15 3.5 20.5a8.5 8.5 0 0 0 17 0C20.5 15 12 1.5 12 1.5Z"
-              className="fill-tear stroke-plum"
-              strokeWidth={2.4}
-              strokeLinejoin="round"
-            />
-            {/* 물방울 하이라이트 — 유리질 느낌을 줘 평평한 도형으로 안 보이게 한다. */}
-            <ellipse cx="8.8" cy="20.5" rx="1.9" ry="3.1" className="fill-white/80" />
-          </svg>
+          <TearShape />
         </span>
       );
 
     case '화남':
       return (
         <span className={cn('animate-vein-pulse', OVERLAY_BASE, anchors.vein)}>
-          <svg viewBox="0 0 24 24" className="size-full" aria-hidden focusable="false">
-            {/* 빨간 털 위에 빨간 핏줄이라 그냥 두면 묻힌다 → plum 밑선을 먼저 굵게 깔아
-                외곽선을 만든다(눈물의 stroke-plum과 같은 규약). 테마색이 바뀌어도 읽힌다. */}
-            <g
-              className="stroke-plum"
-              strokeWidth={5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            >
-              {VEIN_MARKS.map((d) => (
-                <path key={d} d={d} />
-              ))}
-            </g>
-            <g
-              className="stroke-vein"
-              strokeWidth={2.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
-            >
-              {VEIN_MARKS.map((d) => (
-                <path key={d} d={d} />
-              ))}
-            </g>
-          </svg>
+          <VeinShape />
         </span>
       );
 
