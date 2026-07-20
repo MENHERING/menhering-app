@@ -29,6 +29,8 @@ export const SubmitQuizResultSchema = z.object({
   wrongCount: z.number().int(),
   isSuccess: z.boolean(),
   moodValue: z.number().int().nullable(),
+  // 첫 클리어일 때만 0보다 큼(복습은 0). 결과 화면 "행복도 +N%p 상승" 표시에 그대로 쓴다.
+  moodGain: z.number().int(),
   xpReward: z.number().int(),
   coinReward: z.number().int(),
 });
