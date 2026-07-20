@@ -316,6 +316,23 @@ body {
   animation: heart-float 1s ease-out forwards;
 }
 
+/* 감정 대사 전환 — 새 대사가 살짝 떠오르며 나타난다(AvatarPreview 말풍선).
+   호출부가 motion-safe:로 감싸 reduce-motion이면 즉시 표시된다. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.28s ease-out;
+}
+
 /* 아바타 감정 심볼(우울) — 눈물이 눈가에 맺혔다 볼을 타고 흘러내린다(MoodSymbol 오버레이). */
 @keyframes tear-drop {
   0% {

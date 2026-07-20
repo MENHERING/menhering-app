@@ -6,8 +6,10 @@ import { AvatarBackdrop } from '@/components/avatar/AvatarBackdrop';
 import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { NicknameField } from '@/components/avatar/NicknameField';
 import { Section } from '@/components/common/Section';
+import { SpeechBubble } from '@/components/common/SpeechBubble';
 import { DEFAULT_MOOD } from '@/constants/avatar';
 import { AVATAR_SFX_VOLUME, AVATAR_TAP_SOUND } from '@/constants/sounds';
+import { useAvatarDialogue } from '@/hooks/avatar/use-avatar-dialogue';
 import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
 import { useSound } from '@/hooks/use-sound';
 import { useAvatarStore } from '@/stores/avatar-store';
@@ -25,6 +27,8 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   // 감정은 편집값이 아니라 서버 파생값이라 avatar_status 조회 훅에서 읽는다(로딩·비로그인 시 기본값).
   const { data: status } = useAvatarStatus();
   const mood = status?.mood ?? DEFAULT_MOOD;
+  // 감정에 맞는 대사를 타이머로 자동 전환(탭 트리거 없음). 말풍선에 표시한다.
+  const dialogue = useAvatarDialogue(mood);
   // 감정 안내를 버튼 이름에서 분리해 담는 live 영역 id (버튼 포커스 중 감정이 바뀌어도 이름은 그대로).
   const moodStatusId = useId();
 
@@ -42,8 +46,20 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
       {/* 숲 배경 — 카드 전체 */}
       <AvatarBackdrop />
 
-      {/* 콘텐츠: 캐릭터 + 이름표 */}
+      {/* 콘텐츠: 말풍선 + 캐릭터 + 이름표 */}
       <div className="relative z-10 flex flex-col items-center gap-0 px-4 pt-2 pb-4">
+        {/* 감정 대사 말풍선. key로 대사가 바뀔 때마다 fade-in을 다시 태운다(reduce-motion이면 즉시).
+            대사는 시각 표현이라 aria-hidden — 스크린리더에는 아래 감정 status 영역만 전달한다.
+            translate-y: 캐릭터는 그대로 두고 말풍선만 아래로 내려 캐릭터에 붙인다(캔버스 상단 투명
+            영역 위로 겹칠 뿐 머리를 가리지 않는다). z-10으로 캐릭터 위에 올린다.
+            drop-shadow: 숲 배경이 흐릿해 말풍선 흰 배경이 묻히므로, 공용 컴포넌트는 건드리지 않고
+            여기서만 그림자를 더해 도드라지게 한다(홈 화면 말풍선은 그대로). */}
+        <div className="relative z-10 flex min-h-8 translate-y-7 justify-center" aria-hidden>
+          <span key={dialogue} className="motion-safe:animate-fade-in drop-shadow-md">
+            <SpeechBubble size="md">{dialogue}</SpeechBubble>
+          </span>
+        </div>
+
         {/* 캐릭터 탭 → 효과음(+ 살짝 눌리는 press 피드백). 반응 모션(귀·하트)은 Live2DCharacter 내부.
             접근성 이름은 버튼의 aria-label이 담당하므로 내부 AvatarHero는 장식(title 생략)으로 둔다.
             감정 심볼·기운 배경은 aria-hidden(시각 정보)이라, 감정은 아래 aria-live 영역으로 전달한다.
