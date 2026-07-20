@@ -1,6 +1,6 @@
 import { FlameIcon } from 'lucide-react';
-import Image from 'next/image';
 
+import { AvatarRing } from '@/components/common/AvatarRing';
 import { MOOD_ICON } from '@/constants/mood';
 import { cn } from '@/lib/cn';
 import type { Mood, Profile } from '@/types/mypage/model';
@@ -24,22 +24,17 @@ export function ProfileSection({ profile }: ProfileSectionProps) {
 
   return (
     <section className="flex flex-col items-center gap-2 px-5 pb-4">
-      <div className="relative">
-        <div className="from-green-accent to-coral-accent rounded-full bg-linear-to-br p-[3px]">
-          <div className="relative size-[90px] overflow-hidden rounded-full bg-white">
-            <Image
-              src={profile.avatarUrl}
-              alt={`${profile.name} 아바타`}
-              fill
-              className="object-contain"
-              sizes="90px"
-            />
-          </div>
-        </div>
-        <span className="bg-coral absolute right-0 bottom-0 rounded-full px-2 py-0.5 text-[10px] leading-[15px] font-bold text-white">
-          Lv.{profile.level}
-        </span>
-      </div>
+      <AvatarRing
+        size={90}
+        happinessPercent={profile.moodValue}
+        imageSrc={profile.avatarUrl}
+        imageAlt={`${profile.name} 아바타`}
+        badge={
+          <span className="bg-coral rounded-full px-2 py-0.5 text-[10px] leading-[15px] font-bold text-white">
+            Lv.{profile.level}
+          </span>
+        }
+      />
 
       <h2 className="text-brown-ink pt-1 text-lg leading-7 font-bold">{profile.name}</h2>
 
