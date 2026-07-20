@@ -16,10 +16,6 @@
   --coral: #e8563a;
   --coral-dark: #d24a30;
   --coral-soft: #fdd0c4;
-  /* 흰 글씨를 얹는 작은 요소(Lv 뱃지 등) 전용 코랄. --coral(#e8563a) 위 흰 글씨는 명도 대비가
-     3.6:1, --coral-dark도 4.4:1로 WCAG AA 기준(일반 텍스트 4.5:1)에 못 미친다. 이 값은 5.0:1로
-     통과한다. 큰 글씨(18.66px 이상 굵은 글씨)는 3:1 기준이라 --coral을 그대로 써도 된다. */
-  --coral-deep: #c2452c;
 
   --linen: #faf0e6;
   --ink: #3d3d3d;
@@ -42,6 +38,11 @@
      `--*-soft` 토큰은 어두운 글자 뒤에 까는 연한 배경색이라 채도가 낮다 → 심볼 채움에 쓰면
      색이 안 읽힌다(blue-soft #d2d4ee는 파랑이 아니라 페리윙클이라 보라로 보였음). 별도로 둔다. */
   --tear: #6cc0ec;
+  /* 탭 반응 심볼 채움색. 평상시 심볼(하트/눈물/핏줄)과 같은 규약 — plum 외곽선 + 전용 채움색.
+     ⚠️ --note-*는 오답노트용 회색 토큰이라 음표에 재사용하면 안 된다(이름만 같고 용도가 다름).
+     지침은 배경 해칭(--aura-ink)과 같은 무채색 계열로 맞춰, 색이 따로 놀지 않게 한다. */
+  --music-note: #f2b134;
+  --dizzy: #6b6b78;
   /* 캐릭터 뒤에 깔리는 감정 기운(MoodBackdrop). 우울=가라앉은 청색, 지침=탈진한 무채색,
      화남=달아오른 붉은기, 행복=화사한 분홍. 보통만 기운이 없다(대비의 기준선). */
   --aura-blue: #4f74ad;
@@ -144,11 +145,12 @@
   --color-coral: var(--coral);
   --color-coral-dark: var(--coral-dark);
   --color-coral-soft: var(--coral-soft);
-  --color-coral-deep: var(--coral-deep);
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
   --color-tear: var(--tear);
+  --color-music-note: var(--music-note);
+  --color-dizzy: var(--dizzy);
   --color-aura-blue: var(--aura-blue);
   --color-aura-ink: var(--aura-ink);
   --color-aura-red: var(--aura-red);

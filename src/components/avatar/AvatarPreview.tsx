@@ -84,7 +84,7 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
               {/* leading-4 + py-px = 18px. 옆 캐릭터 종류(text-sm = 20px)보다 낮지만 부모가
                   items-center라 중앙 정렬은 유지되고, 알약이 덜 두툼해 보인다. */}
               {level !== null && (
-                <span className="bg-coral-deep shrink-0 rounded-full px-2 py-px text-[11px] leading-4 font-bold text-white">
+                <span className="bg-coral shrink-0 rounded-full px-2 py-px text-[11px] leading-4 font-bold text-white">
                   Lv.{level}
                 </span>
               )}
