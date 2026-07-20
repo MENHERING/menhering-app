@@ -12,8 +12,8 @@ const CHART_MAX = 30;
 
 function LearningChart({ data }: { data: ChartBar[] }) {
   return (
-    <div className="relative pt-4">
-      <div className="text-brown-muted absolute top-4 left-0 flex h-[88px] flex-col justify-between text-[7.5px] leading-none">
+    <div className="relative pt-2">
+      <div className="text-brown-muted absolute top-5 left-0 flex h-[88px] flex-col justify-between text-[7.5px] leading-none">
         <span>30</span>
         <span>20</span>
         <span>10</span>
