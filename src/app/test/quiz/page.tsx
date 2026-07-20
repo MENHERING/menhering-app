@@ -4,8 +4,8 @@ import { useState } from 'react';
 
 import { notFound } from 'next/navigation';
 
+import { QuizAvatarRing } from '@/components/common/AvatarRing';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
-import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizExplanation } from '@/components/quiz/QuizExplanation';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';

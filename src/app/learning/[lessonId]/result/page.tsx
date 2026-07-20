@@ -1,6 +1,6 @@
+import { QuizAvatarRing } from '@/components/common/AvatarRing';
 import { CoinBadge } from '@/components/common/CoinBadge';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
-import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';

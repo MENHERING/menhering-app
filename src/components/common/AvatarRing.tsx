@@ -5,7 +5,7 @@ import { useId } from 'react';
 import Image from 'next/image';
 
 import { AvatarHero } from '@/components/avatar/AvatarHero';
-import { MIN_HAPPINESS_FILL_PERCENT } from '@/components/quiz/gauge-constants';
+import { MIN_HAPPINESS_FILL_PERCENT } from '@/components/common/gauge-constants';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
 import type { Mood } from '@/types/mypage/model';
@@ -14,6 +14,8 @@ interface QuizAvatarRingProps {
   size?: number;
   // 0(멘헤라/우울)~100(행복) — 이 비율만큼 링 호(arc) 길이를 채운다.
   happinessPercent?: number;
+  imageSrc?: string;
+  imageAlt?: string;
   badge?: React.ReactNode;
   characterType?: CharacterType;
   colorTheme?: ColorTheme;
