@@ -13,8 +13,8 @@ import { useSound } from '@/hooks/use-sound';
 import { useAvatarStore } from '@/stores/avatar-store';
 
 interface AvatarPreviewProps {
-  /** user_progress.xp에서 환산한 레벨(서버에서 getLevelInfo 적용 후 전달). */
-  level: number;
+  /** user_progress.xp에서 환산한 레벨(서버에서 getLevelInfo 적용 후 전달). 조회 실패 시 null → 뱃지 숨김. */
+  level: number | null;
 }
 
 export function AvatarPreview({ level }: AvatarPreviewProps) {
@@ -83,9 +83,11 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
             <div className="flex items-center gap-1.5">
               {/* leading-4 + py-px = 18px. 옆 캐릭터 종류(text-sm = 20px)보다 낮지만 부모가
                   items-center라 중앙 정렬은 유지되고, 알약이 덜 두툼해 보인다. */}
-              <span className="bg-coral shrink-0 rounded-full px-2 py-px text-[11px] leading-4 font-bold text-white">
-                Lv.{level}
-              </span>
+              {level !== null && (
+                <span className="bg-coral-deep shrink-0 rounded-full px-2 py-px text-[11px] leading-4 font-bold text-white">
+                  Lv.{level}
+                </span>
+              )}
               <span className="text-brown-soft text-sm">{characterType}</span>
             </div>
           </div>

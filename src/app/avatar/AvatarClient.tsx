@@ -28,7 +28,7 @@ interface AvatarClientProps {
   initialAvatar: Avatar;
   initialCoin: number;
   initialOwned: OwnedItems;
-  initialLevel: number;
+  initialLevel: number | null;
 }
 
 export function AvatarClient({

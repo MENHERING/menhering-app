@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { getMyAvatar, getMyAvatarItems, getMyLevel } from './actions';
+import { getMyAvatar, getMyAvatarItems } from './actions';
 import { AvatarClient } from './AvatarClient';
 
 export const metadata: Metadata = {
@@ -8,12 +8,8 @@ export const metadata: Metadata = {
 };
 
 export default async function AvatarPage() {
-  // 아바타+코인(getMyAvatar)·보유 목록(getMyAvatarItems)·레벨(getMyLevel)을 병렬 조회해 왕복 지연을 겹친다.
-  const [{ avatar, coin }, owned, level] = await Promise.all([
-    getMyAvatar(),
-    getMyAvatarItems(),
-    getMyLevel(),
-  ]);
+  // 아바타+코인+레벨(getMyAvatar)과 보유 목록(getMyAvatarItems)을 병렬 조회해 왕복 지연을 겹친다.
+  const [{ avatar, coin, level }, owned] = await Promise.all([getMyAvatar(), getMyAvatarItems()]);
 
   return (
     <AvatarClient

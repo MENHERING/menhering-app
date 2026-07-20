@@ -16,6 +16,10 @@
   --coral: #e8563a;
   --coral-dark: #d24a30;
   --coral-soft: #fdd0c4;
+  /* 흰 글씨를 얹는 작은 요소(Lv 뱃지 등) 전용 코랄. --coral(#e8563a) 위 흰 글씨는 명도 대비가
+     3.6:1, --coral-dark도 4.4:1로 WCAG AA 기준(일반 텍스트 4.5:1)에 못 미친다. 이 값은 5.0:1로
+     통과한다. 큰 글씨(18.66px 이상 굵은 글씨)는 3:1 기준이라 --coral을 그대로 써도 된다. */
+  --coral-deep: #c2452c;
 
   --linen: #faf0e6;
   --ink: #3d3d3d;
@@ -140,6 +144,7 @@
   --color-coral: var(--coral);
   --color-coral-dark: var(--coral-dark);
   --color-coral-soft: var(--coral-soft);
+  --color-coral-deep: var(--coral-deep);
   --color-linen: var(--linen);
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
