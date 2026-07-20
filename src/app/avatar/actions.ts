@@ -1,6 +1,7 @@
 'use server';
 
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME, DEFAULT_NICKNAME } from '@/constants/avatar';
+import { getLevelInfo } from '@/lib/level';
 import { createClient } from '@/lib/supabase/server';
 import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';
 
@@ -119,6 +120,36 @@ export async function getMyAvatarItems(): Promise<OwnedItems> {
     .map((row) => row.item_value as ColorTheme);
 
   return { characters, themes };
+}
+
+/**
+ * 이름표 옆 Lv 뱃지에 쓸 레벨. XP는 레벨 무관 전역 누적치라 user_progress 한 줄에서 읽고,
+ * 레벨 환산은 마이페이지와 같은 getLevelInfo(xp 500당 1레벨)를 공유한다.
+ *
+ * 유저 식별은 getUser(매번 네트워크 왕복) 대신 getClaims(JWT 로컬 검증)의 sub로 한다 —
+ * 이 값은 RLS가 다시 검증하는 조회 조건일 뿐이라 로컬 검증으로 충분하다.
+ * 비로그인·조회 실패 시엔 1레벨로 폴백한다(뱃지가 사라지는 대신 최소값 표시).
+ */
+export async function getMyLevel(): Promise<number> {
+  const supabase = await createClient();
+
+  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
+  const userId = claimsData?.claims.sub;
+
+  if (claimsError || !userId) return 1;
+
+  const { data, error } = await supabase
+    .from('user_progress')
+    .select('xp')
+    .eq('user_id', userId)
+    .maybeSingle<{ xp: number | null }>();
+
+  if (error) {
+    console.error('[avatar] 레벨 조회 실패:', error);
+    return 1;
+  }
+
+  return getLevelInfo(data?.xp ?? 0).level;
 }
 
 export type SaveAvatarResult = { ok: true } | { ok: false; error: string };

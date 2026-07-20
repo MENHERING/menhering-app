@@ -13,8 +13,8 @@ import { useSound } from '@/hooks/use-sound';
 import { useAvatarStore } from '@/stores/avatar-store';
 
 interface AvatarPreviewProps {
-  // TODO: 레벨/XP는 user_progress 도메인 연동 후 실제 값으로 교체
-  level?: number;
+  /** user_progress.xp에서 환산한 레벨(서버에서 getLevelInfo 적용 후 전달). */
+  level: number;
 }
 
 export function AvatarPreview({ level }: AvatarPreviewProps) {
@@ -41,13 +41,6 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
     >
       {/* 숲 배경 — 카드 전체 */}
       <AvatarBackdrop />
-
-      {/* Lv 배지 */}
-      {typeof level === 'number' && (
-        <span className="bg-coral absolute top-3 right-3 z-10 rounded-full px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
-          Lv.{level}
-        </span>
-      )}
 
       {/* 콘텐츠: 캐릭터 + 이름표 */}
       <div className="relative z-10 flex flex-col items-center gap-0 px-4 pt-2 pb-4">
@@ -84,8 +77,17 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
           <div className="flex flex-col items-center gap-1">
             <NicknameField nickname={nickname} onSave={setNickname} />
 
-            {/* 캐릭터 종류. TODO: 다크모드 도입 시 `dark:text-neutral-400` */}
-            <span className="text-brown-soft text-sm">{characterType}</span>
+            {/* Lv 뱃지 + 캐릭터 종류 한 줄. 닉네임 줄이 아니라 이 줄에 두는 이유는,
+                닉네임 편집 모드의 입력 폭을 뱃지가 잠식하지 않게 하기 위함이다.
+                TODO: 다크모드 도입 시 캐릭터 종류 `dark:text-neutral-400` */}
+            <div className="flex items-center gap-1.5">
+              {/* leading-4 + py-px = 18px. 옆 캐릭터 종류(text-sm = 20px)보다 낮지만 부모가
+                  items-center라 중앙 정렬은 유지되고, 알약이 덜 두툼해 보인다. */}
+              <span className="bg-coral shrink-0 rounded-full px-2 py-px text-[11px] leading-4 font-bold text-white">
+                Lv.{level}
+              </span>
+              <span className="text-brown-soft text-sm">{characterType}</span>
+            </div>
           </div>
         </div>
       </div>
