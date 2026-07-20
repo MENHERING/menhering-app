@@ -1,6 +1,6 @@
 import { FlameIcon } from 'lucide-react';
 
-import { AvatarRing } from '@/components/common/AvatarRing';
+import { QuizAvatarRing } from '@/components/common/AvatarRing';
 import { MOOD_ICON } from '@/constants/mood';
 import { cn } from '@/lib/cn';
 import type { Mood, Profile } from '@/types/mypage/model';
@@ -24,7 +24,7 @@ export function ProfileSection({ profile }: ProfileSectionProps) {
 
   return (
     <section className="flex flex-col items-center gap-2 px-5 pb-4">
-      <AvatarRing
+      <QuizAvatarRing
         size={90}
         happinessPercent={profile.moodValue}
         imageSrc={profile.avatarUrl}

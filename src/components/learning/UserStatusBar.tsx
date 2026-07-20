@@ -5,15 +5,14 @@ interface UserStatusBarProps {
   nickname: string;
   level: number;
   xp: number;
-  avatarSrc: string;
 }
 
-export function UserStatusBar({ nickname, level, xp, avatarSrc }: UserStatusBarProps) {
+export function UserStatusBar({ nickname, level, xp }: UserStatusBarProps) {
   return (
     <div className="flex items-center justify-between px-5 py-6">
       <div className="flex items-center gap-3">
         <Image
-          src={avatarSrc}
+          src="/images/avatar/menhering_1_img.webp"
           alt="아바타"
           width={56}
           height={56}

@@ -26,5 +26,4 @@ export interface Curriculum {
 export interface UserProgress {
   level: number;
   xp: number;
-  avatarSrc: string;
 }

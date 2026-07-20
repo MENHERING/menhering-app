@@ -34,7 +34,7 @@ export function LessonNode({ order, status, isSelected = false, onPress }: Lesso
         <>
           {order}
           <Image
-            src="/images/avatar/panda.png"
+            src="/images/avatar/menhering_1_img.webp"
             alt=""
             width={96}
             height={96}

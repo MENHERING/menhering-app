@@ -88,9 +88,9 @@ export default function QuizPage() {
         {
           onSuccess: (result) => {
             // level/stage는 결과 화면이 "다음 스테이지" 버튼의 실제 목적지를 계산하는 데 쓴다.
-            // xpReward/coinReward는 서버(첫 클리어 판정)가 이미 계산한 값을 그대로 표시만 한다.
+            // xpReward/coinReward/moodGain은 서버(첫 클리어 판정)가 이미 계산한 값을 그대로 표시만 한다.
             router.push(
-              `/learning/${lessonId}/result?correct=${result.correctCount}&wrong=${result.wrongCount}&level=${encodeURIComponent(level)}&stage=${stage}&success=${result.isSuccess}&xp=${result.xpReward}&coin=${result.coinReward}`,
+              `/learning/${lessonId}/result?correct=${result.correctCount}&wrong=${result.wrongCount}&level=${encodeURIComponent(level)}&stage=${stage}&success=${result.isSuccess}&xp=${result.xpReward}&coin=${result.coinReward}&moodGain=${result.moodGain}`,
             );
           },
         },
