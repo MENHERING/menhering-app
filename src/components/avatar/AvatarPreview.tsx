@@ -55,7 +55,7 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
             drop-shadow: 숲 배경이 흐릿해 말풍선 흰 배경이 묻히므로, 공용 컴포넌트는 건드리지 않고
             여기서만 그림자를 더해 도드라지게 한다(홈 화면 말풍선은 그대로). */}
         <div className="relative z-10 flex min-h-8 translate-y-7 justify-center" aria-hidden>
-          <span key={dialogue} className="motion-safe:animate-fade-in drop-shadow-md">
+          <span key={dialogue} className="animate-fade-in drop-shadow-md">
             <SpeechBubble size="md">{dialogue}</SpeechBubble>
           </span>
         </div>

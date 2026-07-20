@@ -317,7 +317,7 @@ body {
 }
 
 /* 감정 대사 전환 — 새 대사가 살짝 떠오르며 나타난다(AvatarPreview 말풍선).
-   호출부가 motion-safe:로 감싸 reduce-motion이면 즉시 표시된다. */
+   reduce-motion이면 아래 미디어 쿼리에서 animation:none으로 즉시 표시된다. */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -411,7 +411,8 @@ body {
   .animate-tear-drop,
   .animate-weary-lines,
   .animate-vein-pulse,
-  .animate-heart-bob {
+  .animate-heart-bob,
+  .animate-fade-in {
     animation: none;
   }
 }

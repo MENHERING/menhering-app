@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { AVATAR_DIALOGUE } from '@/constants/avatar-dialogue';
 import type { Mood } from '@/types/mypage/model';
 
 // 대사가 자동으로 넘어가는 주기. 탭 트리거는 두지 않는다 — 연타 시 대사가 정신없이 바뀌기 때문.
 const ROTATE_INTERVAL_MS = 12000;
+
+// 마지막 조작 후 이 시간이 지나야 회전을 재개한다. 색·캐릭터를 고르는 능동적 작업 중에
+// 말풍선이 계속 바뀌면 주변시 모션이 시선을 뺏으므로, 조작 직후엔 회전을 멈춘다.
+const IDLE_RESUME_MS = 4000;
 
 // exclude를 뺀 나머지에서 균등 랜덤으로 인덱스를 고른다(같은 대사가 연달아 나오는 것 방지).
 // 0 ~ length-2에서 뽑은 뒤 exclude 이상이면 1 밀어, exclude만 건너뛴 균등 분포를 만든다.
@@ -23,6 +27,9 @@ function pickIndexExcluding(length: number, exclude: number): number {
  *
  * 초기값은 항상 0번이라 SSR·클라 첫 렌더가 일치한다(하이드레이션 불일치 없음). 랜덤 전환은
  * 마운트 후 타이머에서만 일어난다. 감정이 바뀌면 새 배열의 0번으로 리셋한다.
+ *
+ * 사용자가 화면을 조작하는 동안(색/캐릭터 선택 등)에는 회전을 멈춘다 — 마지막 조작 이후
+ * IDLE_RESUME_MS가 지나야 다시 돈다.
  */
 export function useAvatarDialogue(mood: Mood): string {
   const lines = AVATAR_DIALOGUE[mood];
@@ -36,10 +43,29 @@ export function useAvatarDialogue(mood: Mood): string {
     setIndex(0);
   }
 
+  // 마지막 사용자 조작 시각(ms). 초기 0이라 마운트 직후엔 유휴로 간주돼 정상 회전한다.
+  const lastInteractionRef = useRef(0);
+  useEffect(() => {
+    const mark = () => {
+      lastInteractionRef.current = Date.now();
+    };
+    // passive: 스크롤·탭 성능에 영향 안 주게. capture로 하위 stopPropagation에도 잡히게 한다.
+    const opts = { passive: true, capture: true } as const;
+    window.addEventListener('pointerdown', mark, opts);
+    window.addEventListener('keydown', mark, opts);
+
+    return () => {
+      window.removeEventListener('pointerdown', mark, opts);
+      window.removeEventListener('keydown', mark, opts);
+    };
+  }, []);
+
   useEffect(() => {
     if (lines.length <= 1) return;
 
     const timerId = setInterval(() => {
+      // 조작 직후엔 이번 틱을 건너뛴다(회전 일시정지). 유휴가 되면 다음 틱부터 재개.
+      if (Date.now() - lastInteractionRef.current < IDLE_RESUME_MS) return;
       setIndex((prev) => pickIndexExcluding(lines.length, prev));
     }, ROTATE_INTERVAL_MS);
 
