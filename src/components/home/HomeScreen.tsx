@@ -15,11 +15,13 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
 import { ROUTES } from '@/constants/routes';
+import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
 import { cn } from '@/lib/cn';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
 import type { HomeSummary } from '@/types/home';
@@ -44,6 +46,11 @@ interface HomeScreenProps {
 
 export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   const router = useRouter();
+
+  // 감정(mood)은 편집값이 아닌 서버 파생값이라 별도 조회한다. 미해결(첫 렌더)이면 mood 없이
+  // 중립으로 그리고, 도착하면 표정·심볼·기운 배경이 얹힌다(점진적 향상). 비로그인은 홈 가드에서
+  // 이미 걸러지므로 privateFetch 401 리다이렉트는 사실상 발생하지 않는다.
+  const { data: avatarStatus } = useAvatarStatus();
 
   // 진행률(%)
   const accessPercent = Math.min(100, (summary.accessStreak / summary.accessStreakMax) * 100);
@@ -104,12 +111,15 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
           </div>
         </div>
 
-        {/* 마스코트 */}
+        {/* 마스코트 — 히어로 렌더러(Live2D 우선 + 감정 표정/심볼, 실패 시 SVG 폴백).
+            상단바 작은 아이콘은 성능상 SVG(CharacterRenderer)로 유지한다. */}
         <div className="mt-6 flex justify-center">
-          <CharacterRenderer
+          <AvatarHero
             characterType={avatar.characterType}
             colorTheme={avatar.colorTheme}
+            mood={avatarStatus?.mood}
             className="size-44 drop-shadow-sm"
+            size={176}
             title="내 아바타"
           />
         </div>
