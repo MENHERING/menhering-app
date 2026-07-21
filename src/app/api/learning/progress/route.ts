@@ -4,6 +4,7 @@ import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
 import { LEVELS } from '@/constants/level';
 import { ApiError, toErrorResult } from '@/lib/api-error';
 import { toSuccessResult } from '@/lib/api-response';
+import { getLevelInfo } from '@/lib/level';
 import { createClient } from '@/lib/supabase/server';
 import { LearningProgressSchema } from '@/schemas/learning-progress.schema';
 
@@ -46,9 +47,13 @@ export async function GET() {
       return { level: l.title, step: l.step, clearedCount, totalCount };
     });
 
+    const { level, currentXp, targetXp } = getLevelInfo(progress?.xp ?? 0);
+
     const { body, status } = toSuccessResult(LearningProgressSchema, {
       myStep,
-      xp: progress?.xp ?? 0,
+      level,
+      currentXp,
+      targetXp,
       curricula,
     });
 

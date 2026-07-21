@@ -18,7 +18,7 @@ export const MOOD_ICON: Record<Mood, LucideIcon> = {
 // 이 함수가 숫자→Mood 변환의 유일한 출처다 — avatar_status 조회 훅이 준비되면
 // 응답을 이 함수에 통과시켜 store/컴포넌트에 Mood 문자열로 넘긴다(소비처는 그대로).
 //
-// ⚠️ 주의: 앱의 0~100 축은 본래 "행복도"(우울↔행복 1축, HappinessGauge/QuizAvatarRing 참고)라
+// ⚠️ 주의: 앱의 0~100 축은 본래 "행복도"(우울↔행복 1축, HappinessGauge/AvatarRing 참고)라
 // 지침·화남은 이 축 위의 "더 낮은 행복"이 아니라 질적으로 다른 감정이다. 즉 화남<지침<우울
 // 순서에 행복도상의 의미는 없고, 편의상 저구간에 배치한 것뿐이다. 세밀한 부정 감정 구분이
 // 필요해지면 mood_value 단일 스칼라로는 부족하므로 별도 신호(연속 오답·타임아웃·스트릭 끊김 등)로

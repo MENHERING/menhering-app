@@ -47,6 +47,7 @@ const eslintConfig = defineConfig([
       'src/app/**/not-found.tsx',
       'src/app/**/template.tsx',
       'src/app/**/route.ts',
+      'src/app/**/manifest.ts',
     ],
     rules: {
       'import/no-default-export': 'off',

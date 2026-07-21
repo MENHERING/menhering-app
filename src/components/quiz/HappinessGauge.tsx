@@ -1,6 +1,6 @@
 import { Frown, Smile } from 'lucide-react';
 
-import { MIN_HAPPINESS_FILL_PERCENT } from '@/components/quiz/gauge-constants';
+import { MIN_HAPPINESS_FILL_PERCENT } from '@/components/common/gauge-constants';
 
 interface HappinessGaugeProps {
   // 0(멘헤라)~100(행복) — 링과 동일한 값을 받아 채워진 비율을 맞춘다.

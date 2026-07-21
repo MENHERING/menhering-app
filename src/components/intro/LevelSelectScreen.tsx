@@ -21,7 +21,7 @@ export function LevelSelectScreen() {
   const handleComplete = () => save(selected);
 
   return (
-    <div className="bg-sand flex min-h-dvh w-full flex-col items-center px-6">
+    <div className="bg-sand flex min-h-dvh w-full flex-col items-center px-6 pb-[env(safe-area-inset-bottom)]">
       <div className="flex w-full max-w-[430px] flex-1 flex-col">
         {/* 헤더 */}
         <div className="mt-12 flex flex-col gap-2">

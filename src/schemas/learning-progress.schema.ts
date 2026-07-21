@@ -9,7 +9,9 @@ export const CurriculumSchema = z.object({
 
 export const LearningProgressSchema = z.object({
   myStep: z.number().int(),
-  xp: z.number().int(),
+  level: z.number().int(),
+  currentXp: z.number().int(),
+  targetXp: z.number().int(),
   curricula: z.array(CurriculumSchema),
 });
 
