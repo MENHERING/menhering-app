@@ -31,9 +31,15 @@ interface AvatarClientProps {
   initialAvatar: Avatar;
   initialCoin: number;
   initialOwned: OwnedItems;
+  initialLevel: number | null;
 }
 
-export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: AvatarClientProps) {
+export function AvatarClient({
+  initialAvatar,
+  initialCoin,
+  initialOwned,
+  initialLevel,
+}: AvatarClientProps) {
   const queryClient = useQueryClient();
 
   // 서버 조회값으로 스토어를 최초 1회 동기 초기화 (기본값 플래시 방지).
@@ -178,8 +184,7 @@ export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: Avata
       />
 
       <main className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
-        {/* TODO: level은 user_progress 연동 후 실제 값으로 교체 */}
-        <AvatarPreview level={5} />
+        <AvatarPreview level={initialLevel} />
         <ColorThemePicker />
         <CharacterPicker />
       </main>
