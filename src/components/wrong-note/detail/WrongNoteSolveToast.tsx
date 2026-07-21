@@ -7,9 +7,15 @@ interface WrongNoteResultToastProps {
   isCorrect: boolean;
   nextLabel?: string;
   onNext?: () => void;
+  isNextPending?: boolean;
 }
 
-export function WrongNoteResultToast({ isCorrect, nextLabel, onNext }: WrongNoteResultToastProps) {
+export function WrongNoteResultToast({
+  isCorrect,
+  nextLabel,
+  onNext,
+  isNextPending,
+}: WrongNoteResultToastProps) {
   const Icon = isCorrect ? PartyPopper : Frown;
 
   return (
@@ -37,6 +43,7 @@ export function WrongNoteResultToast({ isCorrect, nextLabel, onNext }: WrongNote
           size="md"
           isFullWidth
           onClick={onNext}
+          isLoading={isNextPending}
           rightIcon={<ArrowRight className="size-4" strokeWidth={3} aria-hidden />}
           className={cn(
             'gap-1.5 bg-white shadow-none transition-transform duration-200 hover:bg-white/90 active:scale-[0.98]',
