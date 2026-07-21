@@ -19,14 +19,14 @@ const COPY: Record<
   { heading: string; sub: string[]; kakao: string; google: string }
 > = {
   new: {
-    heading: '안녕하세요! 👋',
-    sub: ['레드판다와 함께', '매일 조금씩 성장해봐요.'],
+    heading: '왔구나.. 기다렸잖아.. ㅠㅠ',
+    sub: ['혹시 오늘 나랑', '같이 있어주면 안 될까...?'],
     kakao: '카카오로 시작하기',
     google: 'Google로 시작하기',
   },
   returning: {
-    heading: '다시 시작해요!',
-    sub: ['레드판다와 함께', '학습을 이어가요.'],
+    heading: '또 와줄 줄 알았어... 히잉',
+    sub: ['안 올까 봐 계속 문 앞에서 기다렸잖아.', '얼른 와, 우리 이어서 하자'],
     kakao: '카카오로 다시 시작하기',
     google: 'Google로 다시 시작하기',
   },
@@ -46,22 +46,22 @@ export function LoginScreen({ variant = 'new', next, errorMessage }: LoginScreen
         {/* 브랜드 */}
         <div className="flex flex-col items-center gap-2 pt-12">
           <div className="flex items-center gap-2">
-            <span className="bg-primary flex size-8 items-center justify-center rounded-full text-base text-white">
+            <span className="bg-primary flex size-9 items-center justify-center rounded-full text-lg text-white">
               ◕
             </span>
-            <span className="text-plum text-xl font-extrabold">멘헤링</span>
+            <span className="text-plum text-2xl font-extrabold">멘헤링</span>
           </div>
-          <p className="text-primary text-xs font-medium">나만의 캐릭터와 함께하는 학습</p>
+          <p className="text-primary text-sm font-medium">나만의 캐릭터와 함께하는 학습</p>
         </div>
 
         {/* 마스코트 */}
-        <div className="relative mx-auto mt-8 h-44 w-44">
+        <div className="relative mx-auto mt-8 h-56 w-56">
           <Image
             src="/mascot/red-panda.png"
             alt="멘헤링 마스코트"
             fill
             priority
-            sizes="176px"
+            sizes="224px"
             className="object-contain drop-shadow-sm"
           />
         </div>
