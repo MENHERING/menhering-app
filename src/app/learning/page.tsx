@@ -121,6 +121,13 @@ function LearningPageContent() {
     setCurriculumOverrideId(curriculumId);
     setSelectedLessonId(null);
     setIsDropdownOpen(false);
+    // URL의 ?level=도 같이 갱신해야 새로고침해도 유지된다. router.replace는 기존 ?level= 위에서
+    // 주소창을 안 바꾸는 경우가 있어 history API로 직접 갱신한다.
+    window.history.replaceState(
+      null,
+      '',
+      `${ROUTES.LEARNING}?level=${encodeURIComponent(curriculumId)}`,
+    );
   };
 
   if (isError) {

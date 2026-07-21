@@ -24,7 +24,13 @@ export function QuizResultActions({
   lessonId,
 }: QuizResultActionsProps) {
   const router = useRouter();
-  const goToLearning = () => router.push(`${ROUTES.LEARNING}?level=${encodeURIComponent(level)}`);
+  // 마지막 스테이지를 성공 클리어했으면(승급 가능성) 방금 레벨을 강제하지 않고 myStep 기본값을 보여준다.
+  const goToLearning = () =>
+    router.push(
+      isSuccess && !nextLessonId
+        ? ROUTES.LEARNING
+        : `${ROUTES.LEARNING}?level=${encodeURIComponent(level)}`,
+    );
   const goToWrongNote = () => router.push(ROUTES.WRONG_NOTE);
   // nextLessonId가 없으면(레벨의 마지막 스테이지) 버튼 자체를 안 보여준다 — 아래
   // "스테이지 목록" 버튼과 동작이 겹치는 걸 막는다.
