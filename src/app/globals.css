@@ -38,6 +38,11 @@
      `--*-soft` 토큰은 어두운 글자 뒤에 까는 연한 배경색이라 채도가 낮다 → 심볼 채움에 쓰면
      색이 안 읽힌다(blue-soft #d2d4ee는 파랑이 아니라 페리윙클이라 보라로 보였음). 별도로 둔다. */
   --tear: #6cc0ec;
+  /* 탭 반응 심볼 채움색. 평상시 심볼(하트/눈물/핏줄)과 같은 규약 — plum 외곽선 + 전용 채움색.
+     ⚠️ --note-*는 오답노트용 회색 토큰이라 음표에 재사용하면 안 된다(이름만 같고 용도가 다름).
+     지침은 배경 해칭(--aura-ink)과 같은 무채색 계열로 맞춰, 색이 따로 놀지 않게 한다. */
+  --music-note: #f2b134;
+  --dizzy: #6b6b78;
   /* 캐릭터 뒤에 깔리는 감정 기운(MoodBackdrop). 우울=가라앉은 청색, 지침=탈진한 무채색,
      화남=달아오른 붉은기, 행복=화사한 분홍. 보통만 기운이 없다(대비의 기준선). */
   --aura-blue: #4f74ad;
@@ -144,6 +149,8 @@
   --color-ink: var(--ink);
   --color-brown-soft: var(--brown-soft);
   --color-tear: var(--tear);
+  --color-music-note: var(--music-note);
+  --color-dizzy: var(--dizzy);
   --color-aura-blue: var(--aura-blue);
   --color-aura-ink: var(--aura-ink);
   --color-aura-red: var(--aura-red);
@@ -309,6 +316,23 @@ body {
   animation: heart-float 1s ease-out forwards;
 }
 
+/* 감정 대사 전환 — 새 대사가 살짝 떠오르며 나타난다(AvatarPreview 말풍선).
+   reduce-motion이면 아래 미디어 쿼리에서 animation:none으로 즉시 표시된다. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.28s ease-out;
+}
+
 /* 아바타 감정 심볼(우울) — 눈물이 눈가에 맺혔다 볼을 타고 흘러내린다(MoodSymbol 오버레이). */
 @keyframes tear-drop {
   0% {
@@ -387,7 +411,8 @@ body {
   .animate-tear-drop,
   .animate-weary-lines,
   .animate-vein-pulse,
-  .animate-heart-bob {
+  .animate-heart-bob,
+  .animate-fade-in {
     animation: none;
   }
 }

@@ -3,7 +3,6 @@ import type { Curriculum, Lesson, UserProgress } from '@/types/lesson';
 export const MOCK_USER_PROGRESS: UserProgress = {
   level: 13,
   xp: 1980,
-  avatarSrc: '/images/avatar/panda.png',
 };
 
 export const MOCK_CURRICULA: Curriculum[] = [
