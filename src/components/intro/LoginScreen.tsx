@@ -2,6 +2,7 @@ import { TriangleAlert } from 'lucide-react';
 import Image from 'next/image';
 
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
+import { SpeechBubble } from '@/components/common/SpeechBubble';
 import { SocialLoginButtons } from '@/components/intro/SocialLoginButtons';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 
@@ -45,48 +46,57 @@ export function LoginScreen({ variant = 'new', next, errorMessage }: LoginScreen
       <div className="bg-primary-soft/30 absolute top-1/2 -left-16 size-36 rounded-full" />
 
       <div className="relative flex w-full max-w-[430px] flex-1 flex-col">
-        {/* 브랜드 */}
-        <div className="flex flex-col items-center gap-2 pt-12">
-          <div className="flex items-center gap-2">
-            {/* 로고 아이콘: 홈 상단바와 동일하게 아바타 얼굴을 크롭(overflow-hidden + translate)해 임시 통일.
+        {/* 브랜드~안내 문구는 버튼 위 남는 공간에서 수직 중앙 정렬한다 —
+            큰 화면에서 마스코트와 버튼 사이가 휑하게 벌어지지 않도록. */}
+        <div className="flex flex-1 flex-col justify-center">
+          {/* 브랜드 */}
+          <div className="flex flex-col items-center gap-2">
+            <div className="flex items-center gap-2">
+              {/* 로고 아이콘: 홈 상단바와 동일하게 아바타 얼굴을 크롭(overflow-hidden + translate)해 임시 통일.
                 전용 앱 아이콘(브랜드 마크)은 별도 이슈로 제작 예정. */}
-            <span className="bg-primary flex size-9 items-center justify-center overflow-hidden rounded-full">
-              <CharacterRenderer
-                characterType={DEFAULT_CHARACTER_TYPE}
-                colorTheme={DEFAULT_COLOR_THEME}
-                className="size-8 translate-y-1"
-              />
-            </span>
-            <span className="text-plum text-2xl font-extrabold">멘헤링</span>
-          </div>
-          <p className="text-primary text-sm font-medium">나만의 캐릭터와 함께하는 학습</p>
-        </div>
-
-        {/* 마스코트 */}
-        <div className="relative mx-auto mt-8 h-56 w-56">
-          <Image
-            src="/mascot/red-panda.png"
-            alt="멘헤링 마스코트"
-            fill
-            priority
-            sizes="224px"
-            className="object-contain drop-shadow-sm"
-          />
-        </div>
-
-        {/* 카피 */}
-        <div className="mt-8 flex flex-col gap-2">
-          <h1 className="text-plum text-3xl font-extrabold tracking-tight">{copy.heading}</h1>
-          <p className="text-primary/70 text-sm leading-6 font-medium">
-            {copy.sub.map((line) => (
-              <span key={line} className="block">
-                {line}
+              <span className="bg-primary flex size-9 items-center justify-center overflow-hidden rounded-full">
+                <CharacterRenderer
+                  characterType={DEFAULT_CHARACTER_TYPE}
+                  colorTheme={DEFAULT_COLOR_THEME}
+                  className="size-8 translate-y-1"
+                />
               </span>
-            ))}
-          </p>
+              <span className="text-plum text-2xl font-extrabold">멘헤링</span>
+            </div>
+            <p className="text-primary text-sm font-medium">나만의 캐릭터와 함께하는 학습</p>
+          </div>
+
+          {/* 렛서 대사 말풍선 — 홈과 동일 컴포넌트. 꼬리가 아래(마스코트)를 가리켜 렛서가 말하는 것처럼 보인다. */}
+          <div className="mt-8 flex justify-center">
+            <SpeechBubble size="md">{copy.heading}</SpeechBubble>
+          </div>
+
+          {/* 마스코트 — object-contain 박스 상단 여백 때문에 말풍선과 벌어져 보여서 음수 마진으로 끌어올린다.
+            (말풍선 꼬리가 캐릭터 머리 바로 위에 오도록) */}
+          <div className="relative mx-auto -mt-6 h-64 w-64">
+            <Image
+              src="/mascot/red-panda.png"
+              alt="멘헤링 마스코트"
+              fill
+              priority
+              sizes="256px"
+              className="object-contain drop-shadow-sm"
+            />
+          </div>
+
+          {/* 안내 문구 */}
+          <div className="mt-4 flex flex-col items-center gap-1 text-center">
+            <p className="text-primary text-base leading-6 font-semibold">
+              {copy.sub.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </p>
+          </div>
         </div>
 
-        <div className="mt-auto mb-10 flex flex-col gap-3">
+        <div className="mb-10 flex flex-col gap-3">
           {errorMessage && (
             <div
               role="alert"
