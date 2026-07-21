@@ -1,5 +1,7 @@
 'use client';
 
+import { motion } from 'motion/react';
+
 import { Section } from '@/components/common/Section';
 import { cn } from '@/lib/cn';
 import type { ChartBar } from '@/types/mypage/model';
@@ -21,7 +23,7 @@ function LearningChart({ data }: { data: ChartBar[] }) {
       </div>
 
       <div className="border-sand-line ml-5 flex h-[110px] items-end justify-between gap-1 border-b pt-1">
-        {data.map((bar) => {
+        {data.map((bar, index) => {
           const heightPercent = Math.min(100, (bar.value / CHART_MAX) * 100);
 
           return (
@@ -35,12 +37,14 @@ function LearningChart({ data }: { data: ChartBar[] }) {
                 {bar.value}
               </span>
               <div className="flex h-[77px] w-full items-end justify-center">
-                <div
+                <motion.div
+                  initial={{ height: 0 }}
+                  animate={{ height: `${heightPercent}%` }}
+                  transition={{ duration: 0.5, delay: index * 0.05, ease: 'easeOut' }}
                   className={cn(
                     'w-[26px] max-w-full rounded-t-sm',
                     bar.isHighlighted ? 'bg-coral-highlight' : 'bg-coral/70',
                   )}
-                  style={{ height: `${heightPercent}%` }}
                 />
               </div>
               <span className="text-brown-muted text-[8.5px] leading-none">{bar.label}</span>
