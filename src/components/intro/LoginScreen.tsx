@@ -1,7 +1,9 @@
 import { TriangleAlert } from 'lucide-react';
 import Image from 'next/image';
 
+import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { SocialLoginButtons } from '@/components/intro/SocialLoginButtons';
+import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 
 type LoginVariant = 'new' | 'returning';
 
@@ -20,7 +22,7 @@ const COPY: Record<
 > = {
   new: {
     heading: '왔구나.. 기다렸잖아.. ㅠㅠ',
-    sub: ['혹시 오늘 나랑', '같이 있어주면 안 될까...?'],
+    sub: ['혹시 오늘 나랑 같이 있어주면 안 될까...?'],
     kakao: '카카오로 시작하기',
     google: 'Google로 시작하기',
   },
@@ -46,8 +48,14 @@ export function LoginScreen({ variant = 'new', next, errorMessage }: LoginScreen
         {/* 브랜드 */}
         <div className="flex flex-col items-center gap-2 pt-12">
           <div className="flex items-center gap-2">
-            <span className="bg-primary flex size-9 items-center justify-center rounded-full text-lg text-white">
-              ◕
+            {/* 로고 아이콘: 홈 상단바와 동일하게 아바타 얼굴을 크롭(overflow-hidden + translate)해 임시 통일.
+                전용 앱 아이콘(브랜드 마크)은 별도 이슈로 제작 예정. */}
+            <span className="bg-primary flex size-9 items-center justify-center overflow-hidden rounded-full">
+              <CharacterRenderer
+                characterType={DEFAULT_CHARACTER_TYPE}
+                colorTheme={DEFAULT_COLOR_THEME}
+                className="size-8 translate-y-1"
+              />
             </span>
             <span className="text-plum text-2xl font-extrabold">멘헤링</span>
           </div>
