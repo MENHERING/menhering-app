@@ -6,13 +6,22 @@ import { toSuccessResult } from '@/lib/api-response';
 import { createClient } from '@/lib/supabase/server';
 import { buildWrongNoteOptions } from '@/lib/wrong-note/build-wrong-note-options';
 import {
-  WrongAnswerSchema,
   WrongNoteItemSchema,
+  WrongNoteReviewResultSchema,
   type QuestionLevel,
   type ReviewStatus,
   type WrongNoteItem,
 } from '@/schemas/wrong-note.schema';
 import type { WrongAnswerRow } from '@/types/wrong-note/db';
+
+interface WrongNoteReviewRewardRpcResult {
+  wrongAnswer: WrongAnswerRow;
+  xpReward: number;
+  moodValueBefore: number | null;
+  moodValueAfter: number | null;
+  streak: number | null;
+  rewarded: boolean;
+}
 
 interface WrongAnswerDetailRow {
   id: string;
@@ -119,27 +128,42 @@ export async function PATCH(
       throw new ApiError(401, '로그인이 필요합니다.');
     }
 
-    const { data: wrongAnswer, error } = await supabase
-      .from('wrong_answers')
-      .update({ review_status: '복습완료', reviewed_at: new Date().toISOString() })
-      .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single<WrongAnswerRow>();
+    // 복습완료 전환 + 보상 지급을 RPC 하나로 원자적으로 처리(나누면 동시 요청 시 중복 지급 위험).
+    const { data: rpcResult, error } = await supabase
+      .rpc('apply_wrong_note_review_reward', { p_wrong_answer_id: id })
+      .maybeSingle<WrongNoteReviewRewardRpcResult>();
 
-    if (error || !wrongAnswer) {
+    if (error) {
+      // PGRST202/42883 = 함수가 스키마 캐시에 없음(마이그레이션 미반영). 404 아니라 500으로 구분.
+      if (error.code === 'PGRST202' || error.code === '42883') {
+        throw new ApiError(500, '오답노트 복습 보상 기능이 아직 배포되지 않았습니다.');
+      }
+
       throw new ApiError(404, '존재하지 않는 오답 기록입니다.');
     }
 
-    const { body, status } = toSuccessResult(WrongAnswerSchema, {
-      id: wrongAnswer.id,
-      questionId: wrongAnswer.question_id,
-      sessionId: wrongAnswer.session_id,
-      selectedAnswer: wrongAnswer.selected_answer,
-      correctAnswer: wrongAnswer.correct_answer,
-      reviewStatus: wrongAnswer.review_status,
-      createdAt: wrongAnswer.created_at,
-      reviewedAt: wrongAnswer.reviewed_at,
+    if (!rpcResult) {
+      throw new ApiError(404, '존재하지 않는 오답 기록입니다.');
+    }
+
+    const { wrongAnswer } = rpcResult;
+
+    const { body, status } = toSuccessResult(WrongNoteReviewResultSchema, {
+      wrongAnswer: {
+        id: wrongAnswer.id,
+        questionId: wrongAnswer.question_id,
+        sessionId: wrongAnswer.session_id,
+        selectedAnswer: wrongAnswer.selected_answer,
+        correctAnswer: wrongAnswer.correct_answer,
+        reviewStatus: wrongAnswer.review_status,
+        createdAt: wrongAnswer.created_at,
+        reviewedAt: wrongAnswer.reviewed_at,
+      },
+      xpReward: rpcResult.xpReward,
+      moodValueBefore: rpcResult.moodValueBefore,
+      moodValueAfter: rpcResult.moodValueAfter,
+      streak: rpcResult.streak,
+      rewarded: rpcResult.rewarded,
     });
 
     return NextResponse.json(body, { status });

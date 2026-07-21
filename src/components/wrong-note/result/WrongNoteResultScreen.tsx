@@ -8,15 +8,15 @@ import { Button } from '@/components/common/Button';
 import { WrongNoteResultMoodCard } from '@/components/wrong-note/result/WrongNoteResultMoodCard';
 import { WrongNoteResultStatsCard } from '@/components/wrong-note/result/WrongNoteResultStatsCard';
 import { WrongNoteResultStreakCard } from '@/components/wrong-note/result/WrongNoteResultStreakCard';
+import { DEFAULT_MOOD_VALUE } from '@/constants/avatar';
+import { moodFromValue } from '@/constants/mood';
 import { useWrongNoteStore } from '@/stores/wrong-note-store';
-import type { Mood } from '@/types/mypage/model';
 
-// TODO: 기분 변화·연속 학습 데이터는 별도 추적 시스템이 아직 없어 임시 고정값을 사용한다.
-const MOOD_BEFORE: Mood = '보통';
-const MOOD_AFTER: Mood = '행복';
-const MOOD_DESCRIPTION = '학습으로 기분이 좋아졌어요';
-const STREAK_DAYS = 5;
-const XP_PER_CORRECT = 20;
+// 보상은 항상 유지되거나 증가하므로 "악화" 케이스는 없다.
+function getMoodDescription(before: number, after: number): string {
+  if (after > before) return '학습으로 기분이 좋아졌어요';
+  return '꾸준히 기분을 유지했어요';
+}
 
 interface WrongNoteResultScreenProps {
   queueIds: string[];
@@ -24,12 +24,18 @@ interface WrongNoteResultScreenProps {
 
 export function WrongNoteResultScreen({ queueIds }: WrongNoteResultScreenProps) {
   const router = useRouter();
-  const firstTryCorrectMap = useWrongNoteStore((state) => state.firstTryCorrectMap);
+  const { firstTryCorrectMap, totalXpEarned, moodBefore, moodAfter, streak } = useWrongNoteStore(
+    (state) => state,
+  );
 
   const total = queueIds.length;
   const correct = queueIds.filter((id) => firstTryCorrectMap[id]).length;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
-  const xp = correct * XP_PER_CORRECT;
+  const xp = totalXpEarned;
+
+  const moodBeforeValue = moodBefore ?? DEFAULT_MOOD_VALUE;
+  const moodAfterValue = moodAfter ?? moodBeforeValue;
+  const streakDays = streak ?? 0;
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-4 px-4 py-8">
@@ -65,11 +71,11 @@ export function WrongNoteResultScreen({ queueIds }: WrongNoteResultScreenProps) 
 
       <WrongNoteResultStatsCard correct={correct} total={total} xp={xp} accuracy={accuracy} />
       <WrongNoteResultMoodCard
-        before={MOOD_BEFORE}
-        after={MOOD_AFTER}
-        description={MOOD_DESCRIPTION}
+        before={moodFromValue(moodBeforeValue)}
+        after={moodFromValue(moodAfterValue)}
+        description={getMoodDescription(moodBeforeValue, moodAfterValue)}
       />
-      <WrongNoteResultStreakCard streakDays={STREAK_DAYS} />
+      <WrongNoteResultStreakCard streakDays={streakDays} />
 
       <Button
         isFullWidth

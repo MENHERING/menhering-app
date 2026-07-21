@@ -40,6 +40,7 @@ export function WrongNoteDetailScreen({
   const { data: item, isPending, error } = useWrongNoteItem(id);
   const { mutate: markReviewed } = useMarkWrongNoteReviewed();
   const recordSolveResult = useWrongNoteStore((state) => state.recordSolveResult);
+  const applyReviewReward = useWrongNoteStore((state) => state.applyReviewReward);
   // 선택은 한 번만 가능하며, 정답/오답 여부와 무관하게 즉시 정답을 함께 공개한다.
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   // 복습 완료(PATCH) 실패 시 사용자에게 알려줄 에러 메시지. 성공은 캐시 무효화로 충분해 별도 표시 없음.
@@ -59,6 +60,13 @@ export function WrongNoteDetailScreen({
     // 정답을 맞혔을 때만 복습 완료로 처리하고, 틀리면 미복습 상태를 유지해 다시 풀 수 있게 한다.
     if (isFirstTryCorrect) {
       markReviewed(item.id, {
+        onSuccess: (result) =>
+          applyReviewReward({
+            xpReward: result.xpReward,
+            moodValueBefore: result.moodValueBefore,
+            moodValueAfter: result.moodValueAfter,
+            streak: result.streak,
+          }),
         onError: () => setErrorMessage('복습 완료 처리에 실패했어요.'),
       });
     }

@@ -1,6 +1,5 @@
 export type {
   ChartBar,
-  ChartPeriod,
   FriendItemKind,
   FriendItem,
   MenuItem,

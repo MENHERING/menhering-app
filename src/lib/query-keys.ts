@@ -20,4 +20,7 @@ export const queryKeys = {
     list: () => [...queryKeys.wrongNote.all, 'list'] as const,
     detail: (id: string) => [...queryKeys.wrongNote.all, 'detail', id] as const,
   },
+  mypage: {
+    all: ['mypage'] as const,
+  },
 };

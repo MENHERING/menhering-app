@@ -1,7 +1,7 @@
 import { Clock, X } from 'lucide-react';
 
+import { QuizAvatarRing } from '@/components/common/AvatarRing';
 import { Button } from '@/components/common/Button';
-import { QuizAvatarRing } from '@/components/quiz/QuizAvatarRing';
 
 interface QuizTimeoutModalProps {
   onRetry: () => void;
