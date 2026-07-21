@@ -94,7 +94,7 @@ export function ProductCard({ id, name, price, onSelect }: ProductCardProps) {
 
 **예외 (default export 필수)**: Next.js App Router 예약 파일은 프레임워크 요구사항으로 default export가 강제되며, `eslint.config.mjs`에서도 아래 파일 패턴에 대해 `import/no-default-export` 규칙을 명시적으로 off 처리합니다. 이 경로들은 default export 사용이 컨벤션 위반이 아닙니다.
 
-- `src/app/**/page.tsx`, `layout.tsx`, `error.tsx`, `loading.tsx`, `not-found.tsx`, `template.tsx`
+- `src/app/**/page.tsx`, `layout.tsx`, `error.tsx`, `loading.tsx`, `not-found.tsx`, `template.tsx`, `manifest.ts`(PWA manifest)
 - 설정 파일: `next.config.ts`, `postcss.config.mjs`, `tailwind.config.ts`, `eslint.config.mjs`, `commitlint.config.mjs`
 
 > `route.ts`는 default export 대상이 아닙니다. Route Handler는 `GET`/`POST` 등 HTTP 메서드명의 named export를 사용하므로 1번 규칙(`export function` 사용)을 그대로 따릅니다.
