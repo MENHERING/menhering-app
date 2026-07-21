@@ -9,6 +9,7 @@ export const CurriculumSchema = z.object({
 
 export const LearningProgressSchema = z.object({
   myStep: z.number().int(),
+  xp: z.number().int(),
   curricula: z.array(CurriculumSchema),
 });
 
