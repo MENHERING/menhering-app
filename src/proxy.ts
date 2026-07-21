@@ -6,11 +6,14 @@ import { updateSession } from '@/lib/supabase/middleware';
 
 // 로그인 없이 접근할 수 있는 경로.
 // TODO: 공개 경로 추가 시 여기에 등록
-const PUBLIC_PATHS = new Set(['/', '/login']);
+// /~offline: 서비스워커가 오프라인 폴백으로 미리 캐싱해두는 페이지라, 비로그인 상태에서
+// 캐싱되면 이 페이지가 아니라 /login 리다이렉트가 캐싱되어버린다.
+const PUBLIC_PATHS = new Set(['/', '/login', '/~offline', '/manifest.webmanifest']);
 
 // OAuth 콜백은 세션을 "만드는" 경로라 도착 시점엔 아직 미인증 상태다.
 // 공개로 두지 않으면 가드가 /login으로 되돌려 로그인이 영영 완료되지 않는다.
-const PUBLIC_PREFIXES = ['/auth', '/api/health'];
+// /serwist: 서비스워커 스크립트 서빙 경로. 비로그인 상태에서도 등록·갱신되어야 한다.
+const PUBLIC_PREFIXES = ['/auth', '/api/health', '/serwist'];
 
 function isPublicPath(pathname: string) {
   return (

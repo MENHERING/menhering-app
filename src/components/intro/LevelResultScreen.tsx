@@ -24,7 +24,7 @@ export function LevelResultScreen({ recommendedStep = 2 }: LevelResultScreenProp
   const handleStart = () => save(level.step);
 
   return (
-    <div className="bg-sand flex min-h-dvh w-full flex-col items-center">
+    <div className="bg-sand flex min-h-dvh w-full flex-col items-center pb-[env(safe-area-inset-bottom)]">
       <Header title="테스트 결과" leftType="none" />
       <div className="flex w-full max-w-[430px] flex-1 flex-col px-6">
         <div className="relative mx-auto mt-8 h-40 w-40">
