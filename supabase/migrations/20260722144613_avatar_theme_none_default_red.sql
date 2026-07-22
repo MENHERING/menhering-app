@@ -3,6 +3,8 @@
 -- - 레드: 구매 대상(개명 전 클래식과 동일 색). 기존 클래식 사용자는 레드로 이관 + 무료 보유 부여(grandfather).
 -- 클라 정합: src/types/avatar.ts ColorTheme, src/constants/avatar.ts COLOR_THEMES/DEFAULT_COLOR_THEME.
 -- 재실행 안전(idempotent): drop if exists / create or replace / on conflict do nothing.
+-- ⚠️ 단, 후속 20260722155217(무색→기본/회색→그레이 개명)이 적용된 뒤에는 이 파일을 단독 재실행하지 말 것.
+--    함수·기본보유가 무색/회색으로 되돌아가고, step5 add constraint가 기존 '기본'/'그레이' 행 때문에 실패한다.
 
 -- ── 0) avatars.color_theme CHECK 제약 제거 ──────────────────────────────────
 -- 기존 chk_color_theme는 옛 6종(클래식/…)만 허용해 레드로 못 바꾼다. 이관 후 새 값으로 재생성한다.

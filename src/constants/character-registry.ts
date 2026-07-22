@@ -54,6 +54,10 @@ export interface CharacterRenderSpec {
   thumbnail?: string;
 }
 
+// 레서판다 원화색(빨강). SVG(naturalRoles.body)와 Live2D(live2d.naturalBody)가 같은 색을 써야 하므로
+// 단일 출처로 둔다 — 한쪽만 바꾸면 홈/랭킹 SVG와 히어로 Live2D의 빨강이 어긋난다.
+const REDPANDA_BODY = '#E8563A';
+
 // 레서판다는 부위별 색이 준비돼 히어로(메인 프리뷰)를 Live2D로 렌더한다.
 // 나머지 종류는 Live2D 모델이 없어 SVG로 렌더하며, Live2D 로드 실패 시에도 SVG로 폴백한다.
 export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
@@ -67,11 +71,11 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartRight: 'top-[45%] left-[83%] w-[9%]',
     },
     // 원화색: 레서판다는 붉은 계열(옛 클래식과 동일).
-    naturalRoles: { body: '#E8563A', secondary: '#F0D9CC', accent: '#3D3D3D' },
+    naturalRoles: { body: REDPANDA_BODY, secondary: '#F0D9CC', accent: '#3D3D3D' },
     // 히어로만 Live2D로 렌더. 로드 실패 시 폴백은 위 Svg를 쓴다.
     live2d: {
       modelUrl: '/live2d/redpanda/menhering.model3.json',
-      naturalBody: '#E8563A', // 텍스처가 회색화돼 있어 무색 테마에서 원래 색(빨강)을 곱한다
+      naturalBody: REDPANDA_BODY, // 텍스처가 회색화돼 있어 무색 테마에서 원래 색(빨강)을 곱한다
 
       // 실측(캔버스 %): 실루엣 좌우 끝은 귀 구간 22.8~75.3, 하트 구간 22.8~74.7(중심 48.8).
       // 코 49.4 · 왼눈 42.5 · 오른눈 56.5 · 정수리 20 · 눈 36~43.
