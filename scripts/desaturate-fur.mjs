@@ -25,30 +25,17 @@ import sharp from 'sharp';
 const CORE_SRC = 'public/live2d/core/live2dcubismcore.min.js';
 const TINT_DRAWABLES_JSON = 'src/constants/live2d-tint-drawables.json';
 
-// 종별 moc/텍스처 경로. whitePoint를 명시하면 그 값을, 없으면 입력 명도 p50에서 자동 산출한다(아래).
-// 사용법: node scripts/desaturate-fur.mjs <캐릭터>  (기본 레서판다)
+// moc/텍스처 경로. 사용법: node scripts/desaturate-fur.mjs  (레서판다 전용, 인자 불필요)
 //
-// ⚠️ 정책(2026-07-22): 기본 테마가 '무색'(원화색)으로 바뀌어, 고양이·강아지·토끼는 **원본 컬러
-// 텍스처를 유지**한다(무색=원화색). 이 셋에 desaturate를 돌리면 무색이 회색이 되니 돌리지 말 것.
-// 회색화는 레서판다 전용(텍스처가 이미 회색이고 테마 틴트로 색을 입힘). 재리깅해도 레서판다만.
+// ⚠️ 정책(2026-07-22): 회색화는 **레서판다 전용**이다. 기본 테마가 '무색'(원화색)으로 바뀌어
+// 고양이·강아지·토끼는 원본 컬러 텍스처를 그대로 쓴다(무색=원화색) — 이 셋에 desaturate를 돌리면
+// 원화색이 회색이 되므로 CONFIG에 넣지 않는다. 넣으면 아래 유효성 검증이 못 막는다. 재리깅해도 레서판다만.
 const CONFIG = {
   레서판다: {
     moc: 'public/live2d/redpanda/menhering.moc3',
     texture: 'public/live2d/redpanda/menhering.4096/texture_00.png',
     // 225 = develop 승인본(털 회색값 p50≈170)에 맞춘 고정값. 회귀 방지 위해 그대로 유지.
     whitePoint: 225,
-  },
-  고양이: {
-    moc: 'public/live2d/cat/cat.moc3',
-    texture: 'public/live2d/cat/cat.4096/texture_00.png',
-  },
-  강아지: {
-    moc: 'public/live2d/dog/dog.moc3',
-    texture: 'public/live2d/dog/dog.4096/texture_00.png',
-  },
-  토끼: {
-    moc: 'public/live2d/rabbit/rabbit.moc3',
-    texture: 'public/live2d/rabbit/rabbit.4096/texture_00.png',
   },
 };
 
@@ -65,8 +52,6 @@ const FUR_DRAWABLES = new Set(JSON.parse(readFileSync(TINT_DRAWABLES_JSON, 'utf8
 
 // Photopea "Desaturate"와 같은 HSL 명도 (max+min)/2 를 쓴 뒤, Levels 흰점을 whitePoint로 올린다.
 // 표준 휘도(0.2126R+0.7152G+0.0722B)를 쓰면 진빨강이 거의 검정이 돼 곱하기 결과가 새까매진다.
-// 종별 whitePoint는 아래에서 결정한다(고정값 or 자동): 출력 회색값 p50이 이 목표로 오게 한다.
-const TARGET_P50 = 170;
 
 // 이미 회색인 텍스처를 또 돌리면 흰점 보정이 중첩돼 점점 밝아진다 → 채도로 감지해 건너뛴다.
 const ALREADY_GRAY_SATURATION = 0.05;
@@ -227,33 +212,8 @@ if (meanSaturation < ALREADY_GRAY_SATURATION) {
   process.exit(0);
 }
 
-// whitePoint: 명시값(레서판다)이 있으면 그대로, 없으면 입력 털 명도 p50이 TARGET_P50로 오도록 자동.
-// 탄색·분홍 털은 명도가 높아 고정 225면 결과가 너무 밝아(곱하기 시 테마색이 옅게 씻김) → 종별 자동 산출.
-let whitePoint = cfg.whitePoint;
-if (whitePoint == null) {
-  const lightHist = new Uint32Array(256);
-  let opaque = 0;
-  for (const i of furOffsets) {
-    if (data[i + 3] < 250) continue;
-    const max = Math.max(data[i], data[i + 1], data[i + 2]);
-    const min = Math.min(data[i], data[i + 1], data[i + 2]);
-    lightHist[Math.round((max + min) / 2)]++;
-    opaque++;
-  }
-  let seen = 0;
-  let inputP50 = 128;
-  for (let g = 0; g < 256; g++) {
-    seen += lightHist[g];
-    if (seen > 0.5 * (opaque - 1)) {
-      inputP50 = g;
-      break;
-    }
-  }
-  whitePoint = Math.max(1, Math.round((inputP50 * 255) / TARGET_P50));
-  console.log(
-    `자동 whitePoint: 입력 명도 p50=${inputP50} → whitePoint=${whitePoint} (목표 출력 p50=${TARGET_P50})`,
-  );
-}
+// whitePoint: 레서판다 고정값(225). 회색화는 레서판다 전용이라 종별 자동 산출은 두지 않는다.
+const whitePoint = cfg.whitePoint;
 
 // 변환은 반투명 가장자리(안티앨리어싱)까지 포함해 모든 픽셀에 적용한다.
 // 다만 요약 통계는 **완전 불투명 픽셀만** 센다 — 어두운 가장자리가 섞이면 p50이 끌려 내려가
