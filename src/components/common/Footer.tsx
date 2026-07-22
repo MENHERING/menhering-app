@@ -90,7 +90,7 @@ export function Footer({ className }: FooterProps) {
         aria-label="하단 탭 내비게이션"
         className={cn(
           // TODO: 다크모드 도입 시 `dark:border-neutral-800 dark:bg-neutral-900` 추가
-          'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[env(safe-area-inset-bottom)]',
+          'border-cream sticky bottom-0 z-20 grid grid-cols-4 border-t bg-white pb-[calc(env(safe-area-inset-bottom)+20px)]',
           className,
         )}
       >

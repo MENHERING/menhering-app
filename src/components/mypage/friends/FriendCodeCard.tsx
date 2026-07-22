@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import { Button } from '@/components/common/Button';
 import { Section } from '@/components/common/Section';
 import { cn } from '@/lib/cn';
@@ -9,11 +11,17 @@ interface FriendCodeCardProps {
   className?: string;
 }
 
+const COPIED_LABEL_DURATION_MS = 1500;
+
 export function FriendCodeCard({ code, className }: FriendCodeCardProps) {
+  const [isCopied, setIsCopied] = useState(false);
+
   // TODO : 로직 레벨 분리 필요
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(code);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), COPIED_LABEL_DURATION_MS);
     } catch {
       // 클립보드 API 미지원 환경에서는 UI만 제공한다.
     }
@@ -30,8 +38,13 @@ export function FriendCodeCard({ code, className }: FriendCodeCardProps) {
         <p className="text-coral-accent text-lg leading-7 font-bold">{code}</p>
       </div>
 
-      <Button variant="outline" size="sm" onClick={handleCopy} className="shrink-0">
-        복사
+      <Button
+        variant={isCopied ? 'primary' : 'outline'}
+        size="sm"
+        onClick={handleCopy}
+        className="shrink-0 transition-colors duration-300"
+      >
+        {isCopied ? '복사됨' : '복사'}
       </Button>
     </Section>
   );

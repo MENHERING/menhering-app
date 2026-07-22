@@ -70,7 +70,7 @@ export function SocialLoginButtons({
         type="button"
         onClick={handleKakaoLogin}
         disabled={isPending}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#FEE500] text-base font-bold text-[#191600] transition-opacity active:opacity-80 disabled:opacity-60"
+        className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#FEE500] text-base font-bold text-[#191600] transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <KakaoIcon />
         {kakaoLabel}
@@ -80,7 +80,7 @@ export function SocialLoginButtons({
         type="button"
         onClick={handleGoogleLogin}
         disabled={isPending}
-        className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white text-base font-bold text-[#191600] transition-opacity active:opacity-80 disabled:opacity-60"
+        className="flex h-14 w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-black/10 bg-white text-base font-bold text-[#191600] transition-opacity hover:opacity-90 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <GoogleIcon />
         {googleLabel}

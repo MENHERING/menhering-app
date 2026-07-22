@@ -20,6 +20,12 @@ export const queryKeys = {
     list: () => [...queryKeys.wrongNote.all, 'list'] as const,
     detail: (id: string) => [...queryKeys.wrongNote.all, 'detail', id] as const,
   },
+  friends: {
+    all: ['friends'] as const,
+    myCode: () => [...queryKeys.friends.all, 'my-code'] as const,
+    search: (keyword: string) => [...queryKeys.friends.all, 'search', keyword] as const,
+    requests: () => [...queryKeys.friends.all, 'requests'] as const,
+  },
   mypage: {
     all: ['mypage'] as const,
   },
