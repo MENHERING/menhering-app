@@ -7,6 +7,8 @@ import { ROUTES } from '@/constants/routes';
 
 interface QuizResultActionsProps {
   isSuccess: boolean;
+  // 이 스테이지를 처음 깼는지(복습 재클리어면 false). xpReward > 0과 동일한 신호.
+  isFirstClear: boolean;
   wrongCount: number;
   // 방금 푼 레벨의 다음 스테이지 id(`${level}-${stage+1}`). 마지막 스테이지였으면 null.
   nextLessonId: string | null;
@@ -18,16 +20,18 @@ interface QuizResultActionsProps {
 
 export function QuizResultActions({
   isSuccess,
+  isFirstClear,
   wrongCount,
   nextLessonId,
   level,
   lessonId,
 }: QuizResultActionsProps) {
   const router = useRouter();
-  // 마지막 스테이지를 성공 클리어했으면(승급 가능성) 방금 레벨을 강제하지 않고 myStep 기본값을 보여준다.
+  // 마지막 스테이지를 "처음" 클리어했을 때만(=승급) 방금 레벨을 강제하지 않고 myStep 기본값을
+  // 보여준다. 이미 승급한 뒤 예전 레벨을 복습으로 재클리어한 경우는 레벨 변화가 없으므로 제외.
   const goToLearning = () =>
     router.push(
-      isSuccess && !nextLessonId
+      isFirstClear && !nextLessonId
         ? ROUTES.LEARNING
         : `${ROUTES.LEARNING}?level=${encodeURIComponent(level)}`,
     );

@@ -169,6 +169,7 @@ begin
           else 1
         end,
         stage = case
+          when v_next_level is not null then 1
           when v_is_success and v_assigned_level = p_level and stage = p_stage then stage + 1
           else stage
         end,
@@ -228,6 +229,7 @@ revoke execute on function submit_quiz_result(varchar, integer, jsonb, integer) 
 grant execute on function submit_quiz_result(varchar, integer, jsonb, integer) to authenticated;
 
 -- 1회성 보정: 이미 이 버그로 막혀 있던 기존 유저(스테이지는 넘어갔는데 레벨은 그대로인 경우)를 승급시킨다.
+-- WHERE에 걸리는 행은 전부 "지금 승급되는" 행이므로 stage도 새 레벨 기준으로 1로 리셋한다.
 update user_progress up
 set level = case up.level
   when '입문' then '초급'
@@ -235,7 +237,8 @@ set level = case up.level
   when '중급' then '고급'
   when '고급' then '전문가'
   else up.level
-end
+end,
+stage = 1
 where up.level in ('입문', '초급', '중급', '고급')
   and exists (
     select 1
