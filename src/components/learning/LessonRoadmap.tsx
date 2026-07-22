@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react';
 
+import Image from 'next/image';
+
 import { LessonNode } from '@/components/learning/LessonNode';
 import { LessonStartCard } from '@/components/learning/LessonStartCard';
 import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
@@ -15,10 +17,14 @@ interface LessonRoadmapProps {
   onSelectLesson: (lessonId: string) => void;
 }
 
-// 선택된 레슨 카드의 절대 top 위치 계산용 (노드 h-20, gap-20, py-8과 동일하게 유지)
+// 선택된 레슨 카드의 절대 top 위치 계산용 (노드 h-20, gap-20, pt-8과 동일하게 유지)
 const NODE_SIZE_PX = 80;
 const ROW_GAP_PX = 80;
 const TOP_PADDING_PX = 32;
+
+// "현재" 위치 마스코트는 노드 옆, 지그재그 오프셋과 반대 방향에 세운다 — 다음 노드로
+// 이어지는 길이 그 방향으로 굽어가므로, 반대쪽에 두면 길과 겹치지 않는다.
+const MASCOT_SIDE_OFFSET_PX = 65;
 
 export function LessonRoadmap({
   lessons,
@@ -74,6 +80,9 @@ export function LessonRoadmap({
         // 완료된 스테이지도 복습으로 다시 풀 수 있게 클릭 가능하게 둔다. 잠긴 것만 막는다.
         const isSelectable = lesson.status !== 'locked';
 
+        const isCurrent = lesson.status === 'current';
+        const hasPathBelow = index < lessons.length - 1;
+
         return (
           <div
             key={lesson.id}
@@ -81,7 +90,7 @@ export function LessonRoadmap({
             className="relative"
             style={{ transform: `translateX(${offset}px)` }}
           >
-            {index < lessons.length - 1 && (
+            {hasPathBelow && (
               <RoadPath direction={index % 2 === 0 ? 'right-to-left' : 'left-to-right'} />
             )}
             <LessonNode
@@ -90,6 +99,19 @@ export function LessonRoadmap({
               isSelected={lesson.id === selectedLessonId}
               onPress={isSelectable ? () => onSelectLesson(lesson.id) : undefined}
             />
+            {/* "현재" 위치 마스코트. 카드가 열리면 노드와 같은 확대 애니메이션을 같이 준다. */}
+            {isCurrent && (
+              <Image
+                src="/images/avatar/menhering_1_img.webp"
+                alt=""
+                width={96}
+                height={96}
+                className="pointer-events-none absolute top-1/2 left-1/2 transition-transform"
+                style={{
+                  transform: `translate(calc(-50% + ${offset > 0 ? -MASCOT_SIDE_OFFSET_PX : MASCOT_SIDE_OFFSET_PX}px), -50%) scale(${lesson.id === selectedLessonId ? 1.05 : 1})`,
+                }}
+              />
+            )}
           </div>
         );
       })}

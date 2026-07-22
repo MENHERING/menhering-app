@@ -49,7 +49,7 @@ export default function TestQuizPage() {
       {/* case 02: QuizQuestionCard */}
       <QuizQuestionCard order={question.order} prompt={question.prompt} />
 
-      {/* case 03: QuizOptionButton - default / wrong-selected */}
+      {/* case 03: QuizOptionButton - default / selected */}
       <div className="flex flex-col gap-3">
         <QuizOptionButton
           index={0}
@@ -60,8 +60,8 @@ export default function TestQuizPage() {
         />
         <QuizOptionButton
           index={1}
-          label="내가 고른 오답 상태"
-          state="wrong-selected"
+          label="내가 고른 상태"
+          state="selected"
           disabled
           onSelect={() => {}}
         />
