@@ -1,13 +1,14 @@
-import { Star } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import Image from 'next/image';
 
 interface UserStatusBarProps {
   nickname: string;
   level: number;
-  xp: number;
+  currentXp: number;
+  targetXp: number;
 }
 
-export function UserStatusBar({ nickname, level, xp }: UserStatusBarProps) {
+export function UserStatusBar({ nickname, level, currentXp, targetXp }: UserStatusBarProps) {
   return (
     <div className="flex items-center justify-between px-5 py-6">
       <div className="flex items-center gap-3">
@@ -24,9 +25,11 @@ export function UserStatusBar({ nickname, level, xp }: UserStatusBarProps) {
         </div>
       </div>
 
-      <div className="bg-coral-soft flex items-center gap-1.5 rounded-full px-4 py-2">
-        <Star size={20} className="fill-gold text-gold" />
-        <span className="text-coral-dark text-base font-bold">{xp.toLocaleString()} XP</span>
+      <div className="border-coral inline-flex items-center gap-1.5 rounded-full border bg-white px-3.5 py-1.5">
+        <Zap size={16} className="fill-gold text-gold" aria-hidden />
+        <span className="text-coral-dark text-sm font-bold">
+          {currentXp.toLocaleString()} / {targetXp.toLocaleString()} XP
+        </span>
       </div>
     </div>
   );

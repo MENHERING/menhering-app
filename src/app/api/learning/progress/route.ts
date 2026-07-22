@@ -4,6 +4,7 @@ import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
 import { LEVELS } from '@/constants/level';
 import { ApiError, toErrorResult } from '@/lib/api-error';
 import { toSuccessResult } from '@/lib/api-response';
+import { getLevelInfo } from '@/lib/level';
 import { createClient } from '@/lib/supabase/server';
 import { LearningProgressSchema } from '@/schemas/learning-progress.schema';
 
@@ -24,7 +25,7 @@ export async function GET() {
     // "이미 다 클리어"로 퉁치지 않고, 실제로 어디까지 풀었는지 따로 추적한다.
     const [{ data: progress, error: progressError }, { data: levelProgress, error: levelError }] =
       await Promise.all([
-        supabase.from('user_progress').select('level').eq('user_id', user.id).maybeSingle(),
+        supabase.from('user_progress').select('level, xp').eq('user_id', user.id).maybeSingle(),
         supabase.from('user_level_progress').select('level, stage').eq('user_id', user.id),
       ]);
 
@@ -46,7 +47,15 @@ export async function GET() {
       return { level: l.title, step: l.step, clearedCount, totalCount };
     });
 
-    const { body, status } = toSuccessResult(LearningProgressSchema, { myStep, curricula });
+    const { level, currentXp, targetXp } = getLevelInfo(progress?.xp ?? 0);
+
+    const { body, status } = toSuccessResult(LearningProgressSchema, {
+      myStep,
+      level,
+      currentXp,
+      targetXp,
+      curricula,
+    });
 
     return NextResponse.json(body, { status });
   } catch (error) {
