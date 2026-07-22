@@ -65,7 +65,11 @@ interface Live2DCharacterProps {
   modelUrl: string;
   /** 테마색을 곱할 드로어블 id 목록(캐릭터별). 나머지는 원본 텍스처 색 유지. */
   tintDrawables: string[];
+  /** 발 높이 정렬 보정값(캔버스 높이 대비 비율, +는 아래로). 원화별 배치 차이를 상쇄해 서있는 위치를 통일. */
+  feetNudge?: number;
   colorTheme: ColorTheme;
+  /** '기본'(무색) 테마일 때 body에 곱할 색(캐릭터별). 생략 시 흰색(곱셈 무효=원화색 유지). */
+  naturalBody?: string;
   /** 감정 상태 → 표정(입/눈/눈썹/볼). 생략 시 무표정(보통). */
   mood?: Mood;
   /** false면 틴트 없이 원본 텍스처 색 그대로(무색). 기본 true. */
@@ -84,7 +88,9 @@ interface Live2DCharacterProps {
 export function Live2DCharacter({
   modelUrl,
   tintDrawables,
+  feetNudge,
   colorTheme,
+  naturalBody,
   mood,
   tinted = true,
   size = 128,
@@ -112,12 +118,15 @@ export function Live2DCharacter({
   const colorThemeRef = useRef(colorTheme);
   const tintedRef = useRef(tinted);
   const tintDrawablesRef = useRef(tintDrawables);
+  const naturalBodyRef = useRef(naturalBody);
   useEffect(() => {
     colorThemeRef.current = colorTheme;
     tintedRef.current = tinted;
     tintDrawablesRef.current = tintDrawables;
-    if (modelRef.current) applyTint(modelRef.current, colorTheme, tinted, tintDrawables);
-  }, [colorTheme, tinted, tintDrawables]);
+    naturalBodyRef.current = naturalBody;
+    if (modelRef.current)
+      applyTint(modelRef.current, colorTheme, tinted, tintDrawables, naturalBody);
+  }, [colorTheme, tinted, tintDrawables, naturalBody]);
 
   // mood 변경도 모델 재생성 없이 반영한다. 티커가 도는 평소엔 매 프레임 moodRef를 읽어 보간하므로
   // ref 갱신만으로 충분하다. reduce-motion일 땐 티커 자체가 없어 아무도 ref를 안 읽으므로,
@@ -128,6 +137,12 @@ export function Live2DCharacter({
     const model = modelRef.current;
     if (model && prefersReducedMotion()) applyStaticExpression(model, mood);
   }, [mood]);
+
+  // 발 정렬 보정값은 init에서 모델 배치 시 1회만 읽는다(캐릭터 변경 시 modelUrl이 바뀌어 재init됨).
+  const feetNudgeRef = useRef(feetNudge);
+  useEffect(() => {
+    feetNudgeRef.current = feetNudge;
+  }, [feetNudge]);
 
   useEffect(() => {
     let disposed = false;
@@ -198,7 +213,18 @@ export function Live2DCharacter({
           );
         }
 
-        applyTint(model, colorThemeRef.current, tintedRef.current, tintDrawablesRef.current);
+        // 캐릭터마다 원화가 모델 캔버스 내 다른 높이에 그려져(AI 생성) 캔버스 중심 정렬만으론 "서있는
+        // 발 높이"가 종마다 어긋난다. 측정한 보정값(feetNudge: 캔버스높이 대비 비율, +는 아래로)으로 세로
+        // 정렬한다. 실측(readPixels)은 캔버스 표시 상태에 따라 조용히 실패할 수 있어 정적 측정값을 쓴다.
+        if (feetNudgeRef.current) model.y += feetNudgeRef.current * canvasH;
+
+        applyTint(
+          model,
+          colorThemeRef.current,
+          tintedRef.current,
+          tintDrawablesRef.current,
+          naturalBodyRef.current,
+        );
 
         if (reduceMotion) {
           // 정적 렌더: 움직임 없이 현재 감정 표정만 1회 얹고 배치. 이후 mood 변경은 위 effect가 얹는다.
@@ -410,10 +436,14 @@ function applyTint(
   colorTheme: ColorTheme,
   tinted: boolean,
   tintDrawables: string[],
+  naturalBody?: string,
 ) {
   const core = model.internalModel.coreModel as unknown as CubismCoreModel;
   const tintSet = new Set(tintDrawables);
-  const tint = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
+  // '기본'(무색, 원화색)은 캐릭터별 색을 곱한다 — 대부분 흰색(곱셈 무효=원화색 유지), 텍스처가
+  // 회색화된 캐릭터(레서판다)는 원래 색을 넣는다. 그 외 테마는 테마 body색.
+  const body = colorTheme === '기본' ? (naturalBody ?? '#FFFFFF') : getThemeRoles(colorTheme).body;
+  const tint = tinted ? hexToRgb(body) : { r: 1, g: 1, b: 1 };
   const ids = core.getDrawableIds();
   for (let i = 0; i < ids.length; i++) {
     const { r, g, b } = tintSet.has(ids[i]) ? tint : { r: 1, g: 1, b: 1 };

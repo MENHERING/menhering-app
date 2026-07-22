@@ -3,7 +3,7 @@ import { DogSvg } from '@/components/avatar/characters/DogSvg';
 import { RabbitSvg } from '@/components/avatar/characters/RabbitSvg';
 import { RedPandaSvg } from '@/components/avatar/characters/RedPandaSvg';
 import type { CharacterSvgProps } from '@/components/avatar/characters/types';
-import type { CharacterType } from '@/types/avatar';
+import type { CharacterType, ThemeRoles } from '@/types/avatar';
 
 type CharacterSvg = (props: CharacterSvgProps) => React.ReactElement;
 
@@ -36,7 +36,20 @@ export interface MoodSymbolAnchors {
 export interface CharacterRenderSpec {
   Svg: CharacterSvg;
   svgMoodAnchors: MoodSymbolAnchors;
-  live2d?: { modelUrl: string; moodAnchors: MoodSymbolAnchors };
+  // '기본'(무색·원화색) 테마일 때 SVG에 쓸 캐릭터 고유색. SVG는 테마색으로만 칠하게 설계돼(자연색
+  // 개념 없음) 기본이면 흰색이 되므로, 각 캐릭터의 원화색을 여기 둔다. Live2D는 텍스처가 원화색이라
+  // 이걸 안 쓴다(회색화된 레서판다만 live2d.naturalBody로 처리).
+  naturalRoles: ThemeRoles;
+  // feetNudge: 발 높이 정렬 보정(캔버스 높이 대비 비율, +는 아래로). 원화마다 캐릭터가 캔버스 내
+  // 다른 높이에 그려져 서있는 발 높이가 어긋나는 걸, 레서판다(발 87.5%) 기준으로 맞춘 실측값.
+  // naturalBody: '기본'(무색·원화색) 테마일 때 body에 곱할 색. 대부분 원본 컬러 텍스처라 흰색(=곱셈
+  // 무효=원화색)이라 생략한다. 레서판다는 텍스처가 회색화돼 있어 원래 색(빨강)을 여기서 넣는다.
+  live2d?: {
+    modelUrl: string;
+    moodAnchors: MoodSymbolAnchors;
+    feetNudge?: number;
+    naturalBody?: string;
+  };
   // 있으면 픽커 썸네일을 이 이미지의 얼굴 크롭으로 렌더한다. 없으면 Svg 썸네일.
   thumbnail?: string;
 }
@@ -53,9 +66,13 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartLeft: 'top-[45%] left-[8%] w-[9%]',
       heartRight: 'top-[45%] left-[83%] w-[9%]',
     },
+    // 원화색: 레서판다는 붉은 계열(옛 클래식과 동일).
+    naturalRoles: { body: '#E8563A', secondary: '#F0D9CC', accent: '#3D3D3D' },
     // 히어로만 Live2D로 렌더. 로드 실패 시 폴백은 위 Svg를 쓴다.
     live2d: {
       modelUrl: '/live2d/redpanda/menhering.model3.json',
+      naturalBody: '#E8563A', // 텍스처가 회색화돼 있어 무색 테마에서 원래 색(빨강)을 곱한다
+
       // 실측(캔버스 %): 실루엣 좌우 끝은 귀 구간 22.8~75.3, 하트 구간 22.8~74.7(중심 48.8).
       // 코 49.4 · 왼눈 42.5 · 오른눈 56.5 · 정수리 20 · 눈 36~43.
       moodAnchors: {
@@ -78,8 +95,12 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartLeft: 'top-[50%] left-[9%] w-[9%]',
       heartRight: 'top-[50%] left-[82%] w-[9%]',
     },
+    // 원화색: 토끼는 분홍 계열.
+    naturalRoles: { body: '#F4B8CB', secondary: '#FDEEF3', accent: '#3D3D3D' },
     live2d: {
       modelUrl: '/live2d/rabbit/rabbit.model3.json',
+      feetNudge: 0.004, // 실측 발 87.1% → 87.5%
+
       // 실측(캔버스 %): 실루엣 좌우 29~72.5, y 8.5~87(긴 귀가 위로 뻗어 상단이 높다). 눈 42.5/59.5 ·
       // 눈 y 41~49.5(cy 45.5, 귀 때문에 실루엣 내 눈 위치가 낮다). 하트 높이(43.5%) 실루엣 끝 31.5/68.
       moodAnchors: {
@@ -89,6 +110,9 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
         heartRight: 'top-[43.5%] left-[70.5%] w-[9%]',
       },
     },
+    // 전신 원화(투명 배경). 픽커 CSS(origin-[50%_10%] scale-1.75)가 얼굴로 확대·크롭한다
+    // — 레서판다 썸네일과 동일한 전신 구도라 같은 프레이밍이 나온다.
+    thumbnail: '/images/avatar/rabbit.png',
   },
   강아지: {
     Svg: DogSvg,
@@ -99,8 +123,12 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartLeft: 'top-[43%] left-[9%] w-[9%]',
       heartRight: 'top-[43%] left-[82%] w-[9%]',
     },
+    // 원화색: 강아지는 탄/베이지 계열.
+    naturalRoles: { body: '#E3C39A', secondary: '#F5EDE0', accent: '#3D3D3D' },
     live2d: {
       modelUrl: '/live2d/dog/dog.model3.json',
+      feetNudge: 0.037, // 실측 발 83.8% → 87.5%
+
       // 실측(캔버스 %): 실루엣 좌우 21.5~77.5(고양이보다 넓음). 눈 40.5/59.5 · 눈 y 35.5~43.5(cy 39.5).
       // 하트 높이(37.5%)에서 실루엣 끝 22/77.5. (좌우 눈 대칭 정상)
       moodAnchors: {
@@ -110,6 +138,7 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
         heartRight: 'top-[37.5%] left-[80%] w-[9%]',
       },
     },
+    thumbnail: '/images/avatar/dog.png',
   },
   고양이: {
     Svg: CatSvg,
@@ -120,8 +149,12 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartLeft: 'top-[47%] left-[9%] w-[9%]',
       heartRight: 'top-[47%] left-[82%] w-[9%]',
     },
+    // 원화색: 고양이는 회색 태비 계열.
+    naturalRoles: { body: '#9AA0A6', secondary: '#EFEDE7', accent: '#3D3D3D' },
     live2d: {
       modelUrl: '/live2d/cat/cat.model3.json',
+      feetNudge: 0.023, // 실측 발 85.2% → 87.5%
+
       // 실측(캔버스 %): 실루엣 좌우 25.5~75.5(중심 50.5). 눈 42.5/57.5 · 눈 y 37.5~45.5(cy 41.5).
       // 하트 높이(39.5%)에서 실루엣 끝 30/72. (eye_R 드로어블에 stray 정점 있어 eye_L 미러 사용)
       moodAnchors: {
@@ -131,5 +164,6 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
         heartRight: 'top-[39.5%] left-[74%] w-[9%]',
       },
     },
+    thumbnail: '/images/avatar/cat.png',
   },
 };

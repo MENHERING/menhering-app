@@ -16,7 +16,7 @@ const MOODS = Object.keys(MOOD_EXPRESSION) as Mood[];
 // 오버레이 층 순서·심볼 앵커·모델 경로를 여기서 따로 조립하면 POC가 실물과 조용히 어긋난다.
 // 아바타 탭에는 없는 무색(tinted=false) 토글과 감정 셀렉터만 여기서 얹는다.
 export function Live2dPoc() {
-  const [theme, setTheme] = useState<ColorTheme>('클래식');
+  const [theme, setTheme] = useState<ColorTheme>('기본');
   // false = 무색(틴트 없이 원본 텍스처 그대로). 털 그레이스케일이 살아있는지 확인할 때 쓴다.
   const [tinted, setTinted] = useState(true);
   const [mood, setMood] = useState<Mood>('보통');

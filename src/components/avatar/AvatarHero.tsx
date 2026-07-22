@@ -78,7 +78,9 @@ export function AvatarHero({
         <Live2DCharacter
           modelUrl={live2d.modelUrl}
           tintDrawables={tintDrawables}
+          feetNudge={live2d.feetNudge}
           colorTheme={colorTheme}
+          naturalBody={live2d.naturalBody}
           mood={mood}
           tinted={tinted}
           size={size}

@@ -27,6 +27,10 @@ const TINT_DRAWABLES_JSON = 'src/constants/live2d-tint-drawables.json';
 
 // 종별 moc/텍스처 경로. whitePoint를 명시하면 그 값을, 없으면 입력 명도 p50에서 자동 산출한다(아래).
 // 사용법: node scripts/desaturate-fur.mjs <캐릭터>  (기본 레서판다)
+//
+// ⚠️ 정책(2026-07-22): 기본 테마가 '무색'(원화색)으로 바뀌어, 고양이·강아지·토끼는 **원본 컬러
+// 텍스처를 유지**한다(무색=원화색). 이 셋에 desaturate를 돌리면 무색이 회색이 되니 돌리지 말 것.
+// 회색화는 레서판다 전용(텍스처가 이미 회색이고 테마 틴트로 색을 입힘). 재리깅해도 레서판다만.
 const CONFIG = {
   레서판다: {
     moc: 'public/live2d/redpanda/menhering.moc3',

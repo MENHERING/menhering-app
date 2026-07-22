@@ -94,7 +94,7 @@ export interface OwnedItems {
 
 /**
  * 로그인 유저의 보유 목록을 조회한다. 유저 식별은 함수 내부 auth.uid()가 하고 RLS로 스코프된다.
- * 조회 실패 시 최소 기본값(레서판다/클래식)으로 폴백해, 최소한 기본 항목은 장착·선택 가능하게 한다.
+ * 조회 실패 시 최소 기본값(레서판다/기본)으로 폴백해, 최소한 기본 항목은 장착·선택 가능하게 한다.
  */
 export async function getMyAvatarItems(): Promise<OwnedItems> {
   const supabase = await createClient();
