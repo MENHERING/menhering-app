@@ -1,9 +1,4 @@
-import type { Curriculum, Lesson, UserProgress } from '@/types/lesson';
-
-export const MOCK_USER_PROGRESS: UserProgress = {
-  level: 13,
-  xp: 1980,
-};
+import type { Curriculum, Lesson } from '@/types/lesson';
 
 export const MOCK_CURRICULA: Curriculum[] = [
   {
