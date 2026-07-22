@@ -111,7 +111,9 @@ export default function TestQuizPage() {
       <QuizResultStats correctCount={5} wrongCount={0} />
 
       {/* case 09: QuizXpBadge */}
-      <QuizXpBadge xp={50} />
+      <div className="flex justify-center">
+        <QuizXpBadge xp={50} />
+      </div>
 
       {/* case 10: 실패 결과 헤더 */}
       <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-6">

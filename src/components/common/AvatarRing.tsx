@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import Image from 'next/image';
 
@@ -14,6 +14,10 @@ interface QuizAvatarRingProps {
   size?: number;
   // 0(멘헤라/우울)~100(행복) — 이 비율만큼 링 호(arc) 길이를 채운다.
   happinessPercent?: number;
+  // 방금 오른 만큼(있으면) happinessPercent - gainPercent에서 시작해 최종 값까지
+  // 애니메이션한다. 없으면(다른 화면들처럼 "방금 오른 값" 개념이 없으면) 애니메이션 없이
+  // happinessPercent를 그대로 보여준다.
+  gainPercent?: number;
   imageSrc?: string;
   imageAlt?: string;
   badge?: React.ReactNode;
@@ -29,6 +33,7 @@ interface QuizAvatarRingProps {
 export function QuizAvatarRing({
   size = 160,
   happinessPercent = 100,
+  gainPercent = 0,
   badge,
   characterType = DEFAULT_CHARACTER_TYPE,
   colorTheme = DEFAULT_COLOR_THEME,
@@ -39,7 +44,18 @@ export function QuizAvatarRing({
   const strokeWidth = 10;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const ratio = Math.min(Math.max(happinessPercent, 0), 100) / 100;
+
+  // 오르기 전 값에서 시작해, 마운트 직후 최종 값으로 애니메이션한다(gainPercent가 없으면
+  // 시작 값 = 최종 값이라 사실상 정적으로 그대로 보인다).
+  const [displayPercent, setDisplayPercent] = useState(Math.max(0, happinessPercent - gainPercent));
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setDisplayPercent(happinessPercent));
+
+    return () => cancelAnimationFrame(frame);
+  }, [happinessPercent]);
+
+  const ratio = Math.min(Math.max(displayPercent, 0), 100) / 100;
   const minRatio = MIN_HAPPINESS_FILL_PERCENT / 100;
   const arcRatio = minRatio + (1 - minRatio) * ratio;
   const dashOffset = circumference * (1 - arcRatio);
@@ -72,6 +88,7 @@ export function QuizAvatarRing({
           fill="none"
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
+          className="transition-[stroke-dashoffset] duration-[1400ms] ease-out"
         />
       </svg>
 

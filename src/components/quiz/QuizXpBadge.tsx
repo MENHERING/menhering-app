@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 interface QuizXpBadgeProps {
   xp: number;
@@ -6,8 +6,8 @@ interface QuizXpBadgeProps {
 
 export function QuizXpBadge({ xp }: QuizXpBadgeProps) {
   return (
-    <div className="bg-coral-soft mx-auto flex w-fit items-center gap-1.5 rounded-full px-4 py-2">
-      <Star size={18} className="fill-gold text-gold" />
+    <div className="border-coral flex w-fit items-center gap-1.5 rounded-full border bg-white px-4 py-2">
+      <Zap size={18} className="fill-gold text-gold" />
       <span className="text-coral-dark text-sm font-bold">+{xp} XP 획득</span>
     </div>
   );
