@@ -1,1 +1,6 @@
-["body_fur", "tail", "arm_L", "arm_R"]
+{
+  "레서판다": ["body_fur", "tail", "arm_L", "arm_R"],
+  "고양이": ["body_fur", "tail", "arm_L", "arm_R", "ear_L", "ear_R"],
+  "강아지": ["body_fur", "tail", "arm_L", "arm_R", "ear_L", "ear_R"],
+  "토끼": ["body_fur", "arm_L", "arm_R", "ear_L", "ear_R"]
+}

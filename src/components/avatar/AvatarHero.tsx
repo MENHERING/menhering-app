@@ -9,6 +9,7 @@ import { MoodBackdrop } from '@/components/avatar/MoodBackdrop';
 import { MoodSymbol } from '@/components/avatar/MoodSymbol';
 import { DEFAULT_CHARACTER_TYPE } from '@/constants/avatar';
 import { CHARACTER_REGISTRY } from '@/constants/character-registry';
+import bodyTintDrawables from '@/constants/live2d-tint-drawables.json';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
 import type { Mood } from '@/types/mypage/model';
 
@@ -66,6 +67,9 @@ export function AvatarHero({
   // MoodBackdrop은 캔버스 중앙의 흐릿한 타원이라 렌더러와 무관하게 안전하다.
   // 로드 실패(failed) 시 Live2D 스펙이 있어도 SVG로 폴백한다. 래퍼·배경·심볼 층 구성은 두 경로가 같다.
   const live2d = failed ? undefined : spec.live2d;
+  // 캐릭터별 틴트 대상 드로어블(귀·꼬리 포함 여부가 종마다 다름). 미등록 종은 기본 캐릭터 목록으로 폴백.
+  const tintMap: Record<string, string[]> = bodyTintDrawables;
+  const tintDrawables = tintMap[characterType] ?? tintMap[DEFAULT_CHARACTER_TYPE];
 
   return (
     <div className="relative">
@@ -73,6 +77,7 @@ export function AvatarHero({
       {live2d ? (
         <Live2DCharacter
           modelUrl={live2d.modelUrl}
+          tintDrawables={tintDrawables}
           colorTheme={colorTheme}
           mood={mood}
           tinted={tinted}

@@ -78,6 +78,17 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartLeft: 'top-[50%] left-[9%] w-[9%]',
       heartRight: 'top-[50%] left-[82%] w-[9%]',
     },
+    live2d: {
+      modelUrl: '/live2d/rabbit/rabbit.model3.json',
+      // 실측(캔버스 %): 실루엣 좌우 29~72.5, y 8.5~87(긴 귀가 위로 뻗어 상단이 높다). 눈 42.5/59.5 ·
+      // 눈 y 41~49.5(cy 45.5, 귀 때문에 실루엣 내 눈 위치가 낮다). 하트 높이(43.5%) 실루엣 끝 31.5/68.
+      moodAnchors: {
+        tear: 'top-[50%] left-[58.5%] w-[7%]',
+        vein: 'top-[33%] left-[62%] w-[11%]',
+        heartLeft: 'top-[43.5%] left-[20%] w-[9%]',
+        heartRight: 'top-[43.5%] left-[70.5%] w-[9%]',
+      },
+    },
   },
   강아지: {
     Svg: DogSvg,
@@ -88,6 +99,17 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       heartLeft: 'top-[43%] left-[9%] w-[9%]',
       heartRight: 'top-[43%] left-[82%] w-[9%]',
     },
+    live2d: {
+      modelUrl: '/live2d/dog/dog.model3.json',
+      // 실측(캔버스 %): 실루엣 좌우 21.5~77.5(고양이보다 넓음). 눈 40.5/59.5 · 눈 y 35.5~43.5(cy 39.5).
+      // 하트 높이(37.5%)에서 실루엣 끝 22/77.5. (좌우 눈 대칭 정상)
+      moodAnchors: {
+        tear: 'top-[44%] left-[58.5%] w-[7%]',
+        vein: 'top-[27.5%] left-[62%] w-[11%]',
+        heartLeft: 'top-[37.5%] left-[10.5%] w-[9%]',
+        heartRight: 'top-[37.5%] left-[80%] w-[9%]',
+      },
+    },
   },
   고양이: {
     Svg: CatSvg,
@@ -97,6 +119,17 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
       vein: 'top-[39%] left-[63%] w-[11%]',
       heartLeft: 'top-[47%] left-[9%] w-[9%]',
       heartRight: 'top-[47%] left-[82%] w-[9%]',
+    },
+    live2d: {
+      modelUrl: '/live2d/cat/cat.model3.json',
+      // 실측(캔버스 %): 실루엣 좌우 25.5~75.5(중심 50.5). 눈 42.5/57.5 · 눈 y 37.5~45.5(cy 41.5).
+      // 하트 높이(39.5%)에서 실루엣 끝 30/72. (eye_R 드로어블에 stray 정점 있어 eye_L 미러 사용)
+      moodAnchors: {
+        tear: 'top-[46%] left-[56.5%] w-[7%]',
+        vein: 'top-[29.5%] left-[60%] w-[11%]',
+        heartLeft: 'top-[39.5%] left-[18.5%] w-[9%]',
+        heartRight: 'top-[39.5%] left-[74%] w-[9%]',
+      },
     },
   },
 };
