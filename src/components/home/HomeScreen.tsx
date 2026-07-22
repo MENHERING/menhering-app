@@ -23,6 +23,7 @@ import { Section } from '@/components/common/Section';
 import { ROUTES } from '@/constants/routes';
 import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
 import { cn } from '@/lib/cn';
+import { getLevelInfo } from '@/lib/level';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
 import type { HomeSummary } from '@/types/home';
 
@@ -52,9 +53,13 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   // 이미 걸러지므로 privateFetch 401 리다이렉트는 사실상 발생하지 않는다.
   const { data: avatarStatus } = useAvatarStatus();
 
+  // 누적 XP → 현재 레벨·레벨 내 진행도(500 XP당 1레벨). 누적값을 그대로 표시하지 않고
+  // getLevelInfo로 파생해야 "1550 / 500"처럼 기준을 넘는 표시가 안 나온다.
+  const { level, currentXp, targetXp } = getLevelInfo(summary.xp);
+
   // 진행률(%)
   const accessPercent = Math.min(100, (summary.accessStreak / summary.accessStreakMax) * 100);
-  const xpPercent = Math.min(100, (summary.xp / summary.xpForNextLevel) * 100);
+  const xpPercent = Math.min(100, (currentXp / targetXp) * 100);
 
   const stats: HomeStat[] = [
     {
@@ -154,14 +159,14 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
               </span>
             </div>
             <span className="bg-coral-soft/50 text-coral flex items-center gap-1 rounded-full px-3 py-1.5 text-sm font-extrabold">
-              <Star className="fill-coral size-4" aria-hidden /> {summary.xp} XP
+              <Star className="fill-coral size-4" aria-hidden /> Lv.{level}
             </span>
           </div>
 
           <div className="mt-4 flex items-center justify-between text-xs font-bold">
             <span className="text-brown-soft">다음 레벨까지</span>
             <span className="text-plum">
-              {summary.xp} / {summary.xpForNextLevel} XP
+              {currentXp} / {targetXp} XP
             </span>
           </div>
           {/* 진행률(--xp-pct)은 런타임 동적 값이라 CSS 변수로 주입, 폭은 Tailwind 클래스가 참조 */}

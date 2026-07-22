@@ -1,8 +1,5 @@
-// 홈 화면 표시 기준값. DB에 없는 값(레벨업 기준치·바 최대치)이라 상수로 둔다.
-
-// 다음 레벨까지 필요한 XP. 실제 공식은 lib/level.ts의 getLevelInfo로 정해졌다.
-// TODO: 홈 화면(lib/home/queries.ts)도 getLevelInfo로 교체하면 이 상수는 제거.
-export const XP_FOR_NEXT_LEVEL = 500;
+// 홈 화면 표시 기준값. DB에 없는 값(바 최대치·집계 기간)이라 상수로 둔다.
+// 레벨업 기준치(500 XP/레벨)는 lib/level.ts의 getLevelInfo가 단일 소스라 여기서 관리하지 않는다.
 
 // 마지막 접속 진행 바의 최대 표시 일수.
 export const ACCESS_STREAK_MAX_DAYS = 7;

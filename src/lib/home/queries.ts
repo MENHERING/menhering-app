@@ -1,9 +1,4 @@
-import {
-  ACCESS_STREAK_MAX_DAYS,
-  HOME_GREETING,
-  STATS_WINDOW_DAYS,
-  XP_FOR_NEXT_LEVEL,
-} from '@/constants/home';
+import { ACCESS_STREAK_MAX_DAYS, HOME_GREETING, STATS_WINDOW_DAYS } from '@/constants/home';
 import { createClient } from '@/lib/supabase/server';
 import {
   ProgressSummarySchema,
@@ -22,7 +17,6 @@ const EMPTY_SUMMARY: HomeSummary = {
   accessStreakMax: ACCESS_STREAK_MAX_DAYS,
   stage: 1,
   xp: 0,
-  xpForNextLevel: XP_FOR_NEXT_LEVEL,
   todayCompleted: 0,
   learnStreak: 0,
   accuracyPercent: 0,
@@ -99,7 +93,6 @@ export async function getHomeSummary(): Promise<HomeSummary> {
     accessStreakMax: ACCESS_STREAK_MAX_DAYS,
     stage: progress.success ? (progress.data.stage ?? 1) : 1,
     xp: progress.success ? (progress.data.xp ?? 0) : 0,
-    xpForNextLevel: XP_FOR_NEXT_LEVEL,
     todayCompleted,
     learnStreak: streak,
     accuracyPercent: toPercent(correctTotal, answeredTotal),
