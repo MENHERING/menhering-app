@@ -59,10 +59,20 @@ create policy "본인 관련 친구 요청 조회"
   to authenticated
   using (user_id = (select auth.uid()) or friend_id = (select auth.uid()));
 
--- 3) send_friend_request의 on conflict(user_id, friend_id) 대상. 이름 있는 제약을 가정하지 않고
---    멱등하게 유니크 인덱스 존재를 보장한다(이미 있으면 no-op).
+-- 3) friends 유니크 인덱스 2개.
+--    friends_user_id_friend_id_key: (user_id, friend_id) 정확히 같은 방향 중복만 막는다. 검색/조회
+--    쿼리(search_friend_candidates 등)가 user_id=? and friend_id=? 형태로 필터링할 때 이 인덱스를
+--    그대로 타므로 조회 성능을 위해 남겨둔다.
+--    friends_pair_key: (A,B)/(B,A)는 방향만 다를 뿐 같은 두 사람 관계인데, 위 인덱스는 이걸 다른
+--    키로 봐서 두 사람이 동시에 서로에게 요청을 보내면 반대 방향 '대기중' 행이 동시에 생기는 걸
+--    못 막는다(둘 다 select 시점엔 서로를 못 보고 통과 — TOCTOU 경합). least/greatest로 방향을
+--    지워 같은 쌍이면 항상 같은 키가 되게 한다. send_friend_request는 이 인덱스를 on conflict
+--    대상으로 써서 "확인 후 삽입"이 아니라 삽입 자체의 원자성으로 경합을 막는다.
 create unique index if not exists friends_user_id_friend_id_key
   on public.friends (user_id, friend_id);
+
+create unique index if not exists friends_pair_key
+  on public.friends (least(user_id, friend_id), greatest(user_id, friend_id));
 
 -- ============================================================
 -- 4) 내 친구 코드 조회
@@ -158,8 +168,13 @@ grant execute on function public.search_friend_candidates(text) to anon;
 
 -- ============================================================
 -- 6) 친구 요청 생성.
---    자기 자신에게 요청/이미 친구/양방향 대기 중 요청을 여기서 막는다. 거절 이력이 있으면 재요청을
---    허용한다(대기중으로 되돌림) — 재요청 정책은 추후 바뀔 수 있다.
+--    자기 자신에게 요청은 여기서 막는다. 기존/충돌 판단은 별도 SELECT로 먼저 확인하지 않는다 —
+--    "확인 후 삽입"은 그 사이에 다른 트랜잭션이 끼어들 수 있어(TOCTOU), 두 사람이 동시에 서로에게
+--    요청을 보내면 양쪽 다 확인 시점엔 서로를 못 보고 통과해 반대 방향 '대기중' 행이 동시에
+--    생길 수 있었다. 대신 INSERT를 바로 시도하고 그 성패를 friends_pair_key(방향 무관 유니크
+--    인덱스)로 판단한다 — 유니크 인덱스 충돌 검사 자체가 DB 레벨에서 원자적이라 경합이 성립하지
+--    않는다. 거절(거절) 이력이 있으면 재요청을 허용한다(대기중으로 되돌리고 이번 발신자 기준으로
+--    방향도 새로 맞춘다) — 재요청 정책은 추후 바뀔 수 있다.
 --    22023(잘못된 입력)/PT409(충돌)는 avatar_inventory_purchase.sql이 세운 커스텀 SQLSTATE 규약을
 --    그대로 따른다.
 -- ============================================================
@@ -171,7 +186,6 @@ set search_path = public
 as $$
 declare
   v_user_id uuid := auth.uid();
-  v_existing record;
   v_row public.friends;
 begin
   if v_user_id is null then
@@ -181,21 +195,22 @@ begin
     raise exception '자신에게는 친구 요청을 보낼 수 없습니다.' using errcode = '22023';
   end if;
 
-  select * into v_existing
-  from friends
-  where (user_id = v_user_id and friend_id = p_target_user_id)
-     or (user_id = p_target_user_id and friend_id = v_user_id)
-  limit 1;
-
-  if found and v_existing.status in ('수락', '대기중') then
-    raise exception '이미 친구이거나 대기 중인 요청이 있습니다.' using errcode = 'PT409';
-  end if;
-
   insert into friends (user_id, friend_id, status)
   values (v_user_id, p_target_user_id, '대기중')
-  on conflict (user_id, friend_id) do update
-    set status = '대기중', updated_at = now()
+  on conflict (least(user_id, friend_id), greatest(user_id, friend_id))
+  do update set
+    user_id = excluded.user_id,
+    friend_id = excluded.friend_id,
+    status = '대기중',
+    updated_at = now()
+  where friends.status = '거절'
   returning * into v_row;
+
+  -- 충돌한 기존 행이 '거절'이 아니면(이미 '대기중'이거나 '수락') where절이 막아 갱신도 반환도
+  -- 안 되므로 found가 false다 — 이 경우만 충돌로 본다.
+  if not found then
+    raise exception '이미 친구이거나 대기 중인 요청이 있습니다.' using errcode = 'PT409';
+  end if;
 
   return v_row;
 end;
