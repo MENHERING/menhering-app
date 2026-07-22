@@ -4,10 +4,9 @@ export interface HomeSummary {
   // 마지막 접속 진행 바 - 연속 학습일 / 최대 표시 일수
   accessStreak: number;
   accessStreakMax: number;
-  // 현재 스테이지 및 다음 레벨까지 XP
+  // 현재 스테이지 및 누적 XP. 레벨·레벨 내 진행도는 화면에서 getLevelInfo(xp)로 파생한다.
   stage: number;
   xp: number;
-  xpForNextLevel: number;
   // 하단 스탯 3종
   todayCompleted: number;
   learnStreak: number;

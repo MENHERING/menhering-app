@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
+import { TapSymbol } from '@/components/avatar/TapSymbol';
 import { getThemeRoles } from '@/constants/avatar';
 import {
   EXPRESSION_KEYS,
@@ -85,6 +86,17 @@ interface Live2DCharacterProps {
   onError?: () => void;
 }
 
+// 탭 그룹(burst)마다 중앙에서 살짝 어긋나게 하는 오프셋. burstId % 길이로 순환시켜 랜덤 없이
+// (SSR/재현성 안전) 다양성을 준다. 컨테이너 div에만 적용 — 애니메이션되는 심볼 span에 transform을
+// 주면 heart-float의 transform과 충돌한다. 값은 미세하게(±12px 안쪽) 둬 그룹이 흩어져 보이지 않게 한다.
+const BURST_OFFSETS = [
+  '',
+  '-translate-x-3 -translate-y-1',
+  'translate-x-3 translate-y-1',
+  '-translate-x-2 translate-y-2',
+  'translate-x-2 -translate-y-2',
+];
+
 export function Live2DCharacter({
   modelUrl,
   tintDrawables,
@@ -104,10 +116,13 @@ export function Live2DCharacter({
   const containerRef = useRef<HTMLDivElement>(null);
   const modelRef = useRef<Live2DModel | null>(null);
   const pointerRef = useRef({ x: 0, active: false });
-  // 탭 반응(귀 쫑긋 + 하트 뿅). ticker가 reactionRef를 읽어 파라미터를 흔들고, hearts는 DOM 오버레이.
+  // 탭 반응(귀 쫑긋 + 심볼 뿅). ticker가 reactionRef를 읽어 파라미터를 흔들고, bursts는 DOM 오버레이.
   const reactionRef = useRef({ active: false, t: 0 });
-  const heartIdRef = useRef(0);
-  const [hearts, setHearts] = useState<number[]>([]);
+  // 탭 1회 = 심볼 3개짜리 그룹(burst) 하나. 연타하면 그룹이 중앙에 겹쳐 쌓인다(옆으로 안 번짐).
+  const burstIdRef = useRef(0);
+  // 하트 그라데이션 id의 인스턴스별 접두사. useId 결과에 콜론이 섞일 수 있어 지운다(url(#...) 참조 안전).
+  const tapGradientId = useId().replace(/:/g, '');
+  const [bursts, setBursts] = useState<number[]>([]);
   // 부모 리렌더로 콜백이 바뀌어도 init effect를 재실행하지 않도록 ref로 고정.
   const onErrorRef = useRef(onError);
   useEffect(() => {
@@ -348,15 +363,15 @@ export function Live2DCharacter({
   const handlePointerLeave = () => {
     pointerRef.current.active = false;
   };
-  // 탭하면 귀 쫑긋 + 하트 뿅. reduce-motion이면 반응 생략(효과음은 상위에서 유지).
+  // 탭하면 귀 쫑긋 + 심볼 뿅. reduce-motion이면 반응 생략(효과음은 상위에서 유지).
   const handleTap = () => {
     if (prefersReducedMotion()) return;
     reactionRef.current = { active: true, t: 0 };
-    const base = heartIdRef.current;
-    heartIdRef.current += 3;
-    setHearts((prev) => [...prev, base, base + 1, base + 2]);
+    const burstId = burstIdRef.current;
+    burstIdRef.current += 1;
+    setBursts((prev) => [...prev, burstId]);
   };
-  const removeHeart = (id: number) => setHearts((prev) => prev.filter((h) => h !== id));
+  const removeBurst = (id: number) => setBursts((prev) => prev.filter((b) => b !== id));
 
   return (
     // Pixi가 소유하는 캔버스 컨테이너 + 하트 오버레이를 형제로 감싼다. 오버레이를 컨테이너 자식으로
@@ -372,25 +387,36 @@ export function Live2DCharacter({
         // 이름이 있을 때만 img 역할 부여(빈 aria-label로 이름 없는 이미지가 되는 것 방지).
         {...(title ? { role: 'img', 'aria-label': title } : {})}
       />
-      {hearts.length > 0 && (
-        // 클리핑 없음 → 하트가 머리 위 캔버스 밖(숲 하늘)까지 떠오른다. 카드 overflow가 최종 클립.
-        <div className="pointer-events-none absolute inset-0" aria-hidden>
-          {hearts.map((id) => (
+      {/* 탭마다 독립된 심볼 그룹(burst)을 그린다. 각 그룹은 절대배치로 같은 중앙 자리에 겹쳐 쌓이므로,
+          연타해도 심볼이 옆으로 번지지 않는다(한 그룹에 심볼을 계속 추가하면 flex가 폭을 넓혀 번진다).
+          그룹 내부는 flex + gap으로 세 심볼을 균등 간격·중앙 정렬한다 — left%/transform 대신 flex라야
+          heart-float 애니메이션의 transform(translateY+scale)과 충돌하지 않는다.
+          클리핑 없음 → 심볼이 머리 위 캔버스 밖(숲 하늘)까지 떠오른다. 카드 overflow가 최종 클립.
+          top-[12%]는 심볼이 솟기 시작하는 높이. justify-center 그룹을 살짝 왼쪽으로(pr) 캐릭터 시각
+          중심에 맞춘다 — 캔버스에서 캐릭터가 컨테이너 정중앙보다 약간 왼쪽에 있다. */}
+      {bursts.map((burstId) => (
+        // 그룹 내 세 심볼은 애니메이션이 동시에 끝난다 → 자식 animationend가 컨테이너로 버블되면
+        // 그룹 전체를 한 번에 제거한다(이후 중복 이벤트는 filter가 무시).
+        <div
+          key={burstId}
+          onAnimationEnd={() => removeBurst(burstId)}
+          className={cn(
+            'pointer-events-none absolute inset-x-0 top-[12%] flex items-start justify-center gap-3 pr-[8%]',
+            BURST_OFFSETS[burstId % BURST_OFFSETS.length],
+          )}
+          aria-hidden
+        >
+          {[0, 1, 2].map((slot) => (
             <span
-              key={id}
-              onAnimationEnd={() => removeHeart(id)}
-              className={cn(
-                'animate-heart-float text-primary absolute top-[12%] text-xl',
-                id % 3 === 0 && 'left-[36%]',
-                id % 3 === 1 && 'left-1/2 text-2xl',
-                id % 3 === 2 && 'left-[58%]',
-              )}
+              key={slot}
+              className={cn('animate-heart-float', slot === 1 ? 'size-8' : 'size-6')}
             >
-              ♥
+              {/* 그라데이션 id는 문서 전역이라 그룹·슬롯마다 고유해야 한다(심볼이 여럿 동시에 뜬다). */}
+              <TapSymbol mood={mood} gradientId={`${tapGradientId}-${burstId}-${slot}`} />
             </span>
           ))}
         </div>
-      )}
+      ))}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use server';
 
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME, DEFAULT_NICKNAME } from '@/constants/avatar';
+import { getLevelInfo } from '@/lib/level';
 import { createClient } from '@/lib/supabase/server';
 import type { Avatar, CharacterType, ColorTheme } from '@/types/avatar';
 
@@ -37,18 +38,27 @@ interface AvatarRpcRow {
   updated_at: string | null;
   nickname: string | null;
   coin: number | null;
+  // 진행도 행이 없는 신규 유저는 left join이라 null (오류가 아님 → 0 XP = Lv.1로 본다).
+  xp: number | null;
 }
 
-// 아바타 페이지 초기 데이터: 아바타 + 코인 잔액(users.coin). 같은 조회에서 함께 받아 왕복을 줄인다.
+// 아바타 페이지 초기 데이터: 아바타 + 코인 잔액(users.coin) + 레벨(user_progress.xp 환산).
+// 같은 조회에서 함께 받아 왕복을 줄인다.
 export interface MyAvatarData {
   avatar: Avatar;
   coin: number;
+  // 조회 실패 시 null → 레벨 뱃지를 숨긴다. 레벨은 순수 표시값이라 1로 폴백하면 실제
+  // 고레벨 유저에게 거짓 정보를 보여주고 마이페이지 표기와도 어긋난다.
+  level: number | null;
 }
 
 /**
- * 로그인 유저의 아바타·닉네임·코인을 Postgres 함수 get_my_avatar 하나로 조회한다(왕복 3→1).
+ * 로그인 유저의 아바타·닉네임·코인·레벨을 Postgres 함수 get_my_avatar 하나로 조회한다(왕복 4→1).
  * 유저 식별은 함수 내부 auth.uid()가 하고 RLS(본인 행)로 스코프된다. 함수는 users 기준이라
  * 아바타 row가 없어도(첫 저장 전) 닉네임·코인은 온다 — 실제 아바타 생성은 저장(save_avatar upsert) 시.
+ *
+ * 레벨은 user_progress.xp를 마이페이지와 공유하는 getLevelInfo(xp 500당 1레벨)로 환산한 값이다.
+ * 진행도 행이 없는 신규 유저는 xp가 null로 오지만 이는 오류가 아니므로 0 XP = Lv.1로 본다.
  */
 export async function getMyAvatar(): Promise<MyAvatarData> {
   const supabase = await createClient();
@@ -57,19 +67,20 @@ export async function getMyAvatar(): Promise<MyAvatarData> {
 
   if (error) {
     console.error('[avatar] 아바타 조회 실패:', error);
-    return { avatar: fallbackAvatar(), coin: 0 };
+    return { avatar: fallbackAvatar(), coin: 0, level: null };
   }
 
   // users 행이 없으면(비로그인) 전체 폴백.
-  if (!data) return { avatar: fallbackAvatar(), coin: 0 };
+  if (!data) return { avatar: fallbackAvatar(), coin: 0, level: null };
 
   const nickname = data.nickname ?? DEFAULT_NICKNAME;
   const coin = data.coin ?? 0;
+  const level = getLevelInfo(data.xp ?? 0).level;
 
   // 아바타 row가 아직 없으면(첫 저장 전) 기본 아바타에 실제 닉네임만 얹는다.
   // 닉네임을 avatars 존재 여부와 분리해, 신규 유저가 기본 닉네임으로 덮이는 것을 막는다.
   if (!data.id) {
-    return { avatar: { ...fallbackAvatar(), userId: data.user_id, nickname }, coin };
+    return { avatar: { ...fallbackAvatar(), userId: data.user_id, nickname }, coin, level };
   }
 
   return {
@@ -83,6 +94,7 @@ export async function getMyAvatar(): Promise<MyAvatarData> {
       updatedAt: data.updated_at ?? new Date().toISOString(),
     },
     coin,
+    level,
   };
 }
 

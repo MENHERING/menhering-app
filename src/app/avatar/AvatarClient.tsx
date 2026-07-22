@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { useQueryClient } from '@tanstack/react-query';
+
 import { AvatarPreview } from '@/components/avatar/AvatarPreview';
 import { CharacterPicker } from '@/components/avatar/CharacterPicker';
 import { ColorThemePicker } from '@/components/avatar/ColorThemePicker';
@@ -12,6 +14,7 @@ import { Footer } from '@/components/common/Footer';
 import { Header } from '@/components/common/Header';
 import { Toast } from '@/components/common/Toast';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
+import { queryKeys } from '@/lib/query-keys';
 import { useAvatarEconomyStore } from '@/stores/avatar-economy-store';
 import { selectIsDirty, useAvatarStore } from '@/stores/avatar-store';
 import { useUnsavedChangesStore } from '@/stores/unsaved-changes-store';
@@ -28,9 +31,17 @@ interface AvatarClientProps {
   initialAvatar: Avatar;
   initialCoin: number;
   initialOwned: OwnedItems;
+  initialLevel: number | null;
 }
 
-export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: AvatarClientProps) {
+export function AvatarClient({
+  initialAvatar,
+  initialCoin,
+  initialOwned,
+  initialLevel,
+}: AvatarClientProps) {
+  const queryClient = useQueryClient();
+
   // 서버 조회값으로 스토어를 최초 1회 동기 초기화 (기본값 플래시 방지).
   // useState 지연 초기화는 마운트당 1회만 실행되며 initFrom/initCoin/initOwned는 멱등이라 안전하다.
   useState(() => {
@@ -107,6 +118,8 @@ export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: Avata
       if (result.ok) {
         // 저장 성공 → dirty 기준선을 현재 값으로 갱신
         useAvatarStore.getState().initFrom({ characterType, colorTheme, nickname });
+        // 다른 화면(학습 탭 등)이 useMyAvatar()로 들고 있는 캐시된 닉네임도 갱신되게 무효화한다.
+        queryClient.invalidateQueries({ queryKey: queryKeys.avatar.me() });
         setFeedback({ variant: 'success', message: '저장되었어요!' });
       } else {
         setFeedback({ variant: 'error', message: result.error });
@@ -171,8 +184,7 @@ export function AvatarClient({ initialAvatar, initialCoin, initialOwned }: Avata
       />
 
       <main className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
-        {/* TODO: level은 user_progress 연동 후 실제 값으로 교체 */}
-        <AvatarPreview level={5} />
+        <AvatarPreview level={initialLevel} />
         <ColorThemePicker />
         <CharacterPicker />
       </main>

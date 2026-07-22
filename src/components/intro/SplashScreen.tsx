@@ -32,14 +32,14 @@ export function SplashScreen({ nextPath }: SplashScreenProps) {
           <p className="text-primary text-sm font-medium">나만의 캐릭터와 함께하는 학습</p>
         </div>
 
-        {/* 마스코트 */}
-        <div className="relative h-56 w-56">
+        {/* 마스코트 — 로그인 화면과 동일 크기(256px)로 통일해 스플래시→로그인 전환 시 크기 점프가 없게 한다. */}
+        <div className="relative h-64 w-64">
           <Image
             src="/mascot/red-panda.png"
             alt="멘헤링 마스코트"
             fill
             priority
-            sizes="224px"
+            sizes="256px"
             className="object-contain drop-shadow-sm"
           />
         </div>

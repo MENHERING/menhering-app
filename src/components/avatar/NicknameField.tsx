@@ -92,9 +92,11 @@ export function NicknameField({ nickname, onSave }: NicknameFieldProps) {
           onClick={(e) => commit(e.detail === 0)}
           disabled={!canSave}
           aria-label="닉네임 저장"
-          className="text-coral focus-visible:ring-coral flex size-6 shrink-0 items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+          // 그림자 없음: CTA용 그림자(0_3px_10px)를 size-8 원형에 씌우면 blur가 버튼을 덮어
+          // 브랜드 코랄(#e8563a)이 더 짙은 색으로 보인다. 시인성은 채움 + 크기로만 확보한다.
+          className="bg-coral focus-visible:ring-coral hover:bg-coral-dark flex size-8 shrink-0 items-center justify-center rounded-full text-white transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <Check size={16} aria-hidden />
+          <Check size={18} aria-hidden />
         </button>
       </div>
     );

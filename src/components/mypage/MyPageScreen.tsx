@@ -13,6 +13,7 @@ import { ProfileSection } from '@/components/mypage/ProfileSection';
 import { StatCard } from '@/components/mypage/StatCard';
 import { ROUTES } from '@/constants/routes';
 import { useLogout } from '@/hooks/auth/use-logout';
+import { usePendingFriendRequests } from '@/hooks/friends/use-pending-friend-requests';
 import { useMyPageSummary } from '@/hooks/mypage/use-mypage-summary';
 import { getKstWeekdayLabel } from '@/lib/date/kst';
 import {
@@ -30,6 +31,18 @@ export function MyPageScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { mutate: logout } = useLogout();
   const { data: summary, isPending, isError } = useMyPageSummary();
+  // 친구 랭킹은 아직 미출시라 mock을 그대로 쓰고, 친구 추가 배지만 실제 받은 요청 수로 덮어쓴다.
+  const { data: pendingRequests } = usePendingFriendRequests();
+  const pendingCount = pendingRequests?.length ?? 0;
+  const friendItems = MOCK_MYPAGE_FRIENDS.map((item) =>
+    item.kind === 'add'
+      ? {
+          ...item,
+          badge: String(pendingCount),
+          description: `받은 요청 ${pendingCount} · 코드로 추가`,
+        }
+      : item,
+  );
 
   const handleLogoutConfirm = () => {
     setIsLogoutOpen(false);
@@ -118,7 +131,7 @@ export function MyPageScreen() {
         </div>
 
         <FriendsSection
-          items={MOCK_MYPAGE_FRIENDS}
+          items={friendItems}
           onRanking={() => router.push(ROUTES.RANKING)}
           onAddFriend={() => router.push(ROUTES.MYPAGE_FRIENDS_ADD)}
         />
