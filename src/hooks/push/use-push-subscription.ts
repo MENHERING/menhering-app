@@ -25,6 +25,17 @@ function checkSupported(): boolean {
   );
 }
 
+// navigator.serviceWorker.ready는 SW가 끝내 활성화되지 않으면 무기한 pending이라,
+// 유한 타임아웃으로 감싼다. 초과 시 reject되어 호출부의 finally가 실행되고 isBusy가 풀린다.
+function serviceWorkerReady(timeoutMs = 10_000): Promise<ServiceWorkerRegistration> {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error('서비스워커 준비 시간이 초과되었습니다.')), timeoutMs);
+    }),
+  ]);
+}
+
 // 브라우저 푸시 구독을 관리한다(권한 요청 → pushManager 구독 → 서버 저장, 역순으로 해제).
 // 설정 토글 연동(Phase 2)에서 이 훅을 소비한다.
 export function usePushSubscription(): PushSubscriptionState {
@@ -45,7 +56,7 @@ export function usePushSubscription(): PushSubscriptionState {
     });
 
     // 기존 구독 여부는 SW가 준비된 뒤에만 알 수 있어 별도로 조회한다(없으면 구독 안 됨으로 둔다).
-    navigator.serviceWorker.ready
+    serviceWorkerReady()
       .then((registration) => registration.pushManager.getSubscription())
       .then((subscription) => setIsSubscribed(subscription !== null))
       .catch(() => {});
@@ -62,7 +73,7 @@ export function usePushSubscription(): PushSubscriptionState {
 
       if (result !== 'granted') return;
 
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await serviceWorkerReady();
 
       // 기존 구독이 있으면 재사용, 없으면 VAPID 공개키로 새로 구독한다.
       const subscription =
@@ -90,7 +101,7 @@ export function usePushSubscription(): PushSubscriptionState {
     setIsBusy(true);
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const registration = await serviceWorkerReady();
       const subscription = await registration.pushManager.getSubscription();
 
       if (subscription) {

@@ -24,10 +24,11 @@ create policy "push_subscriptions_select_own" on public.push_subscriptions
 create policy "push_subscriptions_insert_self" on public.push_subscriptions
   for insert with check (auth.uid() = user_id);
 
--- 한 브라우저(endpoint)를 다른 계정으로 재구독하면 소유자를 넘겨받아야 한다. endpoint는 그 브라우저만
--- 가진 값이라, "내 것으로만 바꿀 수 있다"(with check)면 남의 구독을 임의로 뺏을 수 없다.
+-- 본인 구독만 갱신할 수 있다. 같은 유저의 재구독(키 회전)은 user_id가 그대로라 통과한다.
+-- endpoint를 다른 계정으로 넘기는 소유권 이전은 여기서 허용하지 않는다 —
+-- using(true)로 열면 endpoint만 알면 남의 구독 행을 자기 것으로 UPDATE(탈취)할 수 있기 때문이다.
 create policy "push_subscriptions_update_self" on public.push_subscriptions
-  for update using (true) with check (auth.uid() = user_id);
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create policy "push_subscriptions_delete_own" on public.push_subscriptions
   for delete using (auth.uid() = user_id);

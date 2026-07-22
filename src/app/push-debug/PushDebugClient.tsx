@@ -13,15 +13,40 @@ export function PushDebugClient() {
   const { isSupported, permission, isSubscribed, isBusy, subscribe, unsubscribe } =
     usePushSubscription();
   const [message, setMessage] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
+
+  // 구독/해제는 훅에서 실패 시 throw하므로, 여기서 잡아 사용자에게 표면화한다.
+  const handleSubscribe = async () => {
+    setMessage(null);
+
+    try {
+      await subscribe();
+    } catch {
+      setMessage('구독 실패 — 알림 권한과 콘솔을 확인하세요.');
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    setMessage(null);
+
+    try {
+      await unsubscribe();
+    } catch {
+      setMessage('구독 해제 실패 — 콘솔을 확인하세요.');
+    }
+  };
 
   const handleTest = async () => {
     setMessage(null);
+    setIsTesting(true);
 
     try {
       const result = await privateFetch('/api/push/test', PushTestResultSchema, { method: 'POST' });
       setMessage(`발송 ${result.sent}건 / 만료 정리 ${result.pruned}건`);
     } catch {
       setMessage('테스트 발송 실패 — 구독 상태와 콘솔을 확인하세요.');
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -40,21 +65,31 @@ export function PushDebugClient() {
 
       <div className="flex flex-col gap-3">
         {isSubscribed ? (
-          <Button variant="secondary" isFullWidth disabled={isBusy} onClick={unsubscribe}>
+          <Button
+            variant="secondary"
+            isFullWidth
+            disabled={isBusy || isTesting}
+            onClick={handleUnsubscribe}
+          >
             구독 해제
           </Button>
         ) : (
           <Button
             variant="primary"
             isFullWidth
-            disabled={!isSupported || isBusy}
-            onClick={subscribe}
+            disabled={!isSupported || isBusy || isTesting}
+            onClick={handleSubscribe}
           >
             알림 구독
           </Button>
         )}
 
-        <Button variant="primary" isFullWidth disabled={!isSubscribed} onClick={handleTest}>
+        <Button
+          variant="primary"
+          isFullWidth
+          disabled={!isSubscribed || isBusy || isTesting}
+          onClick={handleTest}
+        >
           나에게 테스트 발송
         </Button>
       </div>

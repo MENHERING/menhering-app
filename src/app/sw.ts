@@ -63,12 +63,21 @@ self.addEventListener('notificationclick', (event) => {
   const targetUrl = (event.notification.data as { url?: string } | undefined)?.url ?? '/home';
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+    (async () => {
+      const targetPath = new URL(targetUrl, self.location.origin).pathname;
+      const clientList = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      });
+
+      // 같은 경로가 이미 열려 있으면 새 창을 열지 않고 그 창을 포커스한다.
       for (const client of clientList) {
-        if ('focus' in client) return client.focus();
+        if (new URL(client.url).pathname === targetPath && 'focus' in client) {
+          return client.focus();
+        }
       }
 
       return self.clients.openWindow(targetUrl);
-    }),
+    })(),
   );
 });

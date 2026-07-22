@@ -47,7 +47,16 @@ export async function POST() {
       .map((sub) => sub.endpoint);
 
     if (expiredEndpoints.length > 0) {
-      await supabase.from('push_subscriptions').delete().in('endpoint', expiredEndpoints);
+      const { error: pruneError } = await supabase
+        .from('push_subscriptions')
+        .delete()
+        .in('endpoint', expiredEndpoints);
+
+      // 삭제가 실패하면 만료 구독이 남으므로 pruned로 보고하지 않고 500으로 처리한다.
+      if (pruneError) {
+        console.error('[push/test] 만료 구독 정리 실패:', pruneError);
+        throw new ApiError(500, '만료된 구독 정리에 실패했습니다.');
+      }
     }
 
     const { body, status } = toSuccessResult(PushTestResultSchema, {
