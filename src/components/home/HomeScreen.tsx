@@ -3,7 +3,6 @@
 import type { CSSProperties } from 'react';
 
 import {
-  Bell,
   ChevronRight,
   CircleCheck,
   Flame,
@@ -20,6 +19,7 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
+import { NotificationBell } from '@/components/home/NotificationBell';
 import { ROUTES } from '@/constants/routes';
 import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
 import { cn } from '@/lib/cn';
@@ -96,13 +96,7 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
             </span>
             <h1 className="text-plum text-xl font-extrabold">멘헤링</h1>
           </div>
-          <button
-            type="button"
-            aria-label="알림"
-            className="flex size-10 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] active:opacity-70"
-          >
-            <Bell className="text-coral size-5" aria-hidden />
-          </button>
+          <NotificationBell />
         </header>
 
         {/* 말풍선 */}
