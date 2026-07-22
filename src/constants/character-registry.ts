@@ -52,6 +52,12 @@ export interface CharacterRenderSpec {
   };
   // 있으면 픽커 썸네일을 이 이미지의 얼굴 크롭으로 렌더한다. 없으면 Svg 썸네일.
   thumbnail?: string;
+  // 감정 대사 말풍선의 세로 오프셋(Tailwind translate 클래스). AvatarPreview가 말풍선을 기본
+  // translate-y-7(캐릭터 쪽으로 28px 아래)로 붙이는데, 토끼처럼 귀가 캔버스 위쪽(실측 y 8.5%)까지
+  // 뻗은 캐릭터는 머리 꼭대기가 ~32px 높아 이 값이면 귀에 바짝 붙어 보인다. 그런 캐릭터만 위로
+  // 올리는 보정. 생략 시 AvatarPreview 기본값(translate-y-7)을 쓴다. moodAnchors처럼 Tailwind가
+  // 리터럴로 잡도록 완성된 클래스 문자열로 둔다.
+  speechBubbleNudge?: string;
 }
 
 // 레서판다 원화색(빨강). SVG(naturalRoles.body)와 Live2D(live2d.naturalBody)가 같은 색을 써야 하므로
@@ -117,6 +123,8 @@ export const CHARACTER_REGISTRY: Record<CharacterType, CharacterRenderSpec> = {
     // 전신 원화(투명 배경). 픽커 CSS(origin-[50%_10%] scale-1.75)가 얼굴로 확대·크롭한다
     // — 레서판다 썸네일과 동일한 전신 구도라 같은 프레이밍이 나온다.
     thumbnail: '/images/avatar/rabbit.png',
+    // 긴 귀가 위로 뻗어 머리 꼭대기가 다른 캐릭터보다 높다 → 말풍선을 살짝 위로 올려 귀와 띄운다.
+    speechBubbleNudge: 'translate-y-2',
   },
   강아지: {
     Svg: DogSvg,
