@@ -6,7 +6,7 @@ import { LessonNode } from '@/components/learning/LessonNode';
 import { LessonStartCard } from '@/components/learning/LessonStartCard';
 import { UserStatusBar } from '@/components/learning/UserStatusBar';
 import { getLessonStatus } from '@/lib/curriculum-lock';
-import { MOCK_CURRICULA, MOCK_LESSONS, MOCK_USER_PROGRESS } from '@/mocks/lessons';
+import { MOCK_CURRICULA, MOCK_LESSONS } from '@/mocks/lessons';
 
 export default function TestLearningPage() {
   if (process.env.NODE_ENV !== 'development') notFound();
@@ -25,11 +25,7 @@ export default function TestLearningPage() {
   return (
     <main className="flex min-h-screen flex-col gap-8 bg-gray-50 px-4 py-16">
       {/* case 01: UserStatusBar */}
-      <UserStatusBar
-        nickname="멘헤링이"
-        level={MOCK_USER_PROGRESS.level}
-        xp={MOCK_USER_PROGRESS.xp}
-      />
+      <UserStatusBar nickname="멘헤링이" level={3} currentXp={230} targetXp={500} />
 
       {/* case 02: LessonNode - completed / current / locked */}
       <div className="flex items-center gap-6 rounded-2xl bg-white p-6">

@@ -15,7 +15,6 @@ import { ROUTES } from '@/constants/routes';
 import { useMyAvatar } from '@/hooks/avatar/use-my-avatar';
 import { useLearningProgress } from '@/hooks/learning/use-learning-progress';
 import { getLessonStatus } from '@/lib/curriculum-lock';
-import { MOCK_USER_PROGRESS } from '@/mocks/lessons';
 import type { Curriculum, Lesson } from '@/types/lesson';
 
 const PROBLEM_COUNT = 5;
@@ -70,6 +69,9 @@ function LearningPageContent() {
       totalCount: c.totalCount,
     })) ?? [];
   const myStep = progress?.myStep ?? 0;
+  const level = progress?.level ?? 1;
+  const currentXp = progress?.currentXp ?? 0;
+  const targetXp = progress?.targetXp ?? 500;
 
   const defaultCurriculumId = curricula.find((c) => c.step === myStep)?.id ?? curricula[0]?.id;
 
@@ -143,8 +145,9 @@ function LearningPageContent() {
       <main className="flex-1 pb-6">
         <UserStatusBar
           nickname={avatar?.avatar.nickname ?? DEFAULT_NICKNAME}
-          level={MOCK_USER_PROGRESS.level}
-          xp={MOCK_USER_PROGRESS.xp}
+          level={level}
+          currentXp={currentXp}
+          targetXp={targetXp}
         />
         <div className="relative">
           <CurriculumBar

@@ -22,8 +22,3 @@ export interface Curriculum {
   clearedCount: number;
   totalCount: number;
 }
-
-export interface UserProgress {
-  level: number;
-  xp: number;
-}
