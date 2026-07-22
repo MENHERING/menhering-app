@@ -29,6 +29,7 @@ export function ProfileSection({ profile }: ProfileSectionProps) {
         happinessPercent={profile.moodValue}
         imageSrc={profile.avatarUrl}
         imageAlt={`${profile.name} 아바타`}
+        priority
         badge={
           <span className="bg-coral rounded-full px-2 py-0.5 text-[10px] leading-[15px] font-bold text-white">
             Lv.{profile.level}
