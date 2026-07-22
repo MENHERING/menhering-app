@@ -6,8 +6,13 @@ import { FontSizeControl } from '@/components/mypage/settings/FontSizeControl';
 import { SettingsInfoRow } from '@/components/mypage/settings/SettingsInfoRow';
 import { SettingsToggleRow } from '@/components/mypage/settings/SettingsToggleRow';
 import { SETTINGS_ICON } from '@/constants/mypage-settings';
+import { usePushSubscription } from '@/hooks/push/use-push-subscription';
 import { MOCK_SETTINGS_SECTIONS } from '@/mocks/mypage-settings.mock';
-import type { FontSizeOption } from '@/types/mypage/settings';
+import type { FontSizeOption, SettingsToggleItem } from '@/types/mypage/settings';
+
+// 이 토글만 목업 로컬 상태가 아니라 실제 푸시 구독 여부로 동작한다(usePushSubscription).
+// 카테고리별 알림 선호가 따로 없어(#116 범위 결정), "구독 여부 = 리마인더 on/off"로 취급한다.
+const LEARNING_REMINDER_ID = 'learning-reminder';
 
 export function SettingsScreen() {
   const FontSizeIcon = SETTINGS_ICON['font-size'];
@@ -15,7 +20,9 @@ export function SettingsScreen() {
     () =>
       Object.fromEntries(
         MOCK_SETTINGS_SECTIONS.flatMap((section) =>
-          (section.toggles ?? []).map((item) => [item.id, item.defaultChecked]),
+          (section.toggles ?? [])
+            .filter((item) => item.id !== LEARNING_REMINDER_ID)
+            .map((item) => [item.id, item.defaultChecked]),
         ),
       ),
     [],
@@ -23,9 +30,28 @@ export function SettingsScreen() {
 
   const [toggleState, setToggleState] = useState<Record<string, boolean>>(initialToggleState);
   const [fontSize, setFontSize] = useState<FontSizeOption>('medium');
+  const [reminderError, setReminderError] = useState<string | null>(null);
+
+  const {
+    isSupported: isPushSupported,
+    isSubscribed: isReminderOn,
+    isBusy: isReminderBusy,
+    subscribe: subscribeReminder,
+    unsubscribe: unsubscribeReminder,
+  } = usePushSubscription();
 
   const handleToggle = (id: string, checked: boolean) => {
     setToggleState((prev) => ({ ...prev, [id]: checked }));
+  };
+
+  const handleReminderToggle = async (checked: boolean) => {
+    setReminderError(null);
+
+    try {
+      await (checked ? subscribeReminder() : unsubscribeReminder());
+    } catch {
+      setReminderError('알림 설정을 바꾸지 못했어요. 다시 시도해주세요.');
+    }
   };
 
   return (
@@ -38,15 +64,34 @@ export function SettingsScreen() {
 
           {section.toggles && (
             <div className="shadow-card overflow-hidden rounded-2xl bg-white">
-              {section.toggles.map((item, index) => (
-                <SettingsToggleRow
-                  key={item.id}
-                  item={item}
-                  checked={toggleState[item.id] ?? item.defaultChecked}
-                  onCheckedChange={(checked) => handleToggle(item.id, checked)}
-                  isLast={!section.showFontSize && index === section.toggles!.length - 1}
-                />
-              ))}
+              {section.toggles.map((item, index) => {
+                const isReminder = item.id === LEARNING_REMINDER_ID;
+                const displayItem: SettingsToggleItem = isReminder
+                  ? {
+                      ...item,
+                      description: isPushSupported
+                        ? (reminderError ?? item.description)
+                        : '이 브라우저는 알림을 지원하지 않아요',
+                    }
+                  : item;
+
+                return (
+                  <SettingsToggleRow
+                    key={item.id}
+                    item={displayItem}
+                    checked={
+                      isReminder ? isReminderOn : (toggleState[item.id] ?? item.defaultChecked)
+                    }
+                    onCheckedChange={
+                      isReminder
+                        ? handleReminderToggle
+                        : (checked) => handleToggle(item.id, checked)
+                    }
+                    disabled={isReminder && (!isPushSupported || isReminderBusy)}
+                    isLast={!section.showFontSize && index === section.toggles!.length - 1}
+                  />
+                );
+              })}
 
               {section.showFontSize && (
                 <div className="flex items-center gap-3 px-4 py-3.5">

@@ -7,6 +7,7 @@ interface SettingsToggleRowProps {
   item: SettingsToggleItem;
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
   isLast?: boolean;
 }
 
@@ -14,6 +15,7 @@ export function SettingsToggleRow({
   item,
   checked,
   onCheckedChange,
+  disabled = false,
   isLast = false,
 }: SettingsToggleRowProps) {
   const Icon = SETTINGS_ICON[item.icon];
@@ -42,7 +44,12 @@ export function SettingsToggleRow({
         ) : null}
       </div>
 
-      <Toggle checked={checked} onCheckedChange={onCheckedChange} aria-label={item.title} />
+      <Toggle
+        checked={checked}
+        onCheckedChange={onCheckedChange}
+        disabled={disabled}
+        aria-label={item.title}
+      />
     </div>
   );
 }
