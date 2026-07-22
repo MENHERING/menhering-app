@@ -8,7 +8,6 @@ import {
   CircleCheck,
   Flame,
   PawPrint,
-  Sparkles,
   Star,
   Target,
   type LucideIcon,
@@ -20,7 +19,9 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
+import { SpeechBubble } from '@/components/common/SpeechBubble';
 import { ROUTES } from '@/constants/routes';
+import { useAvatarDialogue } from '@/hooks/avatar/use-avatar-dialogue';
 import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
 import { cn } from '@/lib/cn';
 import { getLevelInfo } from '@/lib/level';
@@ -52,6 +53,10 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   // 중립으로 그리고, 도착하면 표정·심볼·기운 배경이 얹힌다(점진적 향상). 비로그인은 홈 가드에서
   // 이미 걸러지므로 privateFetch 401 리다이렉트는 사실상 발생하지 않는다.
   const { data: avatarStatus } = useAvatarStatus();
+
+  // 말풍선 대사는 감정에 맞춰 렛서가 말하듯 회전시킨다. mood 미해결(첫 렌더)이면 '보통'으로
+  // 시작하고, 도착하면 그 감정의 대사로 바뀐다.
+  const dialogue = useAvatarDialogue(avatarStatus?.mood ?? '보통');
 
   // 누적 XP → 현재 레벨·레벨 내 진행도(500 XP당 1레벨). 누적값을 그대로 표시하지 않고
   // getLevelInfo로 파생해야 "1550 / 500"처럼 기준을 넘는 표시가 안 나온다.
@@ -105,15 +110,9 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
           </button>
         </header>
 
-        {/* 말풍선 */}
+        {/* 말풍선 — 아바타 감정에 맞는 대사를 렛서가 말하듯 띄운다(12s마다 회전). */}
         <div className="mt-4 flex justify-center">
-          <div className="border-coral/30 relative rounded-full border-2 bg-white px-5 py-2.5 shadow-sm">
-            <p className="text-plum flex items-center gap-1 text-sm font-bold">
-              {avatar.nickname}님, {summary.greeting}
-              <Sparkles className="text-coral size-4" aria-hidden />
-            </p>
-            <span className="border-coral/30 absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-r-2 border-b-2 bg-white" />
-          </div>
+          <SpeechBubble size="md">{dialogue}</SpeechBubble>
         </div>
 
         {/* 마스코트 — 히어로 렌더러(Live2D 우선 + 감정 표정/심볼, 실패 시 SVG 폴백).
