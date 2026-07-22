@@ -133,6 +133,7 @@ export default async function QuizResultPage({
       <QuizAvatarRing
         size={200}
         happinessPercent={happinessPercent}
+        gainPercent={gainPercent}
         characterType={characterType}
         colorTheme={colorTheme}
         useHero
@@ -141,7 +142,7 @@ export default async function QuizResultPage({
       {/* 레이아웃의 기본 gap-8이 위 아바타 링과 너무 벌어져 보여서, "오늘의 클리어" 제목이
           있던 자리만큼(-mt-6) 당겨 아바타 바로 아래 보상처럼 붙인다. */}
       <div className="-mt-6 flex items-center justify-center gap-2">
-        <QuizXpBadge xp={xpReward} />
+        {xpReward > 0 && <QuizXpBadge xp={xpReward} />}
         {coinReward > 0 && <CoinBadge amount={coinReward} />}
       </div>
       <HappinessGauge happinessPercent={happinessPercent} gainPercent={gainPercent} />
