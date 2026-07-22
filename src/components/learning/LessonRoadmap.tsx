@@ -65,7 +65,9 @@ export function LessonRoadmap({
   }, [selectedLessonId, onSelectLesson]);
 
   return (
-    <div className="relative flex flex-col items-center gap-20 py-8">
+    // pb-44: 마지막 스테이지의 시작하기 카드가 절대 위치로 아래로 뻗어나가는데, 마지막 노드
+    // 뒤에는 다음 노드가 없어 py-8만으로는 카드 하단이 Footer와 겹친다.
+    <div className="relative flex flex-col items-center gap-20 pt-8 pb-44">
       {lessons.map((lesson, index) => {
         // 노드를 좌우로 번갈아 배치해 곡선 경로처럼 보이게 한다.
         const offset = index % 2 === 0 ? NODE_OFFSET_PX : -NODE_OFFSET_PX;

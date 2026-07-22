@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
-import { QuizExplanation } from '@/components/quiz/QuizExplanation';
+import { Button } from '@/components/common/Button';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
 import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
@@ -125,12 +125,9 @@ export default function QuizPage() {
 
       <div className="flex flex-col gap-3 px-5">
         {question.options.map((option, index) => {
+          const isSelected = hasAnswered && index === selectedIndex;
           const state =
-            hasAnswered && index === question.correctIndex
-              ? 'correct'
-              : hasAnswered && index === selectedIndex
-                ? 'wrong-selected'
-                : 'default';
+            isSelected && index !== question.correctIndex ? 'wrong-selected' : 'default';
 
           return (
             <QuizOptionButton
@@ -145,7 +142,19 @@ export default function QuizPage() {
         })}
       </div>
 
-      {hasAnswered && <QuizExplanation explanation={question.explanation} onNext={handleNext} />}
+      {hasAnswered && (
+        <div className="px-5">
+          <Button
+            variant="primary"
+            size="lg"
+            isFullWidth
+            isLoading={submitQuiz.isPending}
+            onClick={handleNext}
+          >
+            {isLastQuestion ? '결과 보기' : '다음 문제'}
+          </Button>
+        </div>
+      )}
 
       {showTimeoutModal && (
         <QuizTimeoutModal
