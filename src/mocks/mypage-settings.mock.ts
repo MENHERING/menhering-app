@@ -1,21 +1,4 @@
-import type { FriendRequest, SettingsSection } from '@/types/mypage/settings';
-
-export const MOCK_MY_FRIEND_CODE = 'RED-7K2P';
-
-export const MOCK_FRIEND_REQUESTS: FriendRequest[] = [
-  {
-    id: 'req-1',
-    emoji: '🦦',
-    name: '수달이',
-    description: 'Lv.5 · 함께 학습해요',
-  },
-  {
-    id: 'req-2',
-    emoji: '🐹',
-    name: '햄찌',
-    description: 'Lv.3 · 친구의 친구',
-  },
-];
+import type { SettingsSection } from '@/types/mypage/settings';
 
 export const MOCK_SETTINGS_SECTIONS: SettingsSection[] = [
   {
