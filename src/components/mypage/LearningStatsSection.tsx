@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 
 import { Section } from '@/components/common/Section';
 import { cn } from '@/lib/cn';
@@ -13,6 +13,8 @@ interface LearningStatsSectionProps {
 const CHART_MAX = 30;
 
 function LearningChart({ data }: { data: ChartBar[] }) {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div className="relative pt-2">
       <div className="text-brown-muted absolute top-5 left-0 flex h-[88px] flex-col justify-between text-[7.5px] leading-none">
@@ -38,9 +40,13 @@ function LearningChart({ data }: { data: ChartBar[] }) {
               </span>
               <div className="flex h-[77px] w-full items-end justify-center">
                 <motion.div
-                  initial={{ height: 0 }}
+                  initial={prefersReducedMotion ? false : { height: 0 }}
                   animate={{ height: `${heightPercent}%` }}
-                  transition={{ duration: 0.5, delay: index * 0.05, ease: 'easeOut' }}
+                  transition={{
+                    duration: prefersReducedMotion ? 0 : 0.5,
+                    delay: prefersReducedMotion ? 0 : index * 0.05,
+                    ease: 'easeOut',
+                  }}
                   className={cn(
                     'w-[26px] max-w-full rounded-t-sm',
                     bar.isHighlighted ? 'bg-coral-highlight' : 'bg-coral/70',
