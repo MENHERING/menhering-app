@@ -1,6 +1,6 @@
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { cn } from '@/lib/cn';
-import type { RankingEntry } from '@/types/ranking/model';
+import type { RankingEntry } from '@/schemas/ranking.schema';
 
 interface RankingListItemProps {
   entry: RankingEntry;
@@ -18,7 +18,8 @@ export function RankingListItem({ entry }: RankingListItemProps) {
         {entry.rank}
       </span>
 
-      <div className="bg-coral-soft/40 flex size-11 shrink-0 items-center justify-center rounded-full">
+      {/* 다른 화면(프로필·홈)의 원형 아바타와 톤을 맞춘다 — 코랄 틴트 배경 대신 흰 배경 + 옅은 링. */}
+      <div className="ring-sand-line flex size-11 shrink-0 items-center justify-center rounded-full bg-white ring-2">
         <CharacterRenderer
           characterType={entry.characterType}
           colorTheme={entry.colorTheme}

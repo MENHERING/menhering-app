@@ -1,4 +1,4 @@
-import type { RankingEntry } from '@/types/ranking/model';
+import type { RankingEntry } from '@/schemas/ranking.schema';
 
 export const MOCK_RANKING: RankingEntry[] = [
   {
@@ -8,6 +8,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '고양이',
     colorTheme: '민트',
     xp: 1900,
+    isMe: false,
   },
   {
     rank: 2,
@@ -16,6 +17,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '토끼',
     colorTheme: '라벤더',
     xp: 1644,
+    isMe: false,
   },
   {
     rank: 3,
@@ -24,6 +26,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '강아지',
     colorTheme: '피치',
     xp: 1428,
+    isMe: false,
   },
   {
     rank: 4,
@@ -33,6 +36,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     colorTheme: '스카이',
     xp: 1280,
     lastActiveLabel: '3일 전 접속',
+    isMe: false,
   },
   {
     rank: 5,
@@ -52,6 +56,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     colorTheme: '선샤인',
     xp: 1040,
     lastActiveLabel: '3일 전 접속',
+    isMe: false,
   },
   {
     rank: 7,
@@ -61,6 +66,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     colorTheme: '피치',
     xp: 890,
     lastActiveLabel: '2일 전 접속',
+    isMe: false,
   },
   {
     rank: 8,
@@ -70,8 +76,8 @@ export const MOCK_RANKING: RankingEntry[] = [
     colorTheme: '클래식',
     xp: 760,
     lastActiveLabel: '3일 전 접속',
+    isMe: false,
   },
-  // 전체 기간에서만 노출(주간 랭킹엔 아직 활동이 없어 집계 안 됨)
   {
     rank: 9,
     userId: 'user-9',
@@ -80,8 +86,6 @@ export const MOCK_RANKING: RankingEntry[] = [
     colorTheme: '민트',
     xp: 640,
     lastActiveLabel: '10일 전 접속',
+    isMe: false,
   },
 ];
-
-// 주간 랭킹: 최근 활동이 있는 8명만.
-export const MOCK_RANKING_WEEK: RankingEntry[] = MOCK_RANKING.filter((entry) => entry.rank <= 8);

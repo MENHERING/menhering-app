@@ -120,6 +120,9 @@ export function AvatarClient({
         useAvatarStore.getState().initFrom({ characterType, colorTheme, nickname });
         // 다른 화면(학습 탭 등)이 useMyAvatar()로 들고 있는 캐시된 닉네임도 갱신되게 무효화한다.
         queryClient.invalidateQueries({ queryKey: queryKeys.avatar.me() });
+        // 랭킹 화면도 캐릭터/색상을 캐시해 보여주므로 같이 무효화 — 안 하면 방금 바꾼 캐릭터가
+        // 랭킹에는 재방문 전까지 예전 모습으로 남는다.
+        queryClient.invalidateQueries({ queryKey: queryKeys.friends.ranking() });
         setFeedback({ variant: 'success', message: '저장되었어요!' });
       } else {
         setFeedback({ variant: 'error', message: result.error });
