@@ -3,7 +3,6 @@
 import type { CSSProperties } from 'react';
 
 import {
-  Bell,
   ChevronRight,
   CircleCheck,
   Flame,
@@ -20,6 +19,7 @@ import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
 import { SpeechBubble } from '@/components/common/SpeechBubble';
+import { NotificationBell } from '@/components/home/NotificationBell';
 import { ROUTES } from '@/constants/routes';
 import { AVATAR_SFX_VOLUME, AVATAR_TAP_SOUND } from '@/constants/sounds';
 import { useAvatarDialogue } from '@/hooks/avatar/use-avatar-dialogue';
@@ -74,14 +74,14 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   const stats: HomeStat[] = [
     {
       Icon: CircleCheck,
-      iconClass: 'text-accent-green',
+      iconClass: 'text-green-accent',
       value: summary.todayCompleted,
       label: '오늘 완료',
     },
     { Icon: Flame, iconClass: 'text-coral', value: summary.learnStreak, label: '연속 일수' },
     {
       Icon: Target,
-      iconClass: 'text-accent-magenta',
+      iconClass: 'text-plum',
       value: `${summary.accuracyPercent}%`,
       label: '정답률',
     },
@@ -106,13 +106,7 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
             </span>
             <h1 className="text-plum text-xl font-extrabold">멘헤링</h1>
           </div>
-          <button
-            type="button"
-            aria-label="알림"
-            className="flex size-10 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] active:opacity-70"
-          >
-            <Bell className="text-coral size-5" aria-hidden />
-          </button>
+          <NotificationBell />
         </header>
 
         {/* 말풍선 — 아바타 감정에 맞는 대사를 렛서가 말하듯 띄운다(12s마다 회전).
