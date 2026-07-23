@@ -12,8 +12,8 @@ import type { NotificationType } from '@/types/notifications';
 // 알림 종류별 아이콘·색. 아이콘 배경은 통일하고 아이콘 색으로만 종류를 구분한다.
 const TYPE_META: Record<NotificationType, { Icon: LucideIcon; iconClass: string }> = {
   mood: { Icon: Heart, iconClass: 'text-coral' },
-  reminder: { Icon: BookOpen, iconClass: 'text-accent-magenta' },
-  social: { Icon: Users, iconClass: 'text-accent-green' },
+  reminder: { Icon: BookOpen, iconClass: 'text-plum' },
+  social: { Icon: Users, iconClass: 'text-green-accent' },
 };
 
 // 홈 상단 알림 벨 + 드롭다운 패널. 실제 알림 소스(마스코트 감정 알림 #109 등)가 붙기 전까지

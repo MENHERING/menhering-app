@@ -64,14 +64,14 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   const stats: HomeStat[] = [
     {
       Icon: CircleCheck,
-      iconClass: 'text-accent-green',
+      iconClass: 'text-green-accent',
       value: summary.todayCompleted,
       label: '오늘 완료',
     },
     { Icon: Flame, iconClass: 'text-coral', value: summary.learnStreak, label: '연속 일수' },
     {
       Icon: Target,
-      iconClass: 'text-accent-magenta',
+      iconClass: 'text-plum',
       value: `${summary.accuracyPercent}%`,
       label: '정답률',
     },
