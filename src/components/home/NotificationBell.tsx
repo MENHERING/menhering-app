@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Bell, BellOff, BookOpen, Heart, Users, type LucideIcon } from 'lucide-react';
 
+import { usePushSubscription } from '@/hooks/push/use-push-subscription';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/relative-time';
 import { MOCK_NOTIFICATIONS } from '@/mocks/notifications.mock';
@@ -16,13 +17,37 @@ const TYPE_META: Record<NotificationType, { Icon: LucideIcon; iconClass: string 
   social: { Icon: Users, iconClass: 'text-green-accent' },
 };
 
+// 켜기 버튼을 눌러도 소용없는 경우에만 안내 문구를 돌려준다(null이면 토글을 그린다).
+// 권한이 denied면 브라우저가 재요청 자체를 막으므로 버튼을 보여주면 안 된다.
+// 미지원의 대부분은 iOS Safari 탭 — 웹 푸시가 홈 화면에 추가한 PWA에서만 동작해서다.
+function getPushNotice(isSupported: boolean, permission: NotificationPermission): string | null {
+  if (!isSupported)
+    return '이 브라우저에서는 알림을 받을 수 없어요. iPhone은 홈 화면에 추가하면 받을 수 있어요.';
+  if (permission === 'denied') return '브라우저 설정에서 알림을 허용하면 받을 수 있어요.';
+
+  return null;
+}
+
 // 홈 상단 알림 벨 + 드롭다운 패널. 실제 알림 소스(마스코트 감정 알림 #109 등)가 붙기 전까지
 // 목데이터로 UI를 완성한다. 읽음 상태는 로컬(useState) — 영속화는 백엔드 후속.
+// 패널 상단의 기기 알림 토글만 목업이 아니라 실제 푸시 구독(#109)과 연결돼 있다.
 export function NotificationBell() {
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [isOpen, setIsOpen] = useState(false);
+  const [pushError, setPushError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement>(null);
+
+  const {
+    isSupported: isPushSupported,
+    permission,
+    isSubscribed: isPushOn,
+    isBusy: isPushBusy,
+    subscribe,
+    unsubscribe,
+  } = usePushSubscription();
+
+  const pushNotice = getPushNotice(isPushSupported, permission);
 
   const unreadCount = notifications.filter((notification) => !notification.isRead).length;
 
@@ -64,6 +89,22 @@ export function NotificationBell() {
     setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
   };
 
+  // 권한 거부처럼 "정상적으로 실패한" 경우는 훅이 throw하지 않고 permission만 갱신하므로,
+  // 화면은 getPushNotice가 알아서 안내 문구로 바뀐다. catch는 진짜 오류(네트워크·저장 실패)용이다.
+  const handlePushToggle = async () => {
+    setPushError(null);
+
+    try {
+      if (isPushOn) {
+        await unsubscribe();
+      } else {
+        await subscribe();
+      }
+    } catch {
+      setPushError('알림 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -97,6 +138,32 @@ export function NotificationBell() {
                 모두 읽음
               </button>
             )}
+          </div>
+
+          {/* 기기 알림(웹 푸시) on/off. 아래 목록은 앱을 열어야 보이므로, 앱을 닫은 동안에도
+              받으려면 브라우저 구독을 따로 켜야 한다. */}
+          <div className="border-cream bg-sand/40 border-b px-4 py-3">
+            {pushNotice ? (
+              <p className="text-brown-soft text-[11px] leading-relaxed">{pushNotice}</p>
+            ) : (
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-plum text-xs font-bold">
+                  {isPushOn ? '기기 알림 켜짐' : '앱을 닫아도 알림 받기'}
+                </span>
+                <button
+                  type="button"
+                  onClick={handlePushToggle}
+                  disabled={isPushBusy}
+                  className={cn(
+                    'shrink-0 rounded-full px-3 py-1 text-xs font-bold transition-colors disabled:opacity-50',
+                    isPushOn ? 'text-brown-soft bg-black/5' : 'bg-coral text-white',
+                  )}
+                >
+                  {isPushBusy ? '처리 중' : isPushOn ? '끄기' : '켜기'}
+                </button>
+              </div>
+            )}
+            {pushError && <p className="text-coral mt-1.5 text-[11px]">{pushError}</p>}
           </div>
 
           {notifications.length === 0 ? (
