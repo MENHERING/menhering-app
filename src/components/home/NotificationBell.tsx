@@ -22,6 +22,7 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLButtonElement>(null);
 
   const unreadCount = notifications.filter((notification) => !notification.isRead).length;
 
@@ -35,7 +36,11 @@ export function NotificationBell() {
       }
     };
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+      if (event.key !== 'Escape') return;
+
+      setIsOpen(false);
+      // Esc로 닫으면 포커스가 body로 흩어져 키보드 사용자가 위치를 잃는다. 트리거(벨)로 되돌린다.
+      bellRef.current?.focus();
     };
 
     document.addEventListener('pointerdown', handlePointerDown);
@@ -62,6 +67,7 @@ export function NotificationBell() {
   return (
     <div ref={containerRef} className="relative">
       <button
+        ref={bellRef}
         type="button"
         aria-label={unreadCount > 0 ? `알림 ${unreadCount}개` : '알림'}
         aria-haspopup="true"
