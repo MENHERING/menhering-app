@@ -56,7 +56,7 @@ export function QuizResultActions({
       <Button variant="secondary" size="lg" isFullWidth onClick={goToLearning}>
         스테이지 목록
       </Button>
-      {isSuccess && wrongCount > 0 && (
+      {wrongCount > 0 && (
         <Button variant="ghost" size="md" isFullWidth onClick={goToWrongNote}>
           오답노트 보러가기
         </Button>

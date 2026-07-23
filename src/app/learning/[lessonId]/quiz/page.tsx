@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 import { useParams, useRouter } from 'next/navigation';
 
-import { QuizExplanation } from '@/components/quiz/QuizExplanation';
+import { Button } from '@/components/common/Button';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
 import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
@@ -36,8 +36,9 @@ export default function QuizPage() {
   const hasAnswered = selectedIndex !== null;
   const isLastQuestion = questions ? currentIndex === questions.length - 1 : false;
 
+  // 답을 고른 뒤에도(다음 문제로 넘어가기 전까지) 시간은 계속 흐른다.
   useEffect(() => {
-    if (!questions || hasAnswered || showTimeoutModal) return;
+    if (!questions || showTimeoutModal) return;
 
     const timer = setTimeout(() => {
       setSecondsLeft((prev) => {
@@ -50,7 +51,7 @@ export default function QuizPage() {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [questions, secondsLeft, hasAnswered, showTimeoutModal]);
+  }, [questions, secondsLeft, showTimeoutModal]);
 
   if (isError) {
     return (
@@ -64,8 +65,8 @@ export default function QuizPage() {
     return <p className="text-brown-soft px-5 py-16 text-center text-sm">불러오는 중...</p>;
   }
 
+  // 다음 문제로 넘어가기 전까지는 몇 번이든 답을 바꿀 수 있다.
   const handleSelect = (index: number) => {
-    if (hasAnswered) return;
     setSelectedIndex(index);
   };
 
@@ -125,12 +126,7 @@ export default function QuizPage() {
 
       <div className="flex flex-col gap-3 px-5">
         {question.options.map((option, index) => {
-          const state =
-            hasAnswered && index === question.correctIndex
-              ? 'correct'
-              : hasAnswered && index === selectedIndex
-                ? 'wrong-selected'
-                : 'default';
+          const state = hasAnswered && index === selectedIndex ? 'selected' : 'default';
 
           return (
             <QuizOptionButton
@@ -138,14 +134,26 @@ export default function QuizPage() {
               index={index}
               label={option}
               state={state}
-              disabled={hasAnswered}
+              disabled={false}
               onSelect={() => handleSelect(index)}
             />
           );
         })}
       </div>
 
-      {hasAnswered && <QuizExplanation explanation={question.explanation} onNext={handleNext} />}
+      {hasAnswered && (
+        <div className="px-5">
+          <Button
+            variant="primary"
+            size="lg"
+            isFullWidth
+            isLoading={submitQuiz.isPending}
+            onClick={handleNext}
+          >
+            {isLastQuestion ? '결과 보기' : '다음 문제'}
+          </Button>
+        </div>
+      )}
 
       {showTimeoutModal && (
         <QuizTimeoutModal

@@ -1,5 +1,6 @@
 import { QuizAvatarRing } from '@/components/common/AvatarRing';
 import { CoinBadge } from '@/components/common/CoinBadge';
+import { SpeechBubble } from '@/components/common/SpeechBubble';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
@@ -7,6 +8,7 @@ import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
 import { CURRICULUM_TOTAL_COUNT } from '@/constants/curriculum';
 import { moodFromValue } from '@/constants/mood';
+import { QUIZ_FAILURE_DIALOGUE, QUIZ_SUCCESS_DIALOGUE } from '@/constants/quiz-dialogue';
 import { createClient } from '@/lib/supabase/server';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
 
@@ -17,6 +19,12 @@ const DEFAULT_MOOD_VALUE = 60;
 function parseCount(value: string | undefined): number {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
+}
+
+// 서버 컴포넌트라 요청마다 한 번만 실행되고 그대로 HTML에 구워지므로, 무작위 선택도
+// 클라이언트 재실행에 따른 하이드레이션 불일치 없이 안전하다.
+function pickDialogue(lines: readonly string[]): string {
+  return lines[Math.floor(Math.random() * lines.length)];
 }
 
 export default async function QuizResultPage({
@@ -83,19 +91,26 @@ export default async function QuizResultPage({
   const mood = moodFromValue(happinessPercent);
 
   if (!isSuccess) {
+    const dialogue = pickDialogue(QUIZ_FAILURE_DIALOGUE[mood]);
+    const totalCount = correctCount + wrongCount;
+
     return (
       <>
+        <div className="flex justify-center">
+          <SpeechBubble size="md">{dialogue}</SpeechBubble>
+        </div>
         <QuizAvatarRing
+          size={200}
           happinessPercent={happinessPercent}
+          gainPercent={gainPercent}
           characterType={characterType}
           colorTheme={colorTheme}
           useHero
           mood={mood}
         />
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h1 className="text-ink text-xl font-extrabold">아쉬워요!</h1>
-          <p className="text-brown-soft text-sm">이번 스테이지는 통과하지 못했어요</p>
-        </div>
+        <p className="text-brown-soft text-center text-sm">
+          {totalCount}문제를 모두 맞혀야 다음 스테이지로 넘어갈 수 있어요
+        </p>
         <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
         <QuizResultActions
           isSuccess={false}
@@ -109,21 +124,27 @@ export default async function QuizResultPage({
     );
   }
 
+  const successDialogue = pickDialogue(QUIZ_SUCCESS_DIALOGUE[mood]);
+
   return (
     <>
+      <div className="flex justify-center">
+        <SpeechBubble size="md">{successDialogue}</SpeechBubble>
+      </div>
       <QuizAvatarRing
+        size={200}
         happinessPercent={happinessPercent}
+        gainPercent={gainPercent}
         characterType={characterType}
         colorTheme={colorTheme}
         useHero
         mood={mood}
       />
-      <div className="flex flex-col items-center gap-2">
-        <h1 className="text-ink text-xl font-extrabold">오늘의 클리어</h1>
-        <div className="flex items-center gap-2">
-          <QuizXpBadge xp={xpReward} />
-          {coinReward > 0 && <CoinBadge amount={coinReward} />}
-        </div>
+      {/* 레이아웃의 기본 gap-8이 위 아바타 링과 너무 벌어져 보여서, "오늘의 클리어" 제목이
+          있던 자리만큼(-mt-6) 당겨 아바타 바로 아래 보상처럼 붙인다. */}
+      <div className="-mt-6 flex items-center justify-center gap-2">
+        {xpReward > 0 && <QuizXpBadge xp={xpReward} />}
+        {coinReward > 0 && <CoinBadge amount={coinReward} />}
       </div>
       <HappinessGauge happinessPercent={happinessPercent} gainPercent={gainPercent} />
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />

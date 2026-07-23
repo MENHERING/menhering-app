@@ -6,7 +6,6 @@ import { notFound } from 'next/navigation';
 
 import { QuizAvatarRing } from '@/components/common/AvatarRing';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
-import { QuizExplanation } from '@/components/quiz/QuizExplanation';
 import { QuizOptionButton } from '@/components/quiz/QuizOptionButton';
 import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
@@ -50,7 +49,7 @@ export default function TestQuizPage() {
       {/* case 02: QuizQuestionCard */}
       <QuizQuestionCard order={question.order} prompt={question.prompt} />
 
-      {/* case 03: QuizOptionButton - default / correct / wrong-selected */}
+      {/* case 03: QuizOptionButton - default / selected */}
       <div className="flex flex-col gap-3">
         <QuizOptionButton
           index={0}
@@ -61,22 +60,12 @@ export default function TestQuizPage() {
         />
         <QuizOptionButton
           index={1}
-          label="정답 상태"
-          state="correct"
-          disabled
-          onSelect={() => {}}
-        />
-        <QuizOptionButton
-          index={2}
-          label="내가 고른 오답 상태"
-          state="wrong-selected"
+          label="내가 고른 상태"
+          state="selected"
           disabled
           onSelect={() => {}}
         />
       </div>
-
-      {/* case 04: QuizExplanation */}
-      <QuizExplanation explanation={question.explanation} onNext={() => {}} />
 
       {/* case 05: QuizAvatarRing - 정적 이미지(기본) / Live2D 5단계 감정(결과 화면 전용, 한 번에 하나만 마운트) */}
       <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-6">
@@ -122,7 +111,9 @@ export default function TestQuizPage() {
       <QuizResultStats correctCount={5} wrongCount={0} />
 
       {/* case 09: QuizXpBadge */}
-      <QuizXpBadge xp={50} />
+      <div className="flex justify-center">
+        <QuizXpBadge xp={50} />
+      </div>
 
       {/* case 10: 실패 결과 헤더 */}
       <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-6">
