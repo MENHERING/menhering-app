@@ -32,14 +32,19 @@ function pickDialogue(lines: readonly string[]): string {
 // /api/push/test와 동일한 발송·정리 패턴이되, 대상이 "본인"이 아니라 "전체 구독"이다.
 export async function GET(request: NextRequest) {
   try {
+    const cronSecret = process.env.CRON_SECRET;
     const authHeader = request.headers.get('authorization');
 
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    // cronSecret이 배포 환경에 없으면 authHeader와 무관하게 항상 거부한다 — 없으면
+    // `Bearer undefined`가 그대로 비교돼 그 문자열을 보낸 요청이 인증을 통과해버린다.
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       throw new ApiError(401, '인증되지 않은 요청입니다.');
     }
 
     const supabase = createServiceClient();
 
+    // PostgREST 기본 응답 상한(1000행)을 넘는 규모가 되면 페이지네이션(.range())이 필요하다.
+    // 지금 서비스 규모에서는 아직 아니라고 판단해 미루지만, 구독자가 크게 늘면 여기부터 확인할 것.
     const { data: subscriptions, error } = await supabase
       .from('push_subscriptions')
       .select('endpoint, p256dh, auth, user_id');
@@ -79,7 +84,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const results = await Promise.all(
+    // allSettled: 한 구독의 발송 실패(예: 잘못된 키로 인한 4xx)가 나머지 구독자의 발송까지
+    // 막아선 안 된다 — Promise.all이면 하나만 reject해도 전체가 reject돼 그날 리마인더가
+    // 아무에게도 안 나간다. 실패는 관측만 하고(로그), 만료(404/410) 판정된 것만 정리한다.
+    const results = await Promise.allSettled(
       (subscriptions ?? []).map((sub) => {
         const mood = moodFromValue(moodValueByUserId.get(sub.user_id) ?? DEFAULT_MOOD_VALUE);
         const payload = {
@@ -92,8 +100,19 @@ export async function GET(request: NextRequest) {
       }),
     );
 
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(
+          `[push/reminder] 발송 실패 (endpoint: ${subscriptions?.[index]?.endpoint}):`,
+          result.reason,
+        );
+      }
+    });
+
     const expiredEndpoints = (subscriptions ?? [])
-      .filter((_, index) => results[index] === 'expired')
+      .filter(
+        (_, index) => results[index].status === 'fulfilled' && results[index].value === 'expired',
+      )
       .map((sub) => sub.endpoint);
 
     if (expiredEndpoints.length > 0) {
@@ -110,7 +129,8 @@ export async function GET(request: NextRequest) {
     }
 
     const { body, status } = toSuccessResult(PushReminderResultSchema, {
-      sent: results.filter((result) => result === 'sent').length,
+      sent: results.filter((result) => result.status === 'fulfilled' && result.value === 'sent')
+        .length,
       pruned: expiredEndpoints.length,
     });
 

@@ -48,7 +48,15 @@ export function SettingsScreen() {
     setReminderError(null);
 
     try {
-      await (checked ? subscribeReminder() : unsubscribeReminder());
+      if (checked) {
+        // 권한 거부·미지원처럼 "정상적으로 실패한" 경우는 throw 없이 false로 돌아오므로,
+        // catch만으론 못 잡는다 — 반환값을 직접 확인해야 토글이 조용히 그대로 남는 걸 막는다.
+        const subscribed = await subscribeReminder();
+
+        if (!subscribed) setReminderError('알림 권한이 필요해요. 브라우저 설정에서 허용해주세요.');
+      } else {
+        await unsubscribeReminder();
+      }
     } catch {
       setReminderError('알림 설정을 바꾸지 못했어요. 다시 시도해주세요.');
     }

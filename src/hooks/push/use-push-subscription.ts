@@ -12,7 +12,9 @@ interface PushSubscriptionState {
   permission: NotificationPermission;
   isSubscribed: boolean;
   isBusy: boolean;
-  subscribe: () => Promise<void>;
+  // 실제 오류(네트워크·API 실패)는 그대로 throw하고, 미지원·권한 거부처럼 "정상적으로 구독에
+  // 실패한" 경우는 throw 없이 false를 반환한다. 호출부가 권한 거부도 실패로 표시하려면 이 값을 봐야 한다.
+  subscribe: () => Promise<boolean>;
   unsubscribe: () => Promise<void>;
 }
 
@@ -63,7 +65,7 @@ export function usePushSubscription(): PushSubscriptionState {
   }, []);
 
   const subscribe = useCallback(async () => {
-    if (!checkSupported()) return;
+    if (!checkSupported()) return false;
 
     setIsBusy(true);
 
@@ -71,7 +73,7 @@ export function usePushSubscription(): PushSubscriptionState {
       const result = await Notification.requestPermission();
       setPermission(result);
 
-      if (result !== 'granted') return;
+      if (result !== 'granted') return false;
 
       const registration = await serviceWorkerReady();
 
@@ -90,6 +92,8 @@ export function usePushSubscription(): PushSubscriptionState {
       });
 
       setIsSubscribed(true);
+
+      return true;
     } finally {
       setIsBusy(false);
     }
