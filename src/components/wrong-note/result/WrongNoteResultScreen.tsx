@@ -81,7 +81,7 @@ export function WrongNoteResultScreen({ queueIds }: WrongNoteResultScreenProps) 
         isFullWidth
         size="lg"
         className="bg-coral-accent mt-22"
-        onClick={() => router.push('/mypage/wrong-note')}
+        onClick={() => router.replace('/mypage/wrong-note')}
       >
         완료
       </Button>
