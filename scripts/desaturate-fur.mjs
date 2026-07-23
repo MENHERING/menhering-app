@@ -23,18 +23,35 @@ import { createContext, runInContext } from 'node:vm';
 import sharp from 'sharp';
 
 const CORE_SRC = 'public/live2d/core/live2dcubismcore.min.js';
-const MOC = 'public/live2d/redpanda/menhering.moc3';
-const TEXTURE = 'public/live2d/redpanda/menhering.4096/texture_00.png';
 const TINT_DRAWABLES_JSON = 'src/constants/live2d-tint-drawables.json';
 
-// 런타임(Live2DCharacter의 BODY_TINT_DRAWABLES)과 **같은 파일**을 읽는다.
-// 손으로 복사해두면 재리깅 때 한쪽만 고쳐져, 틴트는 되는데 회색화가 안 된 부위가 갈색으로 뜬다.
-const FUR_DRAWABLES = new Set(JSON.parse(readFileSync(TINT_DRAWABLES_JSON, 'utf8')));
+// moc/텍스처 경로. 사용법: node scripts/desaturate-fur.mjs  (레서판다 전용, 인자 불필요)
+//
+// ⚠️ 정책(2026-07-22): 회색화는 **레서판다 전용**이다. 기본 테마가 '무색'(원화색)으로 바뀌어
+// 고양이·강아지·토끼는 원본 컬러 텍스처를 그대로 쓴다(무색=원화색) — 이 셋에 desaturate를 돌리면
+// 원화색이 회색이 되므로 CONFIG에 넣지 않는다. 넣으면 아래 유효성 검증이 못 막는다. 재리깅해도 레서판다만.
+const CONFIG = {
+  레서판다: {
+    moc: 'public/live2d/redpanda/menhering.moc3',
+    texture: 'public/live2d/redpanda/menhering.4096/texture_00.png',
+    // 225 = develop 승인본(털 회색값 p50≈170)에 맞춘 고정값. 회귀 방지 위해 그대로 유지.
+    whitePoint: 225,
+  },
+};
 
-// Photopea "Desaturate"와 같은 HSL 명도 (max+min)/2 를 쓴 뒤, Levels 흰점을 여기로 올린다.
+const CHARACTER = process.argv[2] ?? '레서판다';
+const cfg = CONFIG[CHARACTER];
+if (!cfg)
+  throw new Error(`알 수 없는 캐릭터: ${CHARACTER}. (${Object.keys(CONFIG).join(' / ')} 중 하나)`);
+const MOC = cfg.moc;
+const TEXTURE = cfg.texture;
+
+// 런타임(applyTint의 tintDrawables)과 **같은 파일**의 같은 캐릭터 항목을 읽는다(캐릭터→드로어블 맵).
+// 손으로 복사해두면 재리깅 때 한쪽만 고쳐져, 틴트는 되는데 회색화가 안 된 부위가 갈색으로 뜬다.
+const FUR_DRAWABLES = new Set(JSON.parse(readFileSync(TINT_DRAWABLES_JSON, 'utf8'))[CHARACTER]);
+
+// Photopea "Desaturate"와 같은 HSL 명도 (max+min)/2 를 쓴 뒤, Levels 흰점을 whitePoint로 올린다.
 // 표준 휘도(0.2126R+0.7152G+0.0722B)를 쓰면 진빨강이 거의 검정이 돼 곱하기 결과가 새까매진다.
-// 225 = develop의 승인본 분포(털 회색값 p50≈170)에 맞춘 값.
-const WHITE_POINT = 225;
 
 // 이미 회색인 텍스처를 또 돌리면 흰점 보정이 중첩돼 점점 밝아진다 → 채도로 감지해 건너뛴다.
 const ALREADY_GRAY_SATURATION = 0.05;
@@ -195,15 +212,18 @@ if (meanSaturation < ALREADY_GRAY_SATURATION) {
   process.exit(0);
 }
 
+// whitePoint: 레서판다 고정값(225). 회색화는 레서판다 전용이라 종별 자동 산출은 두지 않는다.
+const whitePoint = cfg.whitePoint;
+
 // 변환은 반투명 가장자리(안티앨리어싱)까지 포함해 모든 픽셀에 적용한다.
 // 다만 요약 통계는 **완전 불투명 픽셀만** 센다 — 어두운 가장자리가 섞이면 p50이 끌려 내려가
-// develop 기준선(회색값 p50≈170, 불투명 기준 측정)과 비교가 안 된다.
+// 기준선(회색값 p50≈170, 불투명 기준 측정)과 비교가 안 된다.
 // 회색값은 0~255 정수라 히스토그램이면 충분하다(백만 개짜리 배열 정렬 불필요).
 const histogram = new Uint32Array(256);
 for (const i of furOffsets) {
   const max = Math.max(data[i], data[i + 1], data[i + 2]);
   const min = Math.min(data[i], data[i + 1], data[i + 2]);
-  const gray = Math.min(255, Math.round(((max + min) / 2) * (255 / WHITE_POINT)));
+  const gray = Math.min(255, Math.round(((max + min) / 2) * (255 / whitePoint)));
   data[i] = data[i + 1] = data[i + 2] = gray;
   if (data[i + 3] >= 250) histogram[gray]++;
 }
