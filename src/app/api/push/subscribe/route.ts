@@ -9,7 +9,10 @@ import {
   PushUnsubscribeInputSchema,
 } from '@/schemas/push.schema';
 
-// 브라우저 푸시 구독을 저장한다. 같은 브라우저(endpoint) 재구독이면 소유자·키를 갱신(upsert)한다.
+// 브라우저 푸시 구독을 저장한다. 같은 유저가 같은 브라우저(endpoint)로 재구독하면 키를 갱신(upsert)한다.
+// 다른 계정으로의 소유권 이전은 RLS UPDATE 정책이 막는다 - endpoint만 알면 남의 구독 행을 자기 것으로
+// 바꿔치기할 수 있기 때문이다. 그래서 공유 브라우저에서 계정을 바꿔 재구독하면 이 저장은 실패한다(500).
+// 이전이 필요해지면 service_role로 기존 행을 정리하는 별도 서버 흐름으로 분리한다.
 export async function POST(request: Request) {
   try {
     const supabase = await createClient();

@@ -38,7 +38,7 @@ export function WrongNoteDetailScreen({
 }: WrongNoteDetailScreenProps) {
   const router = useRouter();
   const { data: item, isPending, error } = useWrongNoteItem(id);
-  const { mutate: markReviewed } = useMarkWrongNoteReviewed();
+  const { mutate: markReviewed, isPending: isReviewPending } = useMarkWrongNoteReviewed();
   const recordSolveResult = useWrongNoteStore((state) => state.recordSolveResult);
   const applyReviewReward = useWrongNoteStore((state) => state.applyReviewReward);
   // 선택은 한 번만 가능하며, 정답/오답 여부와 무관하게 즉시 정답을 함께 공개한다.
@@ -52,6 +52,9 @@ export function WrongNoteDetailScreen({
   );
   const isAnswered = selectedNumber !== null;
   const isCorrect = selectedNumber === correctNumber;
+  // 정답일 때만 복습 완료 mutation이 걸리므로, 그 처리(캐시 무효화 포함)가 끝나기 전엔
+  // 다음으로 못 넘어가게 막는다. 오답이면 mutation 자체가 없어 항상 false.
+  const isNextBlocked = isCorrect && isReviewPending;
 
   const handleSelect = (number: number) => {
     if (isAnswered || !item) return;
@@ -138,7 +141,8 @@ export function WrongNoteDetailScreen({
           <WrongNoteResultToast
             isCorrect={isCorrect}
             nextLabel={isLastInQueue ? '제출하기' : '다음 문제'}
-            onNext={() => router.push(nextHref)}
+            onNext={() => router.replace(nextHref)}
+            isNextPending={isNextBlocked}
           />
         )}
       </main>
