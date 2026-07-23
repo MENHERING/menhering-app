@@ -28,6 +28,9 @@ interface QuizAvatarRingProps {
   // 동시에 뜰 수 있는 자리(퀴즈 타임아웃 모달 등)는 기본값(정적 이미지)을 유지해야 한다.
   useHero?: boolean;
   mood?: Mood;
+  // 이 인스턴스가 페이지 로드 시점에 바로 보이는(LCP 후보) 자리일 때만 true로 넘긴다.
+  // 모달·테스트 페이지처럼 나중에 뜨거나 부차적인 자리에 무분별하게 켜면 오히려 역효과다.
+  priority?: boolean;
 }
 
 export function QuizAvatarRing({
@@ -39,6 +42,7 @@ export function QuizAvatarRing({
   colorTheme = DEFAULT_COLOR_THEME,
   useHero = false,
   mood,
+  priority = false,
 }: QuizAvatarRingProps) {
   const gradientId = useId();
   const strokeWidth = 10;
@@ -106,6 +110,8 @@ export function QuizAvatarRing({
             src="/images/avatar/menhering_1_img.webp"
             alt="멘헤링 마스코트"
             fill
+            sizes={`${size}px`}
+            priority={priority}
             className="object-cover"
           />
         )}

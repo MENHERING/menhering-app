@@ -3,12 +3,10 @@
 import type { CSSProperties } from 'react';
 
 import {
-  Bell,
   ChevronRight,
   CircleCheck,
   Flame,
   PawPrint,
-  Sparkles,
   Star,
   Target,
   type LucideIcon,
@@ -20,8 +18,13 @@ import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { Button } from '@/components/common/Button';
 import { Footer } from '@/components/common/Footer';
 import { Section } from '@/components/common/Section';
+import { SpeechBubble } from '@/components/common/SpeechBubble';
+import { NotificationBell } from '@/components/home/NotificationBell';
 import { ROUTES } from '@/constants/routes';
+import { AVATAR_SFX_VOLUME, AVATAR_TAP_SOUND } from '@/constants/sounds';
+import { useAvatarDialogue } from '@/hooks/avatar/use-avatar-dialogue';
 import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
+import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
 import { getLevelInfo } from '@/lib/level';
 import type { CharacterType, ColorTheme } from '@/types/avatar';
@@ -53,6 +56,13 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   // 이미 걸러지므로 privateFetch 401 리다이렉트는 사실상 발생하지 않는다.
   const { data: avatarStatus } = useAvatarStatus();
 
+  // 말풍선 대사는 감정에 맞춰 렛서가 말하듯 회전시킨다. mood 미해결(첫 렌더)이면 '보통'으로
+  // 시작하고, 도착하면 그 감정의 대사로 바뀐다.
+  const dialogue = useAvatarDialogue(avatarStatus?.mood ?? '보통');
+
+  // 마스코트 탭 효과음(아바타 탭과 동일한 pop). 탭은 사용자 제스처라 자동재생 정책에 걸리지 않는다.
+  const playTap = useSound(AVATAR_TAP_SOUND, AVATAR_SFX_VOLUME);
+
   // 누적 XP → 현재 레벨·레벨 내 진행도(500 XP당 1레벨). 누적값을 그대로 표시하지 않고
   // getLevelInfo로 파생해야 "1550 / 500"처럼 기준을 넘는 표시가 안 나온다.
   const { level, currentXp, targetXp } = getLevelInfo(summary.xp);
@@ -64,14 +74,14 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
   const stats: HomeStat[] = [
     {
       Icon: CircleCheck,
-      iconClass: 'text-accent-green',
+      iconClass: 'text-green-accent',
       value: summary.todayCompleted,
       label: '오늘 완료',
     },
     { Icon: Flame, iconClass: 'text-coral', value: summary.learnStreak, label: '연속 일수' },
     {
       Icon: Target,
-      iconClass: 'text-accent-magenta',
+      iconClass: 'text-plum',
       value: `${summary.accuracyPercent}%`,
       label: '정답률',
     },
@@ -96,37 +106,48 @@ export function HomeScreen({ summary, avatar }: HomeScreenProps) {
             </span>
             <h1 className="text-plum text-xl font-extrabold">멘헤링</h1>
           </div>
-          <button
-            type="button"
-            aria-label="알림"
-            className="flex size-10 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] active:opacity-70"
-          >
-            <Bell className="text-coral size-5" aria-hidden />
-          </button>
+          <NotificationBell />
         </header>
 
-        {/* 말풍선 */}
-        <div className="mt-4 flex justify-center">
-          <div className="border-coral/30 relative rounded-full border-2 bg-white px-5 py-2.5 shadow-sm">
-            <p className="text-plum flex items-center gap-1 text-sm font-bold">
-              {avatar.nickname}님, {summary.greeting}
-              <Sparkles className="text-coral size-4" aria-hidden />
-            </p>
-            <span className="border-coral/30 absolute -bottom-1.5 left-1/2 size-3 -translate-x-1/2 rotate-45 border-r-2 border-b-2 bg-white" />
-          </div>
+        {/* 말풍선 — 아바타 감정에 맞는 대사를 렛서가 말하듯 띄운다(12s마다 회전).
+            감정 기운 배경(아우라)은 아바타 탭 숲 배경 기준으로 튜닝돼, 홈의 밝은 크림 위에선 진하게
+            떠 말풍선을 먹는다. 공용 컴포넌트(MoodBackdrop 아우라·SpeechBubble)는 건드리지 않고
+            홈에서만 처리한다:
+            ① z-10으로 말풍선을 아우라 위로 올리고
+            ② 뒤에 페이지와 같은 크림(bg-sand) 플레이트를 깔아 그 자리 아우라만 가려 깨끗한 무대를 만든다.
+               (크림-on-크림이라 배경에선 안 보이고, 붉은 아우라 위에서만 마스킹된다.) */}
+        <div className="relative z-10 mt-4 flex justify-center">
+          <span className="relative">
+            <span
+              aria-hidden
+              className="bg-sand absolute -inset-x-5 -inset-y-2 rounded-full blur-md"
+            />
+            <span className="relative drop-shadow-md">
+              <SpeechBubble size="md">{dialogue}</SpeechBubble>
+            </span>
+          </span>
         </div>
 
         {/* 마스코트 — 히어로 렌더러(Live2D 우선 + 감정 표정/심볼, 실패 시 SVG 폴백).
-            상단바 작은 아이콘은 성능상 SVG(CharacterRenderer)로 유지한다. */}
-        <div className="mt-6 flex justify-center">
-          <AvatarHero
-            characterType={avatar.characterType}
-            colorTheme={avatar.colorTheme}
-            mood={avatarStatus?.mood}
-            className="size-44 drop-shadow-sm"
-            size={176}
-            title="내 아바타"
-          />
+            상단바 작은 아이콘은 성능상 SVG(CharacterRenderer)로 유지한다.
+            말풍선(+크림 플레이트)이 머리를 덮지 않도록 작은 여백만 두어 머리 바로 위에 붙인다. */}
+        <div className="mt-1 flex justify-center">
+          {/* 캐릭터 탭 → 효과음(아바타 탭과 동일한 pop). press 피드백(active:scale)은 데스크톱/안드로이드용.
+              버튼이 접근성 이름을 담당하므로 내부 AvatarHero는 장식(title 생략)으로 둔다. */}
+          <button
+            type="button"
+            onClick={playTap}
+            aria-label="아바타 쓰다듬기"
+            className="focus-visible:ring-coral rounded-full transition-transform outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-95"
+          >
+            <AvatarHero
+              characterType={avatar.characterType}
+              colorTheme={avatar.colorTheme}
+              mood={avatarStatus?.mood}
+              className="size-44 drop-shadow-sm"
+              size={176}
+            />
+          </button>
         </div>
 
         {/* 마지막 접속 */}
