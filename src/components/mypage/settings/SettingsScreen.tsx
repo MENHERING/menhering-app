@@ -7,7 +7,9 @@ import { SettingsInfoRow } from '@/components/mypage/settings/SettingsInfoRow';
 import { SettingsToggleRow } from '@/components/mypage/settings/SettingsToggleRow';
 import { SETTINGS_ICON } from '@/constants/mypage-settings';
 import { usePushSubscription } from '@/hooks/push/use-push-subscription';
+import { useSfxEnabled } from '@/hooks/use-sfx-enabled';
 import { MOCK_SETTINGS_SECTIONS } from '@/mocks/mypage-settings.mock';
+import { useSoundStore } from '@/stores/sound-store';
 import type { FontSizeOption, SettingsToggleItem } from '@/types/mypage/settings';
 
 // 이 토글만 목업 로컬 상태가 아니라 실제 푸시 구독 여부로 동작한다(usePushSubscription).
@@ -20,6 +22,11 @@ import type { FontSizeOption, SettingsToggleItem } from '@/types/mypage/settings
 // #109 후속 작업(마스코트 감정 알림 구현)에서 처리하기로 함 — 그 전까지의 임시 동작이다.
 const LEARNING_REMINDER_ID = 'learning-reminder';
 
+// 효과음 토글도 목업 로컬 상태가 아니라 실제 재생 여부를 결정한다(useSoundStore).
+// 값은 서버가 아니라 localStorage에 둔다 — 기기마다 다르게 두고 싶은 설정이고,
+// 비로그인 화면(스플래시·로그인)에서도 효과음이 나기 때문이다.
+const SFX_ID = 'sfx';
+
 export function SettingsScreen() {
   const FontSizeIcon = SETTINGS_ICON['font-size'];
   const initialToggleState = useMemo(
@@ -27,7 +34,7 @@ export function SettingsScreen() {
       Object.fromEntries(
         MOCK_SETTINGS_SECTIONS.flatMap((section) =>
           (section.toggles ?? [])
-            .filter((item) => item.id !== LEARNING_REMINDER_ID)
+            .filter((item) => item.id !== LEARNING_REMINDER_ID && item.id !== SFX_ID)
             .map((item) => [item.id, item.defaultChecked]),
         ),
       ),
@@ -45,6 +52,9 @@ export function SettingsScreen() {
     subscribe: subscribeReminder,
     unsubscribe: unsubscribeReminder,
   } = usePushSubscription();
+
+  const isSfxEnabled = useSfxEnabled();
+  const setSfxEnabled = useSoundStore((state) => state.setSfxEnabled);
 
   const handleToggle = (id: string, checked: boolean) => {
     setToggleState((prev) => ({ ...prev, [id]: checked }));
@@ -66,6 +76,21 @@ export function SettingsScreen() {
     } catch {
       setReminderError('알림 설정을 바꾸지 못했어요. 다시 시도해주세요.');
     }
+  };
+
+  // 목업 로컬 상태(toggleState)가 아니라 각자의 실제 소스를 쓰는 토글이 늘어나 분기를 함수로 뺀다.
+  const resolveChecked = (item: SettingsToggleItem): boolean => {
+    if (item.id === LEARNING_REMINDER_ID) return isReminderOn;
+    if (item.id === SFX_ID) return isSfxEnabled;
+
+    return toggleState[item.id] ?? item.defaultChecked;
+  };
+
+  const resolveToggleHandler = (item: SettingsToggleItem): ((checked: boolean) => void) => {
+    if (item.id === LEARNING_REMINDER_ID) return handleReminderToggle;
+    if (item.id === SFX_ID) return setSfxEnabled;
+
+    return (checked) => handleToggle(item.id, checked);
   };
 
   return (
@@ -93,14 +118,8 @@ export function SettingsScreen() {
                   <SettingsToggleRow
                     key={item.id}
                     item={displayItem}
-                    checked={
-                      isReminder ? isReminderOn : (toggleState[item.id] ?? item.defaultChecked)
-                    }
-                    onCheckedChange={
-                      isReminder
-                        ? handleReminderToggle
-                        : (checked) => handleToggle(item.id, checked)
-                    }
+                    checked={resolveChecked(item)}
+                    onCheckedChange={resolveToggleHandler(item)}
                     disabled={isReminder && (!isPushSupported || isReminderBusy)}
                     isLast={!section.showFontSize && index === section.toggles!.length - 1}
                   />
