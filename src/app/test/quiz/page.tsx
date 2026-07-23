@@ -128,6 +128,7 @@ export default function TestQuizPage() {
       <div className="flex flex-col gap-4 rounded-2xl bg-white p-6">
         <QuizResultActions
           isSuccess
+          isFirstClear
           wrongCount={2}
           nextLessonId="입문-2"
           level="입문"
@@ -135,6 +136,7 @@ export default function TestQuizPage() {
         />
         <QuizResultActions
           isSuccess={false}
+          isFirstClear={false}
           wrongCount={4}
           nextLessonId="입문-2"
           level="입문"

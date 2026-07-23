@@ -114,6 +114,7 @@ export default async function QuizResultPage({
         <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
         <QuizResultActions
           isSuccess={false}
+          isFirstClear={xpReward > 0}
           wrongCount={wrongCount}
           nextLessonId={nextLessonId}
           level={level ?? ''}
@@ -149,6 +150,7 @@ export default async function QuizResultPage({
       <QuizResultStats correctCount={correctCount} wrongCount={wrongCount} />
       <QuizResultActions
         isSuccess
+        isFirstClear={xpReward > 0}
         wrongCount={wrongCount}
         nextLessonId={nextLessonId}
         level={level ?? ''}
