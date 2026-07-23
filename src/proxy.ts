@@ -8,7 +8,15 @@ import { updateSession } from '@/lib/supabase/middleware';
 // TODO: 공개 경로 추가 시 여기에 등록
 // /~offline: 서비스워커가 오프라인 폴백으로 미리 캐싱해두는 페이지라, 비로그인 상태에서
 // 캐싱되면 이 페이지가 아니라 /login 리다이렉트가 캐싱되어버린다.
-const PUBLIC_PATHS = new Set(['/', '/login', '/~offline', '/manifest.webmanifest']);
+// /api/push/reminder: Vercel Cron이 유저 세션 없이 호출한다. 인증은 라우트 내부의
+// CRON_SECRET 검증이 담당하므로, 세션 가드 대상에서는 빼야 한다(안 빼면 항상 /login으로 리다이렉트됨).
+const PUBLIC_PATHS = new Set([
+  '/',
+  '/login',
+  '/~offline',
+  '/manifest.webmanifest',
+  '/api/push/reminder',
+]);
 
 // OAuth 콜백은 세션을 "만드는" 경로라 도착 시점엔 아직 미인증 상태다.
 // 공개로 두지 않으면 가드가 /login으로 되돌려 로그인이 영영 완료되지 않는다.
