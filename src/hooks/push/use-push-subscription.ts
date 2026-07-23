@@ -111,7 +111,9 @@ export function usePushSubscription(): PushSubscriptionState {
           body: JSON.stringify({ endpoint: subscription.endpoint }),
         });
 
-        await subscription.unsubscribe();
+        // 서버 행이 지워진 시점에 이미 발송 대상에서 빠지므로, 브라우저 쪽 정리는 best-effort로 둔다.
+        // 여기서 던지면 아래 setIsSubscribed(false)를 못 지나가 서버는 해제됐는데 화면만 "켜짐"으로 남는다.
+        await subscription.unsubscribe().catch(() => {});
       }
 
       setIsSubscribed(false);
