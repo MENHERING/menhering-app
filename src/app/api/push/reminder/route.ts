@@ -1,10 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+import { DEFAULT_MOOD_VALUE } from '@/constants/avatar';
+import { moodFromValue } from '@/constants/mood';
+import { REMINDER_DIALOGUE } from '@/constants/reminder-dialogue';
 import { ApiError, toErrorResult } from '@/lib/api-error';
 import { toSuccessResult } from '@/lib/api-response';
 import { sendPush } from '@/lib/push/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { PushReminderResultSchema } from '@/schemas/push.schema';
+
+// _mood_decay_per_day()(supabase/migrations/20260714121731_avatar_mood_decay.sql)와 같은 값.
+// get_avatar_status RPC는 auth.uid() 기반이라 세션 없는 service role 컨텍스트에선 못 쓰므로,
+// 감쇠를 여기서 같은 공식으로 재계산한다(DB에 쓰지는 않는다 — 문구 선택용 근사치면 충분).
+const MOOD_DECAY_PER_DAY = 25;
+
+function decayedMoodValue(moodValue: number, updatedAt: string): number {
+  const elapsedDays = (Date.now() - new Date(updatedAt).getTime()) / 86_400_000;
+  const decay = Math.floor(elapsedDays * MOOD_DECAY_PER_DAY);
+
+  return Math.max(0, moodValue - decay);
+}
+
+// cron 응답이라 하이드레이션 걱정 없이 매 호출마다 자유롭게 무작위 선택한다.
+function pickDialogue(lines: readonly string[]): string {
+  return lines[Math.floor(Math.random() * lines.length)];
+}
 
 // 매일 KST 09:00(vercel.json cron)에 전체 구독자에게 학습 리마인더를 보낸다.
 // Vercel Cron은 GET으로 호출한다(POST 아님) — https://vercel.com/docs/cron-jobs
@@ -22,23 +42,54 @@ export async function GET(request: NextRequest) {
 
     const { data: subscriptions, error } = await supabase
       .from('push_subscriptions')
-      .select('endpoint, p256dh, auth');
+      .select('endpoint, p256dh, auth, user_id');
 
     if (error) {
       console.error('[push/reminder] 구독 조회 실패:', error);
       throw new ApiError(500, '구독을 불러오지 못했습니다.');
     }
 
-    const payload = {
-      title: '멘헤링',
-      body: '오늘의 학습, 아직이죠? 지금 시작해봐요!',
-      url: '/learning',
-    };
+    // 구독자별 현재 무드로 알림 문구를 다르게 고른다. push_subscriptions와 avatars는 둘 다
+    // auth.users만 참조할 뿐 서로 FK가 없어 PostgREST embed로 한 번에 못 묶으므로 따로 조회해 합친다.
+    const userIds = [...new Set((subscriptions ?? []).map((sub) => sub.user_id))];
+    const moodValueByUserId = new Map<string, number>();
+
+    if (userIds.length > 0) {
+      const { data: avatarRows, error: avatarError } = await supabase
+        .from('avatars')
+        .select('user_id, avatar_status(mood_value, updated_at)')
+        .in('user_id', userIds);
+
+      if (avatarError) {
+        // 무드 조회 실패는 발송 자체를 막을 이유가 없다 — 아래에서 기본값(DEFAULT_MOOD_VALUE)으로 폴백.
+        console.error('[push/reminder] 무드 조회 실패:', avatarError);
+      } else {
+        for (const row of avatarRows ?? []) {
+          const status = Array.isArray(row.avatar_status)
+            ? row.avatar_status[0]
+            : row.avatar_status;
+
+          if (status) {
+            moodValueByUserId.set(
+              row.user_id,
+              decayedMoodValue(status.mood_value, status.updated_at),
+            );
+          }
+        }
+      }
+    }
 
     const results = await Promise.all(
-      (subscriptions ?? []).map((sub) =>
-        sendPush({ endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth }, payload),
-      ),
+      (subscriptions ?? []).map((sub) => {
+        const mood = moodFromValue(moodValueByUserId.get(sub.user_id) ?? DEFAULT_MOOD_VALUE);
+        const payload = {
+          title: '멘헤링',
+          body: pickDialogue(REMINDER_DIALOGUE[mood]),
+          url: '/learning',
+        };
+
+        return sendPush({ endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth }, payload);
+      }),
     );
 
     const expiredEndpoints = (subscriptions ?? [])
