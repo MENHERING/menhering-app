@@ -8,6 +8,9 @@ export const queryKeys = {
     quiz: (level: string, stage: number) =>
       [...queryKeys.learning.all, 'quiz', level, stage] as const,
   },
+  levelTest: {
+    all: ['level-test'] as const,
+  },
   avatar: {
     all: ['avatar'] as const,
     me: () => [...queryKeys.avatar.all, 'me'] as const,
