@@ -52,7 +52,7 @@ export function LevelTestScreen() {
 
   if (isPending) return <OnboardingLoading />;
 
-  if (isError || questions.length === 0) {
+  if (isError || !questions || questions.length === 0) {
     return <OnboardingError error={error ?? new Error('문제 없음')} reset={() => void refetch()} />;
   }
 
