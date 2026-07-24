@@ -29,7 +29,7 @@ function pickDialogue(lines: readonly string[]): string {
 // 매일 KST 09:00(vercel.json cron)에 전체 구독자에게 학습 리마인더를 보낸다.
 // Vercel Cron은 GET으로 호출한다(POST 아님) — https://vercel.com/docs/cron-jobs
 // 유저 세션이 없는 컨텍스트이므로 service role로 RLS를 우회해 전체 구독을 읽는다.
-// /api/push/test와 동일한 발송·정리 패턴이되, 대상이 "본인"이 아니라 "전체 구독"이다.
+// 발송 후 만료(404/410) 구독을 정리하는 패턴이되, 대상이 "본인"이 아니라 "전체 구독"이다.
 export async function GET(request: NextRequest) {
   try {
     const cronSecret = process.env.CRON_SECRET;
