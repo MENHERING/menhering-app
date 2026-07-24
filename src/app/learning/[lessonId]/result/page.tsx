@@ -3,6 +3,7 @@ import { CoinBadge } from '@/components/common/CoinBadge';
 import { SpeechBubble } from '@/components/common/SpeechBubble';
 import { HappinessGauge } from '@/components/quiz/HappinessGauge';
 import { QuizResultActions } from '@/components/quiz/QuizResultActions';
+import { QuizResultSound } from '@/components/quiz/QuizResultSound';
 import { QuizResultStats } from '@/components/quiz/QuizResultStats';
 import { QuizXpBadge } from '@/components/quiz/QuizXpBadge';
 import { DEFAULT_CHARACTER_TYPE, DEFAULT_COLOR_THEME } from '@/constants/avatar';
@@ -96,6 +97,7 @@ export default async function QuizResultPage({
 
     return (
       <>
+        <QuizResultSound isSuccess={false} />
         <div className="flex justify-center">
           <SpeechBubble size="md">{dialogue}</SpeechBubble>
         </div>
@@ -128,6 +130,7 @@ export default async function QuizResultPage({
 
   return (
     <>
+      <QuizResultSound isSuccess />
       <div className="flex justify-center">
         <SpeechBubble size="md">{successDialogue}</SpeechBubble>
       </div>

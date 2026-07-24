@@ -13,6 +13,8 @@ import { WrongNoteExplanationCard } from '@/components/wrong-note/detail/WrongNo
 import { WrongNoteProgressBar } from '@/components/wrong-note/detail/WrongNoteProgressBar';
 import { WrongNoteResultToast } from '@/components/wrong-note/detail/WrongNoteSolveToast';
 import { WrongNoteSubjectTags } from '@/components/wrong-note/WrongNoteSubjectTags';
+import { AVATAR_SFX_VOLUME, QUIZ_CORRECT_SOUND, QUIZ_WRONG_SOUND } from '@/constants/sounds';
+import { useSound } from '@/hooks/use-sound';
 import { useMarkWrongNoteReviewed } from '@/hooks/wrong-note/use-mark-wrong-note-reviewed';
 import { useWrongNoteItem } from '@/hooks/wrong-note/use-wrong-note-item';
 import { ApiError } from '@/lib/api-error';
@@ -46,6 +48,9 @@ export function WrongNoteDetailScreen({
   // 복습 완료(PATCH) 실패 시 사용자에게 알려줄 에러 메시지. 성공은 캐시 무효화로 충분해 별도 표시 없음.
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const playCorrect = useSound(QUIZ_CORRECT_SOUND, AVATAR_SFX_VOLUME);
+  const playWrong = useSound(QUIZ_WRONG_SOUND, AVATAR_SFX_VOLUME);
+
   const correctNumber = useMemo(
     () => item?.options.find((option) => option.state === 'correct')?.number,
     [item],
@@ -60,6 +65,14 @@ export function WrongNoteDetailScreen({
     if (isAnswered || !item) return;
     setSelectedNumber(number);
     const isFirstTryCorrect = number === correctNumber;
+
+    // 이 화면은 선택 즉시 정답을 공개하는 설계라, 퀴즈와 달리 선택 시점에 소리를 내도 된다.
+    if (isFirstTryCorrect) {
+      playCorrect();
+    } else {
+      playWrong();
+    }
+
     // 정답을 맞혔을 때만 복습 완료로 처리하고, 틀리면 미복습 상태를 유지해 다시 풀 수 있게 한다.
     if (isFirstTryCorrect) {
       markReviewed(item.id, {
