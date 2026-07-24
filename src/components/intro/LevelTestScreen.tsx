@@ -6,68 +6,61 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
+import { OnboardingError } from '@/components/intro/OnboardingError';
+import { OnboardingLoading } from '@/components/intro/OnboardingLoading';
 import { ROUTES } from '@/constants/routes';
 import { AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME } from '@/constants/sounds';
+import { useLevelTestQuestions } from '@/hooks/level-test/use-level-test';
 import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
-
-interface Question {
-  title: string;
-  options: string[];
-}
-
-// 실력테스트 문항
-const QUESTIONS: Question[] = [
-  {
-    title: '요즘 감정 상태를 가장 잘 표현하는 문장은?',
-    options: [
-      '천천히 다시 해보고 싶어요',
-      '도움 없이 해낼 수 있어요',
-      '조금 어려워도 괜찮아요',
-      '새로운 도전을 원해요',
-    ],
-  },
-  {
-    title: '코드를 읽을 때 나는?',
-    options: [
-      '한 줄씩 천천히 따라가요',
-      '전체 흐름부터 파악해요',
-      '핵심 로직만 골라 봐요',
-      '개선점부터 눈에 들어와요',
-    ],
-  },
-  {
-    title: '새 기술을 만나면?',
-    options: [
-      '기초 문서부터 읽어요',
-      '예제를 따라 만들어봐요',
-      '바로 프로젝트에 써봐요',
-      '내부 동작까지 파고들어요',
-    ],
-  },
-];
+import type { LevelTestQuestion } from '@/schemas/level-test.schema';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
-// TODO: 실제 추천 알고리즘으로 교체. 임시: 선택지 인덱스(0~3) 평균 → 레벨 1~5 매핑
-function calcRecommendedStep(answers: number[]): number {
-  if (answers.length === 0) return 2;
-  const avg = answers.reduce((sum, a) => sum + a, 0) / answers.length;
-  const step = Math.round(1 + (avg / 3) * 4);
-  return Math.min(5, Math.max(1, step));
+// 추천 레벨 판정 — "계단 오르기" 방식.
+//
+// 문항은 쉬운 난이도부터 순서대로 온다(입문→전문가, 각 1문항). 첫 문항부터 차례로 밟아 올라가다가
+// 처음 틀린 지점에서 멈추고, 밟고 올라선 마지막 계단의 난이도(step)를 추천 레벨로 준다.
+// 첫 문항부터 틀리면 입문(1).
+//
+// 왜 "맞힌 것 중 가장 어려운 난이도"가 아닌가:
+//   답안이 O O X O X 일 때 그 방식은 고급(4)을 추천한다 — 중급에서 막힌 사람인데 고급 문제를
+//   찍어서 맞춘 것뿐이다. 4지선다라 고급·전문가 둘 중 하나가 우연히 맞을 확률이 44%나 되어,
+//   아무렇게나 찍어도 열에 넷은 고급 이상을 받는다. 계단 방식은 입문부터 맞혀야 올라가므로
+//   찍기로는 75%가 입문에서 멈춘다.
+//
+// 한 문항 삐끗하면 낮게 나오는 건 의도한 것이다. 이 값은 확정이 아니라 추천이고, 다음 화면에서
+// 사용자가 직접 다른 레벨을 고를 수 있다. 낮게 추천하면 사용자가 올리면 되지만, 높게 추천해
+// 첫 학습부터 막히면 그냥 이탈한다.
+function calcRecommendedStep(questions: LevelTestQuestion[], answers: number[]): number {
+  let step = 1;
+
+  for (const [index, question] of questions.entries()) {
+    if (answers[index] !== question.correctIndex) break;
+    step = question.step;
+  }
+
+  return step;
 }
 
 export function LevelTestScreen() {
   const router = useRouter();
+  const { data: questions, isPending, isError, error, refetch } = useLevelTestQuestions();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const playSelect = useSound(AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME);
 
-  const question = QUESTIONS[index];
+  if (isPending) return <OnboardingLoading />;
+
+  if (isError || questions.length === 0) {
+    return <OnboardingError error={error ?? new Error('문제 없음')} reset={() => void refetch()} />;
+  }
+
+  const question = questions[index];
   const selected = answers[index];
-  const isLast = index === QUESTIONS.length - 1;
+  const isLast = index === questions.length - 1;
   // 문항 수 무관 진행률(%) — 동적 값이라 인라인 스타일로 처리
-  const progressPercent = ((index + 1) / QUESTIONS.length) * 100;
+  const progressPercent = ((index + 1) / questions.length) * 100;
 
   const handleSelect = (optionIndex: number) => {
     setAnswers((prev) => {
@@ -88,7 +81,7 @@ export function LevelTestScreen() {
 
   const handleNext = () => {
     if (isLast) {
-      const step = calcRecommendedStep(answers);
+      const step = calcRecommendedStep(questions, answers);
       router.push(`${ROUTES.LEVEL_TEST_RESULT}?step=${step}`);
       return;
     }
@@ -109,14 +102,16 @@ export function LevelTestScreen() {
             />
           </div>
           <span className="text-coral text-xs font-bold">
-            {index + 1} / {QUESTIONS.length}
+            {index + 1} / {questions.length}
           </span>
         </div>
 
         {/* 질문 카드 */}
         <div className="mt-6 flex flex-col items-center gap-4 rounded-2xl bg-white px-6 py-8 shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
           <span className="text-coral text-sm font-bold">Q{index + 1}</span>
-          <p className="text-plum text-center text-lg leading-7 font-extrabold">{question.title}</p>
+          <p className="text-plum text-center text-lg leading-7 font-extrabold">
+            {question.prompt}
+          </p>
         </div>
 
         {/* 선택지 */}
