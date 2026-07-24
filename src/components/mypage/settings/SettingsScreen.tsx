@@ -7,8 +7,10 @@ import { SettingsInfoRow } from '@/components/mypage/settings/SettingsInfoRow';
 import { SettingsToggleRow } from '@/components/mypage/settings/SettingsToggleRow';
 import { SETTINGS_ICON } from '@/constants/mypage-settings';
 import { usePushSubscription } from '@/hooks/push/use-push-subscription';
+import { useBgmEnabled } from '@/hooks/use-bgm-enabled';
 import { useSfxEnabled } from '@/hooks/use-sfx-enabled';
 import { MOCK_SETTINGS_SECTIONS } from '@/mocks/mypage-settings.mock';
+import { useBgmStore } from '@/stores/bgm-store';
 import { useSoundStore } from '@/stores/sound-store';
 import type { FontSizeOption, SettingsToggleItem } from '@/types/mypage/settings';
 
@@ -27,6 +29,9 @@ const LEARNING_REMINDER_ID = 'learning-reminder';
 // 비로그인 화면(스플래시·로그인)에서도 효과음이 나기 때문이다.
 const SFX_ID = 'sfx';
 
+// 배경음악 토글도 실제 재생 여부(useBgmStore)와 연결한다. 재생 제어는 전역 BgmController가 한다.
+const BGM_ID = 'bgm';
+
 export function SettingsScreen() {
   const FontSizeIcon = SETTINGS_ICON['font-size'];
   const initialToggleState = useMemo(
@@ -34,7 +39,10 @@ export function SettingsScreen() {
       Object.fromEntries(
         MOCK_SETTINGS_SECTIONS.flatMap((section) =>
           (section.toggles ?? [])
-            .filter((item) => item.id !== LEARNING_REMINDER_ID && item.id !== SFX_ID)
+            .filter(
+              (item) =>
+                item.id !== LEARNING_REMINDER_ID && item.id !== SFX_ID && item.id !== BGM_ID,
+            )
             .map((item) => [item.id, item.defaultChecked]),
         ),
       ),
@@ -55,6 +63,9 @@ export function SettingsScreen() {
 
   const isSfxEnabled = useSfxEnabled();
   const setSfxEnabled = useSoundStore((state) => state.setSfxEnabled);
+
+  const isBgmEnabled = useBgmEnabled();
+  const setBgmEnabled = useBgmStore((state) => state.setBgmEnabled);
 
   const handleToggle = (id: string, checked: boolean) => {
     setToggleState((prev) => ({ ...prev, [id]: checked }));
@@ -82,6 +93,7 @@ export function SettingsScreen() {
   const resolveChecked = (item: SettingsToggleItem): boolean => {
     if (item.id === LEARNING_REMINDER_ID) return isReminderOn;
     if (item.id === SFX_ID) return isSfxEnabled;
+    if (item.id === BGM_ID) return isBgmEnabled;
 
     return toggleState[item.id] ?? item.defaultChecked;
   };
@@ -89,6 +101,7 @@ export function SettingsScreen() {
   const resolveToggleHandler = (item: SettingsToggleItem): ((checked: boolean) => void) => {
     if (item.id === LEARNING_REMINDER_ID) return handleReminderToggle;
     if (item.id === SFX_ID) return setSfxEnabled;
+    if (item.id === BGM_ID) return setBgmEnabled;
 
     return (checked) => handleToggle(item.id, checked);
   };

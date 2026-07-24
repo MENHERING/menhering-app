@@ -10,3 +10,9 @@ export const AVATAR_SFX_VOLUME = 0.1;
 
 // 효과음 on/off 저장 키(localStorage). 값은 zustand persist가 관리한다.
 export const SFX_STORAGE_KEY = 'menhering-sfx';
+
+// 배경음악. 90초 루프. 길어서 wav 대신 mp3(PWA 캐시 부담↓).
+// 배경에 깔려 계속 들리는 소리라, 짧게 튀고 마는 효과음(AVATAR_SFX_VOLUME=0.1)보다 낮춰 잡는다.
+export const BGM_SOUND = '/sounds/bgm-main.mp3';
+export const BGM_VOLUME = 0.05;
+export const BGM_STORAGE_KEY = 'menhering-bgm';
