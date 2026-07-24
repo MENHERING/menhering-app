@@ -12,8 +12,7 @@ export const AVATAR_SFX_VOLUME = 0.1;
 export const SFX_STORAGE_KEY = 'menhering-sfx';
 
 // 배경음악. 90초 루프. 길어서 wav 대신 mp3(PWA 캐시 부담↓).
-// 볼륨은 효과음(AVATAR_SFX_VOLUME=0.1)과 별개 기준이다 — 효과음은 짧게 튀어 낮아도 들리지만,
-// BGM은 배경에 깔리는 지속음이라 같은 값이면 거의 안 들린다. 실제 청감으로 맞춘 값이다.
+// 배경에 깔려 계속 들리는 소리라, 짧게 튀고 마는 효과음(AVATAR_SFX_VOLUME=0.1)보다 낮춰 잡는다.
 export const BGM_SOUND = '/sounds/bgm-main.mp3';
-export const BGM_VOLUME = 0.15;
+export const BGM_VOLUME = 0.05;
 export const BGM_STORAGE_KEY = 'menhering-bgm';
