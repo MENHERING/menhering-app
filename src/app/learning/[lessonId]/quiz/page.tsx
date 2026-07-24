@@ -10,8 +10,15 @@ import { QuizQuestionCard } from '@/components/quiz/QuizQuestionCard';
 import { QuizTimeoutModal } from '@/components/quiz/QuizTimeoutModal';
 import { QuizTimer } from '@/components/quiz/QuizTimer';
 import { ROUTES } from '@/constants/routes';
+import {
+  AVATAR_SELECT_SOUND,
+  AVATAR_SFX_VOLUME,
+  QUIZ_CORRECT_SOUND,
+  QUIZ_WRONG_SOUND,
+} from '@/constants/sounds';
 import { useQuiz } from '@/hooks/learning/use-quiz';
 import { useSubmitQuiz } from '@/hooks/learning/use-submit-quiz';
+import { useSound } from '@/hooks/use-sound';
 import { parseLessonId } from '@/lib/parse-lesson-id';
 import { QUIZ_TIME_LIMIT_SECONDS } from '@/mocks/quiz';
 
@@ -31,6 +38,10 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   // useState의 지연 초기화 함수는 마운트 시 한 번만 호출되므로 순수성 규칙에 안전하다.
   const [startedAt, setStartedAt] = useState(() => Date.now());
+
+  const playSelect = useSound(AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME);
+  const playCorrect = useSound(QUIZ_CORRECT_SOUND, AVATAR_SFX_VOLUME);
+  const playWrong = useSound(QUIZ_WRONG_SOUND, AVATAR_SFX_VOLUME);
 
   const question = questions?.[currentIndex];
   const hasAnswered = selectedIndex !== null;
@@ -68,10 +79,21 @@ export default function QuizPage() {
   // 다음 문제로 넘어가기 전까지는 몇 번이든 답을 바꿀 수 있다.
   const handleSelect = (index: number) => {
     setSelectedIndex(index);
+    playSelect();
   };
 
   const handleNext = () => {
     const finalAnswers = { ...answers, [question.id]: (selectedIndex ?? 0) + 1 };
+
+    // 정답/오답 소리는 "선택할 때"가 아니라 "다음을 누를 때" 낸다. 이 화면은 넘어가기 전까지 답을
+    // 몇 번이든 바꿀 수 있어서, 선택마다 소리를 내면 보기를 하나씩 눌러보며 정답을 찾아낼 수 있다.
+    // 다음을 누른 시점엔 답이 확정이라(퀴즈 안에 뒤로가기 없음) 그 문제가 없다.
+    // 화면 표시는 지금처럼 중립을 유지한다 — 정답 공개는 결과 화면과 오답노트가 담당한다.
+    if (selectedIndex === question.correctIndex) {
+      playCorrect();
+    } else {
+      playWrong();
+    }
 
     if (isLastQuestion) {
       const durationSec = Math.round((Date.now() - startedAt) / 1000);

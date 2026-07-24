@@ -11,6 +11,11 @@ export const AVATAR_SFX_VOLUME = 0.1;
 // 효과음 on/off 저장 키(localStorage). 값은 zustand persist가 관리한다.
 export const SFX_STORAGE_KEY = 'menhering-sfx';
 
+// 학습 효과음. 문항 채점(정답/오답)과 스테이지 결과(클리어/실패)에 쓴다.
+export const QUIZ_CORRECT_SOUND = '/sounds/quiz-correct.mp3';
+export const QUIZ_WRONG_SOUND = '/sounds/quiz-wrong.mp3';
+export const QUIZ_COMPLETE_SOUND = '/sounds/quiz-complete.mp3';
+export const QUIZ_FAIL_SOUND = '/sounds/quiz-fail.mp3';
 // 배경음악. 90초 루프. 길어서 wav 대신 mp3(PWA 캐시 부담↓).
 // 배경에 깔려 계속 들리는 소리라, 짧게 튀고 마는 효과음(AVATAR_SFX_VOLUME=0.1)보다 낮춰 잡는다.
 export const BGM_SOUND = '/sounds/bgm-main.mp3';
