@@ -1,5 +1,4 @@
 import { Check, Lock } from 'lucide-react';
-import Image from 'next/image';
 
 import { cn } from '@/lib/cn';
 import type { LessonStatus } from '@/types/lesson';
@@ -30,18 +29,7 @@ export function LessonNode({ order, status, isSelected = false, onPress }: Lesso
       )}
     >
       {status === 'completed' && <Check size={32} className="text-white" strokeWidth={3} />}
-      {status === 'current' && (
-        <>
-          {order}
-          <Image
-            src="/images/avatar/menhering_1_img.webp"
-            alt=""
-            width={96}
-            height={96}
-            className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2"
-          />
-        </>
-      )}
+      {status === 'current' && order}
       {status === 'locked' && <Lock size={28} className="text-locked-icon" />}
     </button>
   );

@@ -7,7 +7,8 @@ import { AvatarHero } from '@/components/avatar/AvatarHero';
 import { NicknameField } from '@/components/avatar/NicknameField';
 import { Section } from '@/components/common/Section';
 import { SpeechBubble } from '@/components/common/SpeechBubble';
-import { DEFAULT_MOOD } from '@/constants/avatar';
+import { DEFAULT_CHARACTER_TYPE, DEFAULT_MOOD } from '@/constants/avatar';
+import { CHARACTER_REGISTRY } from '@/constants/character-registry';
 import { AVATAR_SFX_VOLUME, AVATAR_TAP_SOUND } from '@/constants/sounds';
 import { useAvatarDialogue } from '@/hooks/avatar/use-avatar-dialogue';
 import { useAvatarStatus } from '@/hooks/avatar/use-avatar-status';
@@ -32,6 +33,11 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
   // 감정 안내를 버튼 이름에서 분리해 담는 live 영역 id (버튼 포커스 중 감정이 바뀌어도 이름은 그대로).
   const moodStatusId = useId();
 
+  // 말풍선 세로 위치. 캐릭터마다 머리 꼭대기 높이가 달라(토끼는 귀가 위로 뻗음) 레지스트리에서
+  // 캐릭터별 보정을 읽는다. 미등록/미지정이면 기본 translate-y-7(캐릭터 쪽으로 28px 아래).
+  const spec = CHARACTER_REGISTRY[characterType] ?? CHARACTER_REGISTRY[DEFAULT_CHARACTER_TYPE];
+  const bubbleNudge = spec.speechBubbleNudge ?? 'translate-y-7';
+
   const playTap = useSound(AVATAR_TAP_SOUND, AVATAR_SFX_VOLUME);
 
   return (
@@ -54,7 +60,7 @@ export function AvatarPreview({ level }: AvatarPreviewProps) {
             영역 위로 겹칠 뿐 머리를 가리지 않는다). z-10으로 캐릭터 위에 올린다.
             drop-shadow: 숲 배경이 흐릿해 말풍선 흰 배경이 묻히므로, 공용 컴포넌트는 건드리지 않고
             여기서만 그림자를 더해 도드라지게 한다(홈 화면 말풍선은 그대로). */}
-        <div className="relative z-10 flex min-h-8 translate-y-7 justify-center" aria-hidden>
+        <div className={`relative z-10 flex min-h-8 justify-center ${bubbleNudge}`} aria-hidden>
           <span key={dialogue} className="animate-fade-in drop-shadow-md">
             <SpeechBubble size="md">{dialogue}</SpeechBubble>
           </span>

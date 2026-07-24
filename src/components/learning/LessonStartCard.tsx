@@ -2,7 +2,6 @@ import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/common/Button';
 import { NODE_OFFSET_PX } from '@/components/learning/roadmap-layout';
-import { cn } from '@/lib/cn';
 import type { LessonWithStatus } from '@/types/lesson';
 
 interface LessonStartCardProps {
@@ -36,19 +35,7 @@ export function LessonStartCard({ level, lesson, pointerAlign }: LessonStartCard
           <h2 className="text-base font-bold">{lesson.title}</h2>
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-white/85">
-            레슨 · {lesson.problemCount}문제
-          </span>
-          <div className="flex gap-1.5">
-            {Array.from({ length: lesson.problemCount }).map((_, index) => (
-              <span
-                key={`problem-dot-${index}`}
-                className={cn('h-2 w-2 rounded-full', index === 0 ? 'bg-white' : 'bg-white/40')}
-              />
-            ))}
-          </div>
-        </div>
+        <span className="text-xs font-medium text-white/85">레슨 · {lesson.problemCount}문제</span>
 
         <Button
           variant="secondary"

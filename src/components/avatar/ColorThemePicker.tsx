@@ -21,7 +21,9 @@ export function ColorThemePicker() {
   return (
     <PickerSection title="색상 테마" headingId="color-theme-heading" cost={THEME_COST}>
       {COLOR_THEMES.map((theme) => {
-        const owned = ownedThemes.includes(theme.value);
+        // '기본'(무색)은 무료 기본 테마 → 항상 보유(구매 대상 아님). 나머지는 인벤토리 기준.
+        const isNone = theme.value === '기본';
+        const owned = isNone || ownedThemes.includes(theme.value);
         const selected = owned && theme.value === colorTheme;
 
         return (
@@ -42,16 +44,18 @@ export function ColorThemePicker() {
             className={cn(selectableCardClass(selected), 'flex items-center gap-2 px-3 py-3')}
           >
             {/* 스와치 미리보기 — 실제 캐릭터에 입혀지는 body(털) 색 한 가지.
+                무색은 흰 원이 안 보이므로 대각 슬래시로 "색 없음"을 표시한다.
                 (동적 색상은 SVG fill로 표현 → 인라인 style 회피) */}
             <svg viewBox="0 0 22 22" className="size-[22px] shrink-0" aria-hidden>
               <circle
                 cx={11}
                 cy={11}
                 r={10}
-                fill={theme.roles.body}
-                stroke="rgba(0,0,0,0.1)"
+                fill={isNone ? '#FFFFFF' : theme.roles.body}
+                stroke="rgba(0,0,0,0.15)"
                 strokeWidth={1}
               />
+              {isNone && <line x1={4} y1={18} x2={18} y2={4} stroke="#F87171" strokeWidth={1.5} />}
             </svg>
 
             {/* TODO: 다크모드 도입 시 라벨 `dark:text-neutral-100` */}

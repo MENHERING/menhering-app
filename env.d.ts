@@ -16,5 +16,8 @@ namespace NodeJS {
     VAPID_PRIVATE_KEY: string;
     // 연락처 URI (mailto: 또는 https:). web-push setVapidDetails 필수값.
     VAPID_SUBJECT: string;
+
+    // 스케줄 발송(Vercel Cron) 인증용 시크릿. Vercel이 Authorization: Bearer 헤더로 자동 전송한다.
+    CRON_SECRET: string;
   }
 }

@@ -6,7 +6,6 @@ import { Application, settings, UPDATE_PRIORITY } from 'pixi.js';
 
 import { TapSymbol } from '@/components/avatar/TapSymbol';
 import { getThemeRoles } from '@/constants/avatar';
-import bodyTintDrawableIds from '@/constants/live2d-tint-drawables.json';
 import {
   EXPRESSION_KEYS,
   getMoodExpression,
@@ -43,14 +42,11 @@ interface CubismCoreModel {
   setOverwriteFlagForDrawableMultiplyColors(index: number, value: boolean): void;
 }
 
-// 테마 body색을 곱할 드로어블(재리깅으로 크림과 분리됨). 나머지는 흰색(1,1,1)으로 덮어써
-// 원본 텍스처 색을 유지한다. 눈은 통짜 드로어블(eye_L/eye_R)이라 여기 넣으면 눈동자·흰
-// 반짝이까지 다 물든다 → 제외(고정). 반사광만 테마색 하려면 눈을 base/reflection으로 분리
-// 재리깅한 뒤 reflection 드로어블 id를 여기(=JSON)에 추가한다.
-//
-// 목록을 JSON에 둔 이유: scripts/desaturate-fur.mjs가 **같은 목록**으로 텍스처를 회색화해야 한다.
-// 둘이 어긋나면 틴트는 되지만 회색화가 안 된 부위가 생겨 탁한 갈색으로 렌더된다.
-const BODY_TINT_DRAWABLES = new Set<string>(bodyTintDrawableIds);
+// 테마 body색을 곱할 드로어블 목록은 캐릭터마다 다르다(예: 토끼 흰 솜꼬리는 틴트 제외, 고양이·강아지
+// 귀는 몸과 같이 물들어야 함) → 상위(AvatarHero)가 캐릭터별 목록을 `tintDrawables` prop으로 넘긴다.
+// 목록의 단일 출처는 live2d-tint-drawables.json(캐릭터→드로어블 맵)이며 scripts/desaturate-fur.mjs가
+// **같은 맵**으로 텍스처를 회색화한다. 둘이 어긋나면 틴트는 되지만 회색화 안 된 부위가 탁하게 렌더된다.
+// 나머지 드로어블(눈·하트·크림·코·입·볼)은 흰색(1,1,1)으로 덮어써 원본 텍스처 색을 유지한다.
 
 // pixi Application/WebGL 컨텍스트를 페이지 세션 내내 하나만 두고 재사용한다.
 // 컨텍스트를 파괴·재생성하면 플러그인(Cubism)의 셰이더·마스크가 첫 컨텍스트에 묶인 채 orphan돼,
@@ -68,7 +64,13 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 interface Live2DCharacterProps {
   modelUrl: string;
+  /** 테마색을 곱할 드로어블 id 목록(캐릭터별). 나머지는 원본 텍스처 색 유지. */
+  tintDrawables: string[];
+  /** 발 높이 정렬 보정값(캔버스 높이 대비 비율, +는 아래로). 원화별 배치 차이를 상쇄해 서있는 위치를 통일. */
+  feetNudge?: number;
   colorTheme: ColorTheme;
+  /** '기본'(무색) 테마일 때 body에 곱할 색(캐릭터별). 생략 시 흰색(곱셈 무효=원화색 유지). */
+  naturalBody?: string;
   /** 감정 상태 → 표정(입/눈/눈썹/볼). 생략 시 무표정(보통). */
   mood?: Mood;
   /** false면 틴트 없이 원본 텍스처 색 그대로(무색). 기본 true. */
@@ -97,7 +99,10 @@ const BURST_OFFSETS = [
 
 export function Live2DCharacter({
   modelUrl,
+  tintDrawables,
+  feetNudge,
   colorTheme,
+  naturalBody,
   mood,
   tinted = true,
   size = 128,
@@ -124,14 +129,19 @@ export function Live2DCharacter({
     onErrorRef.current = onError;
   }, [onError]);
 
-  // 테마/틴트 변경은 모델 재생성 없이 재틴트만. init 이후 도착하는 첫 값도 여기서 반영.
+  // 테마/틴트/틴트대상 변경은 모델 재생성 없이 재틴트만. init 이후 도착하는 첫 값도 여기서 반영.
   const colorThemeRef = useRef(colorTheme);
   const tintedRef = useRef(tinted);
+  const tintDrawablesRef = useRef(tintDrawables);
+  const naturalBodyRef = useRef(naturalBody);
   useEffect(() => {
     colorThemeRef.current = colorTheme;
     tintedRef.current = tinted;
-    if (modelRef.current) applyTint(modelRef.current, colorTheme, tinted);
-  }, [colorTheme, tinted]);
+    tintDrawablesRef.current = tintDrawables;
+    naturalBodyRef.current = naturalBody;
+    if (modelRef.current)
+      applyTint(modelRef.current, colorTheme, tinted, tintDrawables, naturalBody);
+  }, [colorTheme, tinted, tintDrawables, naturalBody]);
 
   // mood 변경도 모델 재생성 없이 반영한다. 티커가 도는 평소엔 매 프레임 moodRef를 읽어 보간하므로
   // ref 갱신만으로 충분하다. reduce-motion일 땐 티커 자체가 없어 아무도 ref를 안 읽으므로,
@@ -142,6 +152,12 @@ export function Live2DCharacter({
     const model = modelRef.current;
     if (model && prefersReducedMotion()) applyStaticExpression(model, mood);
   }, [mood]);
+
+  // 발 정렬 보정값은 init에서 모델 배치 시 1회만 읽는다(캐릭터 변경 시 modelUrl이 바뀌어 재init됨).
+  const feetNudgeRef = useRef(feetNudge);
+  useEffect(() => {
+    feetNudgeRef.current = feetNudge;
+  }, [feetNudge]);
 
   useEffect(() => {
     let disposed = false;
@@ -212,7 +228,18 @@ export function Live2DCharacter({
           );
         }
 
-        applyTint(model, colorThemeRef.current, tintedRef.current);
+        // 캐릭터마다 원화가 모델 캔버스 내 다른 높이에 그려져(AI 생성) 캔버스 중심 정렬만으론 "서있는
+        // 발 높이"가 종마다 어긋난다. 측정한 보정값(feetNudge: 캔버스높이 대비 비율, +는 아래로)으로 세로
+        // 정렬한다. 실측(readPixels)은 캔버스 표시 상태에 따라 조용히 실패할 수 있어 정적 측정값을 쓴다.
+        if (feetNudgeRef.current) model.y += feetNudgeRef.current * canvasH;
+
+        applyTint(
+          model,
+          colorThemeRef.current,
+          tintedRef.current,
+          tintDrawablesRef.current,
+          naturalBodyRef.current,
+        );
 
         if (reduceMotion) {
           // 정적 렌더: 움직임 없이 현재 감정 표정만 1회 얹고 배치. 이후 mood 변경은 위 effect가 얹는다.
@@ -424,18 +451,28 @@ function applyStaticExpression(model: Live2DModel, mood: Mood | undefined) {
   model.update(16);
 }
 
-// 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 털(BODY_TINT_DRAWABLES)은
-// 테마색, 나머지(크림·눈·코·하트)는 흰색(1,1,1). overwrite 플래그를 켜 매 프레임 유지시킨다.
+// 부위별 틴트. 모든 드로어블의 Multiply를 명시적으로 덮어쓴다 — 틴트 대상(tintDrawables, 캐릭터별
+// 털·귀·꼬리 등)은 테마색, 나머지(크림·눈·코·하트)는 흰색(1,1,1). overwrite 플래그를 켜 매 프레임 유지.
 //
 // ⚠️ 나머지를 흰색으로 "명시" 덮어써야 하는 이유: 이 플러그인은 0.4.0과 달리 드로어블별 baked
 // Multiply를 실제로 렌더한다. 재리깅 모델의 일부 드로어블(눈 등)에 흰색 아닌 baked 값이 남아
 // 있으면 그대로 어둡게/안 보이게 뜬다. 흰색으로 덮어써 원본 텍스처 색을 복원한다.
-function applyTint(model: Live2DModel, colorTheme: ColorTheme, tinted: boolean) {
+function applyTint(
+  model: Live2DModel,
+  colorTheme: ColorTheme,
+  tinted: boolean,
+  tintDrawables: string[],
+  naturalBody?: string,
+) {
   const core = model.internalModel.coreModel as unknown as CubismCoreModel;
-  const tint = tinted ? hexToRgb(getThemeRoles(colorTheme).body) : { r: 1, g: 1, b: 1 };
+  const tintSet = new Set(tintDrawables);
+  // '기본'(무색, 원화색)은 캐릭터별 색을 곱한다 — 대부분 흰색(곱셈 무효=원화색 유지), 텍스처가
+  // 회색화된 캐릭터(레서판다)는 원래 색을 넣는다. 그 외 테마는 테마 body색.
+  const body = colorTheme === '기본' ? (naturalBody ?? '#FFFFFF') : getThemeRoles(colorTheme).body;
+  const tint = tinted ? hexToRgb(body) : { r: 1, g: 1, b: 1 };
   const ids = core.getDrawableIds();
   for (let i = 0; i < ids.length; i++) {
-    const { r, g, b } = BODY_TINT_DRAWABLES.has(ids[i]) ? tint : { r: 1, g: 1, b: 1 };
+    const { r, g, b } = tintSet.has(ids[i]) ? tint : { r: 1, g: 1, b: 1 };
     core.setMultiplyColorByRGBA(i, r, g, b, 1);
     core.setOverwriteFlagForDrawableMultiplyColors(i, true);
   }

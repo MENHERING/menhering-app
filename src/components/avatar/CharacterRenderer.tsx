@@ -20,8 +20,9 @@ export function CharacterRenderer({
   className,
   title,
 }: CharacterRendererProps) {
-  const { Svg } = CHARACTER_REGISTRY[characterType] ?? CHARACTER_REGISTRY[DEFAULT_CHARACTER_TYPE];
-  const roles = getThemeRoles(colorTheme);
+  const spec = CHARACTER_REGISTRY[characterType] ?? CHARACTER_REGISTRY[DEFAULT_CHARACTER_TYPE];
+  // '기본'(무색, 원화색)은 SVG가 테마색으로만 칠해 흰색이 되므로, 캐릭터 고유색(naturalRoles)을 쓴다.
+  const roles = colorTheme === '기본' ? spec.naturalRoles : getThemeRoles(colorTheme);
 
-  return <Svg {...roles} className={className} title={title} />;
+  return <spec.Svg {...roles} className={className} title={title} />;
 }

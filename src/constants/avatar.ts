@@ -4,7 +4,8 @@ import type { Mood } from '@/types/mypage/model';
 // 저장값은 한글(DB avatars.color_theme/character_type 정합). 영문 slug 사용 금지.
 
 export const DEFAULT_CHARACTER_TYPE: CharacterType = '레서판다';
-export const DEFAULT_COLOR_THEME: ColorTheme = '클래식';
+// 기본 테마 '기본'은 틴트 없음 → 캐릭터 원화색 그대로. 색 테마는 구매해서 입힌다.
+export const DEFAULT_COLOR_THEME: ColorTheme = '기본';
 
 // 닉네임 입력 제약(users.nickname). 실제 기본값은 소셜 로그인명으로 초기화됨.
 export const NICKNAME_MAX_LENGTH = 20;
@@ -43,10 +44,15 @@ interface ColorThemeConfig {
   roles: ThemeRoles;
 }
 
-// 와이어프레임 색상 테마 6종. 클래식은 브랜드 토큰 재사용.
+// 색상 테마. '기본'은 무료 기본값이며 body를 흰색으로 둬 Live2D 곱셈 틴트가 원화색을 그대로 살린다
+// (흰색 × 텍스처 = 텍스처). 레드~그레이는 구매 대상. 레드는 기존 '클래식'(브랜드 코럴)을 개명한 것.
 export const COLOR_THEMES: readonly ColorThemeConfig[] = [
   {
-    value: '클래식',
+    value: '기본',
+    roles: { body: '#FFFFFF', secondary: '#FFFFFF', accent: '#3D3D3D' },
+  },
+  {
+    value: '레드',
     roles: { body: '#E8563A', secondary: '#F0D9CC', accent: '#3D3D3D' },
   },
   {
@@ -69,6 +75,11 @@ export const COLOR_THEMES: readonly ColorThemeConfig[] = [
     value: '선샤인',
     roles: { body: '#FFD400', secondary: '#FAF3E6', accent: '#6B4A22' },
   },
+  {
+    // 고양이 원화색(#9AA0A6)보다 진한 회색.
+    value: '그레이',
+    roles: { body: '#6B7280', secondary: '#DDE1E6', accent: '#3D3D3D' },
+  },
 ];
 
 // 색상 테마 값만 추출한 목록. 검증(zod) 등에서 재사용하는 단일 출처.
@@ -85,7 +96,7 @@ const COLOR_THEME_MAP: Record<ColorTheme, ColorThemeConfig> = COLOR_THEMES.reduc
   {} as Record<ColorTheme, ColorThemeConfig>,
 );
 
-// 테마 값 → SVG 색 슬롯. 잘못된 값이 들어와도 클래식으로 폴백.
+// 테마 값 → SVG 색 슬롯. 잘못된 값이 들어와도 기본(무색)으로 폴백.
 export function getThemeRoles(theme: ColorTheme): ThemeRoles {
   return (COLOR_THEME_MAP[theme] ?? COLOR_THEME_MAP[DEFAULT_COLOR_THEME]).roles;
 }

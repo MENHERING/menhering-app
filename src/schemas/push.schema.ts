@@ -34,3 +34,11 @@ export const PushTestResultSchema = z.object({
 });
 
 export type PushTestResult = z.infer<typeof PushTestResultSchema>;
+
+// 학습 리마인더 스케줄 발송 결과 — 성공/정리(만료 구독 삭제) 건수.
+export const PushReminderResultSchema = z.object({
+  sent: z.number().int(),
+  pruned: z.number().int(),
+});
+
+export type PushReminderResult = z.infer<typeof PushReminderResultSchema>;
