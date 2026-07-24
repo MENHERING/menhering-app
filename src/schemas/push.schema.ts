@@ -27,14 +27,6 @@ export const PushSubscribeResultSchema = z.object({
 
 export type PushSubscribeResult = z.infer<typeof PushSubscribeResultSchema>;
 
-// 디버그 테스트 발송 결과 — 성공/정리(만료 구독 삭제) 건수.
-export const PushTestResultSchema = z.object({
-  sent: z.number().int(),
-  pruned: z.number().int(),
-});
-
-export type PushTestResult = z.infer<typeof PushTestResultSchema>;
-
 // 학습 리마인더 스케줄 발송 결과 — 성공/정리(만료 구독 삭제) 건수.
 export const PushReminderResultSchema = z.object({
   sent: z.number().int(),
