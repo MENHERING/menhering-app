@@ -5,9 +5,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Bell, BellOff, BookOpen, Heart, Users, type LucideIcon } from 'lucide-react';
 
 import { usePushSubscription } from '@/hooks/push/use-push-subscription';
+import { privateFetch } from '@/lib/api-client';
 import { cn } from '@/lib/cn';
 import { formatRelativeTime } from '@/lib/relative-time';
 import { MOCK_NOTIFICATIONS } from '@/mocks/notifications.mock';
+import { PushTestResultSchema } from '@/schemas/push.schema';
 import type { NotificationType } from '@/types/notifications';
 
 // 알림 종류별 아이콘·색. 아이콘 배경은 통일하고 아이콘 색으로만 종류를 구분한다.
@@ -35,6 +37,9 @@ export function NotificationBell() {
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [isOpen, setIsOpen] = useState(false);
   const [pushError, setPushError] = useState<string | null>(null);
+  // 테스트 발송 결과 안내. 성공/실패 모두 이 자리에 문구로 보여준다.
+  const [testMessage, setTestMessage] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLButtonElement>(null);
 
@@ -93,6 +98,7 @@ export function NotificationBell() {
   // 화면은 getPushNotice가 알아서 안내 문구로 바뀐다. catch는 진짜 오류(네트워크·저장 실패)용이다.
   const handlePushToggle = async () => {
     setPushError(null);
+    setTestMessage(null);
 
     try {
       if (isPushOn) {
@@ -102,6 +108,23 @@ export function NotificationBell() {
       }
     } catch {
       setPushError('알림 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
+  // 알림을 켜도 OS 알림 설정이 꺼져 있으면 아무 일도 안 일어나서, 사용자가 켜졌는지 알 방법이 없다.
+  // 본인 구독에만 한 건 보내 실제로 도착하는지 직접 확인하게 한다.
+  const handleTestSend = async () => {
+    setPushError(null);
+    setTestMessage(null);
+    setIsTesting(true);
+
+    try {
+      await privateFetch('/api/push/test', PushTestResultSchema, { method: 'POST' });
+      setTestMessage('보냈어요! 잠시 후 알림이 도착해요.');
+    } catch {
+      setTestMessage('보내지 못했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setIsTesting(false);
     }
   };
 
@@ -163,6 +186,21 @@ export function NotificationBell() {
                 </button>
               </div>
             )}
+
+            {/* 켜져 있을 때만 노출. 알림을 켜도 OS 알림 설정이 꺼져 있으면 아무 일도 일어나지 않아
+                사용자가 제대로 켜졌는지 알 수 없어서, 직접 한 건 받아볼 수단을 둔다. */}
+            {isPushOn && (
+              <button
+                type="button"
+                onClick={handleTestSend}
+                disabled={isTesting}
+                className="text-brown-soft hover:text-coral mt-2 text-[11px] font-bold underline underline-offset-2 transition-colors disabled:opacity-50"
+              >
+                {isTesting ? '보내는 중…' : '알림 잘 오는지 확인하기'}
+              </button>
+            )}
+
+            {testMessage && <p className="text-brown-soft mt-1.5 text-[11px]">{testMessage}</p>}
             {pushError && <p className="text-coral mt-1.5 text-[11px]">{pushError}</p>}
           </div>
 
