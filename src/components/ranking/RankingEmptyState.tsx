@@ -8,6 +8,8 @@ interface RankingEmptyStateProps {
   variant: RankingEmptyStateVariant;
   // 'not-started'일 때만 사용(학습 화면으로 이동).
   onStartLearning?: () => void;
+  // 'no-friends'일 때만 사용(친구 추가 화면으로 이동).
+  onAddFriend?: () => void;
 }
 
 const CONTENT: Record<
@@ -26,7 +28,11 @@ const CONTENT: Record<
   },
 };
 
-export function RankingEmptyState({ variant, onStartLearning }: RankingEmptyStateProps) {
+export function RankingEmptyState({
+  variant,
+  onStartLearning,
+  onAddFriend,
+}: RankingEmptyStateProps) {
   const { Icon, title, description } = CONTENT[variant];
 
   return (
@@ -43,9 +49,7 @@ export function RankingEmptyState({ variant, onStartLearning }: RankingEmptyStat
           학습 시작하기
         </Button>
       ) : (
-        // 친구 추가 화면이 아직 없어 버튼은 비활성 상태로만 노출한다.
-        // TODO: 친구 추가 화면 연결 후 활성화
-        <Button variant="secondary" size="md" disabled className="mt-2">
+        <Button variant="secondary" size="md" onClick={onAddFriend} className="mt-2">
           친구 추가하기
         </Button>
       )}

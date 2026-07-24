@@ -1,6 +1,6 @@
 # MENHERING APP
 
-> 로고는 추후 추가 예정
+![MENHERING logo](docs/images/logo.png)
 
 **사용자 참여도에 따른 감정 변화 학습 동기부여 서비스 — 모바일 우선 PWA 팀 프론트엔드**
 

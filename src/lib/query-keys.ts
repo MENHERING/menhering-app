@@ -25,6 +25,7 @@ export const queryKeys = {
     myCode: () => [...queryKeys.friends.all, 'my-code'] as const,
     search: (keyword: string) => [...queryKeys.friends.all, 'search', keyword] as const,
     requests: () => [...queryKeys.friends.all, 'requests'] as const,
+    ranking: () => [...queryKeys.friends.all, 'ranking'] as const,
   },
   mypage: {
     all: ['mypage'] as const,

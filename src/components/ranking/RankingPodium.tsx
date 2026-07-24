@@ -2,7 +2,7 @@ import { Crown } from 'lucide-react';
 
 import { CharacterRenderer } from '@/components/avatar/CharacterRenderer';
 import { cn } from '@/lib/cn';
-import type { RankingEntry } from '@/types/ranking/model';
+import type { RankingEntry } from '@/schemas/ranking.schema';
 
 interface RankingPodiumProps {
   first: RankingEntry;
@@ -38,9 +38,10 @@ function PodiumSlot({ entry, position }: PodiumSlotProps) {
             className="absolute -top-6 left-1/2 -translate-x-1/2 fill-[var(--gold)] text-[var(--gold)]"
           />
         )}
+        {/* 다른 화면(프로필·홈)의 원형 아바타와 톤을 맞춘다 — 코랄 틴트 배경 대신 흰 배경 + 옅은 링. */}
         <div
           className={cn(
-            'bg-coral-soft/40 flex items-center justify-center rounded-full',
+            'ring-sand-line flex items-center justify-center rounded-full bg-white ring-2',
             style.avatarSize,
           )}
         >

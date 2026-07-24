@@ -1,5 +1,5 @@
 import { RankingListItem } from '@/components/ranking/RankingListItem';
-import type { RankingEntry } from '@/types/ranking/model';
+import type { RankingEntry } from '@/schemas/ranking.schema';
 
 interface RankingListProps {
   entries: RankingEntry[];
