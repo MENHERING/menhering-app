@@ -8,7 +8,9 @@ import { Button } from '@/components/common/Button';
 import { Toast } from '@/components/common/Toast';
 import { LEVELS } from '@/constants/level';
 import { ROUTES } from '@/constants/routes';
+import { AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME } from '@/constants/sounds';
 import { useSaveOnboardingLevel } from '@/hooks/onboarding/use-save-onboarding-level';
+import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
 import { useUserLevelStore } from '@/stores/user-level-store';
 
@@ -17,6 +19,12 @@ export function LevelSelectScreen() {
   const step = useUserLevelStore((state) => state.step);
   const [selected, setSelected] = useState(step);
   const { save, isSaving, errorMessage, clearError } = useSaveOnboardingLevel();
+  const playSelect = useSound(AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME);
+
+  const handleSelect = (nextStep: number) => {
+    setSelected(nextStep);
+    playSelect();
+  };
 
   const handleComplete = () => save(selected);
 
@@ -41,7 +49,7 @@ export function LevelSelectScreen() {
               <li key={step}>
                 <button
                   type="button"
-                  onClick={() => setSelected(step)}
+                  onClick={() => handleSelect(step)}
                   aria-pressed={isActive}
                   className={cn(
                     'flex w-full items-center gap-4 rounded-2xl bg-white px-4 py-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-shadow',

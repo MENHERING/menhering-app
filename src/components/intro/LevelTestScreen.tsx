@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/common/Button';
 import { Header } from '@/components/common/Header';
 import { ROUTES } from '@/constants/routes';
+import { AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME } from '@/constants/sounds';
+import { useSound } from '@/hooks/use-sound';
 import { cn } from '@/lib/cn';
 
 interface Question {
@@ -59,6 +61,7 @@ export function LevelTestScreen() {
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+  const playSelect = useSound(AVATAR_SELECT_SOUND, AVATAR_SFX_VOLUME);
 
   const question = QUESTIONS[index];
   const selected = answers[index];
@@ -72,6 +75,7 @@ export function LevelTestScreen() {
       next[index] = optionIndex;
       return next;
     });
+    playSelect();
   };
 
   const handleBack = () => {
