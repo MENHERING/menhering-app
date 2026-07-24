@@ -114,12 +114,15 @@ export function LevelTestScreen() {
           </p>
         </div>
 
-        {/* 선택지 */}
+        {/* 선택지 — key는 보기 텍스트가 아니라 인덱스를 쓴다. DB 실데이터라 한 문항 안에서 보기
+            텍스트가 겹칠 수 있고(비슷한 오답·오탈자), 그러면 key가 중복돼 선택 하이라이트가
+            엉뚱한 항목에 남는다. 보기는 정렬·삽입·삭제 없이 문항이 바뀔 때 통째로 갈리므로
+            인덱스 key의 통상적 위험(순서 변경 시 상태 오귀속)은 없다. */}
         <ul className="mt-6 flex flex-col gap-3">
           {question.options.map((option, optionIndex) => {
             const isActive = selected === optionIndex;
             return (
-              <li key={option}>
+              <li key={optionIndex}>
                 <button
                   type="button"
                   onClick={() => handleSelect(optionIndex)}
