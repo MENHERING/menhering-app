@@ -11,8 +11,9 @@ export const RankingEntrySchema = z.object({
   characterType: z.enum(CHARACTER_TYPES),
   colorTheme: z.enum(COLOR_THEME_VALUES),
   xp: z.number().int(),
-  // 다른 사람: "3일 전 접속" 등 마지막 접속 정보. 본인 행에는 없다(streakDays로 대신 표시).
-  lastActiveLabel: z.string().optional(),
+  // 다른 사람: "3일 전 학습" 등 마지막 학습 활동 정보(로그인 자체를 추적하는 컬럼이 없어
+  // "접속"이 아니라 "학습"이다). 본인 행에는 없다(streakDays로 대신 표시).
+  lastStudiedLabel: z.string().optional(),
   // 본인: 연속 학습일수(스트릭). 다른 사람 행에는 없다.
   streakDays: z.number().int().optional(),
   isMe: z.boolean(),

@@ -47,12 +47,15 @@ export async function GET() {
       ...(row.is_me
         ? { streakDays: row.streak ?? 0 }
         : {
-            lastActiveLabel:
+            // days_since_active는 user_progress.last_attended 기반이고, 그 컬럼은 퀴즈 제출·
+            // 오답노트 복습 완료 시에만 갱신된다(로그인/접속 자체를 기록하는 곳은 없다) — "접속"이
+            // 아니라 "학습"이라고 표기해야 실제 데이터와 어긋나지 않는다.
+            lastStudiedLabel:
               row.days_since_active == null
                 ? undefined
                 : row.days_since_active <= 0
-                  ? '오늘 접속'
-                  : `${row.days_since_active}일 전 접속`,
+                  ? '오늘 학습'
+                  : `${row.days_since_active}일 전 학습`,
           }),
     }));
 

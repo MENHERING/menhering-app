@@ -35,7 +35,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '고양이',
     colorTheme: '스카이',
     xp: 1280,
-    lastActiveLabel: '3일 전 접속',
+    lastStudiedLabel: '3일 전 학습',
     isMe: false,
   },
   {
@@ -55,7 +55,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '강아지',
     colorTheme: '선샤인',
     xp: 1040,
-    lastActiveLabel: '3일 전 접속',
+    lastStudiedLabel: '3일 전 학습',
     isMe: false,
   },
   {
@@ -65,7 +65,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '토끼',
     colorTheme: '피치',
     xp: 890,
-    lastActiveLabel: '2일 전 접속',
+    lastStudiedLabel: '2일 전 학습',
     isMe: false,
   },
   {
@@ -75,7 +75,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '고양이',
     colorTheme: '레드',
     xp: 760,
-    lastActiveLabel: '3일 전 접속',
+    lastStudiedLabel: '3일 전 학습',
     isMe: false,
   },
   {
@@ -85,7 +85,7 @@ export const MOCK_RANKING: RankingEntry[] = [
     characterType: '강아지',
     colorTheme: '민트',
     xp: 640,
-    lastActiveLabel: '10일 전 접속',
+    lastStudiedLabel: '10일 전 학습',
     isMe: false,
   },
 ];
